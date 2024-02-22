@@ -1,7 +1,0 @@
-{
-    "Elevator":[
-        {"Elevator_number":1, "port":2020},
-        {"Elevator_number":2, "port":2021},
-        {"Elevator_number":3, "port":2022},
-    ]
-}

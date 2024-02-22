@@ -1,21 +1,19 @@
-package main
+package network
 
 import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"time"
+	"os"
 )
 
 // Globals
 const ( 
-    UDPSendPort string = ":20024"
     N_FLOORS int = 4
     N_BUTTONS int = 3
 )
 
-
-// NB. hardcoded values
+// Information to send over UDP broadcast
 type Packet struct {
     Version     int         `json:"Version"`
     ElevatorNum int         `json:"ElevatorNum"`
@@ -23,6 +21,32 @@ type Packet struct {
     Queue       [N_FLOORS][N_BUTTONS]int   `json:"Queue"`
 }
 
+type UDPPorts struct {
+    UDPBrodcast string      `json:"UDPBroadcastPort"`
+    UDPReceve   []string    `json:"UDPRecevePorts"` 
+}
+
+func GetNetworkConfig() (elevatorUDPPorts UDPPorts) {
+    jsonData, err := os.ReadFile("config.json")
+
+    // can't read the config file, try again
+    if err != nil {
+        fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
+        GetNetworkConfig()
+    }
+    
+    // Parse jsonData into ElevatorPorts struct
+    err = json.Unmarshal(jsonData,&elevatorUDPPorts)
+
+    if err != nil {
+        fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
+
+        // try again
+        GetNetworkConfig()
+    }
+
+    return
+}
 func (packet *Packet) display() {
     fmt.Printf("Elevator number: \t%v\n", packet.ElevatorNum)
     fmt.Printf("Version: \t\t%v\n", packet.Version)
@@ -33,7 +57,7 @@ func (packet *Packet) display() {
     }
 }
 
-func listener(port string) {
+func Listener(port string) {
 	pc, err := net.ListenPacket("udp", port)
 	if err != nil {
 		panic(err)
@@ -45,10 +69,11 @@ func listener(port string) {
     for {
         n, addr, err := pc.ReadFrom(buf)
         if err != nil {
-            panic(err)
+            print(err)
         }
         // print IP addres
         fmt.Println(addr.String())
+        fmt.Println(buf[:n])
 
         packet := jsonDecodeElevatorData(buf[:n])
         packet.display()
@@ -65,7 +90,7 @@ func jsonDecodeElevatorData(jsonPacket []byte) (packet Packet) {
 }
 
 
-func udpInitDail(port string) net.Conn {
+func UdpInitDail(port string) net.Conn {
 	conn, err := net.Dial("udp", port)
 	if err != nil {
 		panic(err)
@@ -73,11 +98,16 @@ func udpInitDail(port string) net.Conn {
     return conn
 }
 
-func jsonEncodeElevatorData(version int, elevatorNum int, guid int, queue [N_FLOORS][N_BUTTONS]int) []byte { 
-    packet := &Packet{Version: version,
-                      ElevatorNum: elevatorNum,
-                      Guid:guid,
-                      Queue: queue}
+func BroadcastPacket(packet Packet, conn net.Conn){
+    var jsonPacket []byte = jsonEncodeElevatorData(packet)
+    _, err := conn.Write(jsonPacket)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+}
+
+func jsonEncodeElevatorData(packet Packet) []byte { 
     marshaldPacket, err := json.Marshal(packet)              
     if err != nil {
         panic(err)
@@ -85,27 +115,4 @@ func jsonEncodeElevatorData(version int, elevatorNum int, guid int, queue [N_FLO
     return marshaldPacket
 } 
 
-func main() {
-    go listener(UDPSendPort)
 
-    var conn net.Conn = udpInitDail(UDPSendPort)
-    defer conn.Close()
-
-    var testQueue = [4][3]int{
-        {1, 2, 3},
-        {3, 4, 5},
-        {1, 4, 5},
-        {1, 2, 5},
-    }
-
-    var packet []byte = jsonEncodeElevatorData(1, 1, 1, testQueue)
-
-   for { 
-    _, err := conn.Write(packet)
-    if err != nil {
-        fmt.Println(err)
-    }
-    time.Sleep(1000 * time.Millisecond)
-    }
-
-}
