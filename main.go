@@ -8,6 +8,9 @@ import (
 	"project/timer"
 )
 
+//Todo rydding: samle ting i funkdjonrt
+//og endre objektnavn på elevator- heter nå e eller my_elevator eller elevator
+
 func main() {
 	numFloors := 4
 
