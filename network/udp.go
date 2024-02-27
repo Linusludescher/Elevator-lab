@@ -5,59 +5,61 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"project/elevator"
+	"time"
 )
 
 // Globals
-const ( 
-    N_FLOORS int = 4
-    N_BUTTONS int = 3
+const (
+	N_FLOORS  int = 4
+	N_BUTTONS int = 3
 )
 
 // Information to send over UDP broadcast
 type Packet struct {
-    Version     int         `json:"Version"`
-    ElevatorNum int         `json:"ElevatorNum"`
-    Guid        int         `json:"Guid"`
-    Queue       [N_FLOORS][N_BUTTONS]int   `json:"Queue"`
+	Version     int                      `json:"Version"`
+	ElevatorNum int                      `json:"ElevatorNum"`
+	Guid        int                      `json:"Guid"`
+	Queue       [N_FLOORS][N_BUTTONS]int `json:"Queue"`
 }
 
 type UDPPorts struct {
-    UDPBrodcast string      `json:"UDPBroadcastPort"`
-    UDPReceve   []string    `json:"UDPRecevePorts"` 
+	UDPBrodcast string   `json:"UDPBroadcastPort"`
+	UDPReceve   []string `json:"UDPRecevePorts"`
 }
 
 func GetNetworkConfig() (elevatorUDPPorts UDPPorts) {
-    jsonData, err := os.ReadFile("config.json")
+	jsonData, err := os.ReadFile("config.json")
 
-    // can't read the config file, try again
-    if err != nil {
-        fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
-        GetNetworkConfig()
-    }
-    
-    // Parse jsonData into ElevatorPorts struct
-    err = json.Unmarshal(jsonData,&elevatorUDPPorts)
+	// can't read the config file, try again
+	if err != nil {
+		fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
+		GetNetworkConfig()
+	}
 
-    if err != nil {
-        fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
+	// Parse jsonData into ElevatorPorts struct
+	err = json.Unmarshal(jsonData, &elevatorUDPPorts)
 
-        // try again
-        GetNetworkConfig()
-    }
+	if err != nil {
+		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
 
-    return
+		// try again
+		GetNetworkConfig()
+	}
+
+	return
 }
 func (packet *Packet) display() {
-    fmt.Printf("Elevator number: \t%v\n", packet.ElevatorNum)
-    fmt.Printf("Version: \t\t%v\n", packet.Version)
-    fmt.Printf("ID: \t\t\t%v\n", packet.Guid)
-    fmt.Println("Floor \t Hall Up \t Hall Down \t Cab")
-    for i := 0; i < N_FLOORS; i++ {
-        fmt.Printf("%v \t %v \t\t %v \t\t %v \t\n", i + 1, packet.Queue[i][0], packet.Queue[i][1], packet.Queue[i][2])
-    }
+	fmt.Printf("Elevator number: \t%v\n", packet.ElevatorNum)
+	fmt.Printf("Version: \t\t%v\n", packet.Version)
+	fmt.Printf("ID: \t\t\t%v\n", packet.Guid)
+	fmt.Println("Floor \t Hall Up \t Hall Down \t Cab")
+	for i := 0; i < N_FLOORS; i++ {
+		fmt.Printf("%v \t %v \t\t %v \t\t %v \t\n", i+1, packet.Queue[i][0], packet.Queue[i][1], packet.Queue[i][2])
+	}
 }
 
-func Listener(port string) {
+func Listener(packet_chan chan Packet, port string) {
 	pc, err := net.ListenPacket("udp", port)
 	if err != nil {
 		panic(err)
@@ -66,53 +68,60 @@ func Listener(port string) {
 
 	buf := make([]byte, 1024)
 
-    for {
-        n, addr, err := pc.ReadFrom(buf)
-        if err != nil {
-            print(err)
-        }
-        // print IP addres
-        fmt.Println(addr.String())
-        fmt.Println(buf[:n])
+	for {
+		n, addr, err := pc.ReadFrom(buf)
+		if err != nil {
+			print(err)
+		}
+		// print IP addres
+		fmt.Println(addr.String())
+		fmt.Println(buf[:n])
 
-        packet := jsonDecodeElevatorData(buf[:n])
-        packet.display()
+		packet := jsonDecodeElevatorData(buf[:n])
+		packet.display()
+        packet_chan <- packet
 	}
 
 }
 
 func jsonDecodeElevatorData(jsonPacket []byte) (packet Packet) {
-    err := json.Unmarshal(jsonPacket, &packet)
-    if err != nil {
-        fmt.Println(err)
-    }
-    return packet
+	err := json.Unmarshal(jsonPacket, &packet)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return packet
 }
-
 
 func UdpInitDail(port string) net.Conn {
 	conn, err := net.Dial("udp", port)
 	if err != nil {
 		panic(err)
 	}
-    return conn
+	return conn
 }
 
-func BroadcastPacket(packet Packet, conn net.Conn){
-    var jsonPacket []byte = jsonEncodeElevatorData(packet)
-    _, err := conn.Write(jsonPacket)
-    if err != nil {
-        fmt.Println(err)
-    }
+func broadcastPacket(packet Packet, conn net.Conn) {
+	var jsonPacket []byte = jsonEncodeElevatorData(packet)
+	_, err := conn.Write(jsonPacket)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 }
 
-func jsonEncodeElevatorData(packet Packet) []byte { 
-    marshaldPacket, err := json.Marshal(packet)              
-    if err != nil {
-        panic(err)
-    }
-    return marshaldPacket
-} 
+func jsonEncodeElevatorData(packet Packet) []byte {
+	marshaldPacket, err := json.Marshal(packet)
+	if err != nil {
+		panic(err)
+	}
+	return marshaldPacket
+}
 
-
+func Broadcasteverysecond(elevator_chan chan elevator.Elevator, conn net.Conn) {
+	for {
+		elev := <-elevator_chan
+		packet := Packet{0, 1, 123, elev.Requests}
+		broadcastPacket(packet, conn)
+		time.Sleep(100 * time.Millisecond)
+	}
+}

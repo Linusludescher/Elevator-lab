@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"project/elevator"
 	"project/elevio"
+	"project/network"
 	"project/requests"
 	"project/timer"
 )
@@ -12,6 +13,7 @@ import (
 //og endre objektnavn på elevator- heter nå e eller my_elevator eller elevator
 
 func main() {
+
 	numFloors := 4
 
 	elevio.Init("localhost:15657", numFloors)
@@ -21,6 +23,8 @@ func main() {
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
 	timer_chan := make(chan bool)
+	elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
+	udp_receive := make(chan network.Packet)
 
 	my_elevator := elevator.Elevator_uninitialized()
 
@@ -28,6 +32,15 @@ func main() {
 	go elevio.PollFloorSensor(drv_floors)
 	go elevio.PollObstructionSwitch(drv_obstr)
 	go elevio.PollStopButton(drv_stop)
+
+	// Network init
+	ports := network.GetNetworkConfig()
+	conn := network.UdpInitDail(ports.UDPBrodcast)
+	defer conn.Close()
+	go network.Broadcasteverysecond(elevator_chan, conn)
+	for _, port := range ports.UDPReceve {
+		go network.Listener(udp_receive, port)
+	}
 
 	for {
 		select {
@@ -58,6 +71,7 @@ func main() {
 			}
 
 		case buttn := <-drv_buttons:
+
 			requests.SetOrderHere(&my_elevator, buttn) // tuple her etterhvert
 			my_elevator.Display()
 
@@ -124,6 +138,25 @@ func main() {
 			// fjerne hele køen?
 			requests.DeleteAllOrdes(&my_elevator)
 			// vente ellerno?
+		case udp_packet := <-udp_receive:
+			my_elevator.Requests = udp_packet.Queue
+		default:
+			elevator_chan <- my_elevator
+
+			if my_elevator.Dirn == elevio.MD_Stop {
+				fmt.Printf("test1\n")
+				if requests.RequestsAbove(my_elevator) {
+					fmt.Printf("test2\n")
+					elevio.SetMotorDirection(elevio.MD_Up)
+					my_elevator.Last_dir = elevio.MD_Up
+					my_elevator.Dirn = elevio.MD_Up
+				} else if requests.RequestsBelow(my_elevator) {
+					fmt.Printf("test3\n")
+					elevio.SetMotorDirection(elevio.MD_Down)
+					my_elevator.Last_dir = elevio.MD_Down
+					my_elevator.Dirn = elevio.MD_Down
+				}
+			}
 		}
 	}
 }

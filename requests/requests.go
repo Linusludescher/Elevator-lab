@@ -30,7 +30,7 @@ func RequestsBelow(e elevator.Elevator) bool {
 
 func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
 	for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-		if e.Requests[elevio.GetFloor()][btn] == 1 {
+		if e.Requests[e.Last_Floor][btn] == 1 {
 			return true
 		}
 	}
@@ -38,20 +38,20 @@ func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med el
 }
 
 func RequestsHereCabOrUp(e elevator.Elevator) bool { // stygt, kan ores på en linje
-	if e.Requests[elevio.GetFloor()][elevio.BT_HallUp] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_HallUp] == 1 {
 		return true
 	}
-	if e.Requests[elevio.GetFloor()][elevio.BT_Cab] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_Cab] == 1 {
 		return true
 	}
 	return false
 }
 
 func RequestsHereCabOrDown(e elevator.Elevator) bool {
-	if e.Requests[elevio.GetFloor()][elevio.BT_HallDown] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_HallDown] == 1 {
 		return true
 	}
-	if e.Requests[elevio.GetFloor()][elevio.BT_Cab] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_Cab] == 1 {
 		return true
 	}
 	return false
@@ -59,8 +59,8 @@ func RequestsHereCabOrDown(e elevator.Elevator) bool {
 
 func DeleteOrdersHere(e *elevator.Elevator) {
 	for orderType := 0; orderType < 3; orderType++ {
-		e.Requests[elevio.GetFloor()][orderType] = 0
-		elevio.SetButtonLamp(elevio.ButtonType(orderType), elevio.GetFloor(), false)
+		e.Requests[e.Last_Floor][orderType] = 0
+		elevio.SetButtonLamp(elevio.ButtonType(orderType), e.Last_Floor, false)
 	}
 }
 
@@ -74,7 +74,7 @@ func DeleteAllOrdes(e *elevator.Elevator) {
 }
 
 func SetOrderHere(e *elevator.Elevator, buttn elevio.ButtonEvent) {
-	if buttn.Floor == elevio.GetFloor() {
+	if buttn.Floor == e.Last_Floor {
 		return
 	}
 	e.Requests[buttn.Floor][buttn.Button] = 1
