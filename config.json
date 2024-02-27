@@ -1,0 +1,8 @@
+{
+    "Elevator": {
+        "Floors": 4,
+        "Buttons": 3
+    },
+        "UDPBroadcastPort": "255.255.255.255:20024",
+        "UDPRecevePorts":["255.255.255.255:20025", "255.255.255.255:20026"]
+}
