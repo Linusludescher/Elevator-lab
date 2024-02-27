@@ -78,8 +78,7 @@ func Listener(packet_chan chan Packet, port string) {
 		fmt.Println(buf[:n])
 
 		packet := jsonDecodeElevatorData(buf[:n])
-		packet.display()
-        packet_chan <- packet
+		packet_chan <- packet
 	}
 
 }

@@ -142,9 +142,8 @@ func main() {
 			my_elevator.Requests = udp_packet.Queue
 		default:
 			elevator_chan <- my_elevator
-
+			my_elevator.Display()
 			if my_elevator.Dirn == elevio.MD_Stop {
-				fmt.Printf("test1\n")
 				if requests.RequestsAbove(my_elevator) {
 					fmt.Printf("test2\n")
 					elevio.SetMotorDirection(elevio.MD_Up)
