@@ -43,3 +43,9 @@ func (elevator *Elevator) Display() {
 		fmt.Printf("%v \t %v \t\t %v \t\t %v \t\n", i+1, elevator.Requests[i][0], elevator.Requests[i][1], elevator.Requests[i][2])
 	}
 }
+
+func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection){
+	elevio.SetMotorDirection(dir)
+	elevator.Last_dir = dir
+	elevator.Dirn = dir
+}

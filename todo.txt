@@ -1,0 +1,35 @@
+Notater om hva som har blitt neglisjert/må gjøres
+
+-timerbug: når man trykker mens timer går, går heisen allikevel
+-fikse obstruction og stop
+-modulisere?->ikke inkludere moduler i hverandre?
+-bug: går ikke an å sette en order til last floor
+-endre dirn type fra elevio.MD_Up til noe annet i et høyere lag. Alle burde ikke være avhenging av elevio.
+
+
+
+VERSION CONTROL
+
+Functions:
+
+UppVersion
+    Iterere opp
+    hvis limit nådd, resette til 0
+
+Skal_vi_oppdatere
+    får inn melding, sjekke om vi skal oppdatere tabellen
+
+Er_alle_enige
+    returne true eller false
+
+ResolveConflict
+
+
+forslag:
+i en melding sender vi også hvem som endret til ny versjon. Det blir enkelt å sjekke om min endring er konsensus, og vi kan skru på lyset.
+
+Må passe på hvem som er online, en liste
+Når melding fra ny heis (ikke i lista):
+
+reconnect_merge
+    prøve å merge tabellene?

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"project/elevator"
 	"project/elevio"
+	"project/timer"
 )
 
 func RequestsAbove(e elevator.Elevator) bool {
@@ -88,4 +89,11 @@ func PrintRequests(e elevator.Elevator) {
 			fmt.Print(e.Requests[f][btn])
 		}
 	}
+}
+
+func ArrivedAtFloor(e *elevator.Elevator, timer_chan chan bool) {
+	elevio.SetMotorDirection(elevio.MD_Stop)
+	e.Dirn = elevio.MD_Stop
+	DeleteOrdersHere(e)
+	go timer.TimerStart(3, timer_chan)
 }

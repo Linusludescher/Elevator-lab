@@ -28,13 +28,13 @@ type UDPPorts struct {
 	UDPReceve   []string `json:"UDPRecevePorts"`
 }
 
-func GetNetworkConfig() (elevatorUDPPorts UDPPorts) {
+func getNetworkConfig() (elevatorUDPPorts UDPPorts) {
 	jsonData, err := os.ReadFile("config.json")
 
 	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
-		GetNetworkConfig()
+		getNetworkConfig()
 	}
 
 	// Parse jsonData into ElevatorPorts struct
@@ -44,12 +44,12 @@ func GetNetworkConfig() (elevatorUDPPorts UDPPorts) {
 		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
 
 		// try again
-		GetNetworkConfig()
+		getNetworkConfig()
 	}
 
 	return
 }
-func (packet *Packet) display() {
+func (packet *Packet) Display() {
 	fmt.Printf("Elevator number: \t%v\n", packet.ElevatorNum)
 	fmt.Printf("Version: \t\t%v\n", packet.Version)
 	fmt.Printf("ID: \t\t\t%v\n", packet.Guid)
@@ -59,7 +59,7 @@ func (packet *Packet) display() {
 	}
 }
 
-func Listener(packet_chan chan Packet, port string) {
+func listener(packet_chan chan Packet, port string) {
 	pc, err := net.ListenPacket("udp", port)
 	if err != nil {
 		panic(err)
@@ -91,10 +91,10 @@ func jsonDecodeElevatorData(jsonPacket []byte) (packet Packet) {
 	return packet
 }
 
-func UdpInitDail(port string) net.Conn {
+func udpInitDail(port string) net.Conn {
 	conn, err := net.Dial("udp", port)
 	if err != nil {
-		panic(err)
+		panic(err) // dårlig, prøver bare en gang
 	}
 	return conn
 }
@@ -116,11 +116,21 @@ func jsonEncodeElevatorData(packet Packet) []byte {
 	return marshaldPacket
 }
 
-func Broadcasteverysecond(elevator_chan chan elevator.Elevator, conn net.Conn) {
+func broadcasteverysecond(elevator_chan chan elevator.Elevator, conn net.Conn) {
 	for {
 		elev := <-elevator_chan
 		packet := Packet{0, 1, 123, elev.Requests}
 		broadcastPacket(packet, conn)
 		time.Sleep(100 * time.Millisecond)
 	}
+}
+
+func NetworkInit(elevator_chan chan elevator.Elevator, udp_receive chan Packet) (conn net.Conn) {
+	ports := getNetworkConfig()
+	conn = udpInitDail(ports.UDPBrodcast)
+	go broadcasteverysecond(elevator_chan, conn)
+	for _, port := range ports.UDPReceve {
+		go listener(udp_receive, port)
+	}
+	return
 }
