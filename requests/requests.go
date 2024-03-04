@@ -5,6 +5,7 @@ import (
 	"project/elevator"
 	"project/elevio"
 	"project/timer"
+	"time"
 )
 
 func RequestsAbove(e elevator.Elevator) bool {
@@ -100,4 +101,9 @@ func ArrivedAtFloor(e *elevator.Elevator, timer_chan chan bool) {
 	DeleteOrdersHere(e)
 	e.Version++
 	go timer.TimerStart(3, timer_chan)
+}
+
+func DisplayQueueCont(e *elevator.Elevator){
+	e.Display()
+	time.Sleep(time.Second)
 }
