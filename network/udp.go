@@ -20,7 +20,7 @@ type Packet struct {
 	Version     int                      `json:"Version"`
 	ElevatorNum int                      `json:"ElevatorNum"`
 	Guid        int                      `json:"Guid"`
-	Queue       [N_FLOORS][N_BUTTONS]int `json:"Queue"`
+	Queue       [][]int `json:"Queue"`
 }
 
 type UDPPorts struct {

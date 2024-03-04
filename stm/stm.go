@@ -79,6 +79,7 @@ func Obstuction(e elevator.Elevator, obstr bool) {
 func StopButtonPressed(e elevator.Elevator) {
 	// fjerne hele køen?
 	requests.DeleteAllOrdes(&e)
+	
 	// vente ellerno?
 }
 

@@ -63,6 +63,7 @@ func DeleteOrdersHere(e *elevator.Elevator) {
 		e.Requests[e.Last_Floor][orderType] = 0
 		elevio.SetButtonLamp(elevio.ButtonType(orderType), e.Last_Floor, false)
 	}
+	e.Version++
 }
 
 func DeleteAllOrdes(e *elevator.Elevator) {
@@ -72,6 +73,7 @@ func DeleteAllOrdes(e *elevator.Elevator) {
 			elevio.SetButtonLamp(elevio.ButtonType(orderType), floor, false)
 		}
 	}
+	e.Version++
 }
 
 func SetOrderHere(e *elevator.Elevator, buttn elevio.ButtonEvent) {
@@ -80,6 +82,7 @@ func SetOrderHere(e *elevator.Elevator, buttn elevio.ButtonEvent) {
 	}
 	e.Requests[buttn.Floor][buttn.Button] = 1
 	elevio.SetButtonLamp(buttn.Button, buttn.Floor, true) // må endres når flere heiser
+	e.Version++
 }
 
 func PrintRequests(e elevator.Elevator) {
@@ -95,5 +98,6 @@ func ArrivedAtFloor(e *elevator.Elevator, timer_chan chan bool) {
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	e.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e)
+	e.Version++
 	go timer.TimerStart(3, timer_chan)
 }

@@ -6,6 +6,7 @@ import (
 	"project/elevio"
 	"project/network"
 	"project/stm"
+	"project/version_control"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -54,7 +55,7 @@ func main() {
 			stm.StopButtonPressed(my_elevator)
 
 		case udp_packet := <-udp_receive_chan:
-			my_elevator.Requests = udp_packet.Queue
+			versioncontrol.Version_update_queue(&my_elevator, udp_packet)
 
 		default:
 			stm.DefaultState(&my_elevator, broadcast_elevator_chan) // Dårlig navn? beskriver dårlig

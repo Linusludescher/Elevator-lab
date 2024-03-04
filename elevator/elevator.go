@@ -2,7 +2,9 @@ package elevator
 
 import (
 	"fmt"
+	"os"
 	"project/elevio"
+	"encoding/json"
 )
 
 const N_FLOORS int = 4
@@ -16,16 +18,47 @@ const (
 	EB_Moving
 )
 
+type ConfigData struct{
+	N_FLOORS int	`json:"Floors"`
+	N_BUTTONS int	`json:"Buttons"`
+	ElevatorNum int	`json:"ElevNum"`
+}
+
+func readElevatorConfig() (elevatorData ConfigData) {
+	jsonData , err := os.ReadFile("config.json")
+
+	// can't read the config file, try again
+	if err != nil {
+		fmt.Printf("elevator.go: Error reading config file: %s\n", err)
+		// tyr again
+		readElevatorConfig()
+	}
+
+	// Parse jsonData into ElevatorData struct
+	err = json.Unmarshal(jsonData, &elevatorData)
+
+	// can't parse the config file, try again
+	if err != nil {
+		fmt.Printf("elevator.go: Error unmarshal json data to ElevatorData struct: %s\n", err)
+		// tyr again
+		readElevatorConfig()
+	}
+	return
+}
+
 type Elevator struct {
+	ElevNum int
+	Version int
 	Dirn       elevio.MotorDirection
     Last_dir   elevio.MotorDirection
 	Last_Floor int
-	Requests   [N_FLOORS][N_BUTTONS]int
+	Requests   [][]int
 }
 
 func Elevator_uninitialized() (elevator Elevator) {
-	var matrix [N_FLOORS][N_BUTTONS]int
-	elevator = Elevator{elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
+	elevatorConfig := readElevatorConfig()
+	matrix := make([][]int, elevatorConfig.N_FLOORS, elevatorConfig.N_BUTTONS)
+	elevator = Elevator{elevatorConfig.ElevatorNum,0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
 	}
