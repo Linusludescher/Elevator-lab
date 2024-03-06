@@ -23,8 +23,10 @@ func main() {
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
 	timer_chan := make(chan bool)
-	broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
-	udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
+	// broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
+	// udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
+
+	network_channels := network.Init_network()
 
 	my_elevator := elevator.Elevator_uninitialized()
 
@@ -32,9 +34,6 @@ func main() {
 	go elevio.PollFloorSensor(drv_floors)
 	go elevio.PollObstructionSwitch(drv_obstr)
 	go elevio.PollStopButton(drv_stop)
-
-	conn := network.NetworkInit(broadcast_elevator_chan, udp_receive_chan)
-	defer conn.Close()
 
 	for {
 		select {
@@ -54,11 +53,11 @@ func main() {
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)
 
-		case udp_packet := <-udp_receive_chan:
+		case udp_packet := <-network_channels.packetRx:
 			versioncontrol.Version_update_queue(&my_elevator, udp_packet)
 
 		default:
-			stm.DefaultState(&my_elevator, broadcast_elevator_chan) // Dårlig navn? beskriver dårlig
+			stm.DefaultState(&my_elevator, network_channels.packetTx) // Dårlig navn? beskriver dårlig
 		}
 	}
 }
