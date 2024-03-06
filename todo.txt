@@ -35,12 +35,8 @@ reconnect_merge
     prøve å merge tabellene?
 
 
-TUPLES I QUEUE
+TUPLES I QUEUE: problem løst: vi bare bruker ints! 0 for ingen ordre, 10 for ordre, 11 for tatt av heis 1 osv. 
 
 fikse opp i funksjons- og variabelnavn. enten camelCase eller under_strek. Fikse opp i små og store bokstaver for funksjoner. Konsistens på methods vs funksjoner. 
 
-
-lenke lveshare: 
-
-https://prod.liveshare.vsengsaas.visualstudio.com/join?967C1DBC6B1709C6F1F98788207DE46ED416
-
+Mangler LYS 
