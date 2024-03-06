@@ -130,6 +130,7 @@ func Init_network() (networkChan NetworkChan){
 		}
 	}()
 
+    // midlertidlig, slik at vi ikke må skrive så mye kode for å teste
     go func() {
 	fmt.Println("Started")
 	for {
@@ -142,7 +143,7 @@ func Init_network() (networkChan NetworkChan){
 
 		case a := <-networkChan.packetRx:
 			fmt.Printf("Received: %#v\n", a)
-            a.Display()
+            a.Display() // feilmelding hvis a ikke er en struct Packet
 		}
 	}
 }()
