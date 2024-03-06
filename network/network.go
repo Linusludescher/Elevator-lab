@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"project/elevator"
 	"project/network/bcast"
 	"project/network/localip"
 	"project/network/peers"
@@ -33,10 +34,10 @@ type UDPPorts struct {
 }
 
 type NetworkChan struct {
-	peerUpdateCh chan peers.PeerUpdate
-	peerTxEnable chan bool
-	packetTx     chan Packet
-	packetRx     chan Packet
+	PeerUpdateCh chan peers.PeerUpdate
+	PeerTxEnable chan bool
+	PacketTx     chan Packet
+	PacketRx     chan Packet
 }
 
 func getNetworkConfig() (elevatorUDPPorts UDPPorts) {
@@ -96,24 +97,24 @@ func Init_network() (networkChan NetworkChan) {
 
 	// We make a channel for receiving updates on the id's of the peers that are
 	//  alive on the network
-	networkChan.peerUpdateCh = make(chan peers.PeerUpdate)
+	networkChan.PeerUpdateCh = make(chan peers.PeerUpdate)
 	// We can disable/enable the transmitter after it has been started.
 	// This could be used to signal that we are somehow "unavailable".
-	networkChan.peerTxEnable = make(chan bool)
+	networkChan.PeerTxEnable = make(chan bool)
 
-	go peers.Transmitter(ports.UDPstatusPort, id, networkChan.peerTxEnable)
-	go peers.Receiver(ports.UDPstatusPort, networkChan.peerUpdateCh)
+	go peers.Transmitter(ports.UDPstatusPort, id, networkChan.PeerTxEnable)
+	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdateCh)
 
 	// We make channels for sending and receiving our custom data types
-	networkChan.packetTx = make(chan Packet)
-	networkChan.packetRx = make(chan Packet)
+	networkChan.PacketTx = make(chan Packet)
+	networkChan.PacketRx = make(chan Packet)
 	// ... and start the transmitter/receiver pair on some port
 	// These functions can take any number of channels! It is also possible to
 	//  start multiple transmitters/receivers on the same port.
-	go bcast.Transmitter(ports.UDPTx, networkChan.packetTx)
+	go bcast.Transmitter(ports.UDPTx, networkChan.PacketTx)
 
 	for rxPort := range ports.UDPRx {
-		go bcast.Receiver(rxPort, networkChan.packetRx)
+		go bcast.Receiver(rxPort, networkChan.PacketRx)
 	}
 
 	// The example message. We just send one of these every second.
@@ -121,7 +122,7 @@ func Init_network() (networkChan NetworkChan) {
 		var packet Packet
 		for {
 			packet.Version++
-			networkChan.packetTx <- packet
+			networkChan.PacketTx <- packet
 			time.Sleep(1 * time.Second)
 		}
 	}()
@@ -131,17 +132,28 @@ func Init_network() (networkChan NetworkChan) {
 		fmt.Println("Started")
 		for {
 			select {
-			case p := <-networkChan.peerUpdateCh:
+			case p := <-networkChan.PeerUpdateCh:
 				fmt.Printf("Peer update:\n")
 				fmt.Printf("  Peers:    %q\n", p.Peers)
 				fmt.Printf("  New:      %q\n", p.New)
 				fmt.Printf("  Lost:     %q\n", p.Lost)
 
-			case a := <-networkChan.packetRx:
+			case a := <-networkChan.PacketRx:
 				fmt.Printf("Received: %#v\n", a)
 				a.Display() // feilmelding hvis a ikke er en struct Packet
 			}
 		}
 	}()
 	return
+}
+
+func Elevator_to_packet(e elevator.Elevator) Packet {
+	packet := Packet{
+		Version:     e.Version,
+		ElevatorNum: e.ElevNum,
+		Guid:        0,
+		Queue:       e.Requests,
+	}
+
+	return packet
 }

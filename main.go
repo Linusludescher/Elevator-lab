@@ -6,7 +6,7 @@ import (
 	"project/elevio"
 	"project/network"
 	"project/stm"
-	"project/version_control"
+	"project/versioncontrol"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -53,11 +53,11 @@ func main() {
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)
 
-		case udp_packet := <-network_channels.packetRx:
+		case udp_packet := <-network_channels.PacketRx:
 			versioncontrol.Version_update_queue(&my_elevator, udp_packet)
 
 		default:
-			stm.DefaultState(&my_elevator, network_channels.packetTx) // Dårlig navn? beskriver dårlig
+			stm.DefaultState(&my_elevator, network_channels.PacketTx) // Dårlig navn? beskriver dårlig
 		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"project/elevator"
 	"project/elevio"
+	"project/network"
 	"project/requests"
 )
 
@@ -27,7 +28,7 @@ func TimerState(e *elevator.Elevator) {
 
 func ButtonPressed(e *elevator.Elevator, buttn elevio.ButtonEvent) {
 	requests.SetOrderHere(e, buttn) // tuple her etterhvert
-	e.Display()	
+	e.Display()
 }
 
 func FloorSensed(e *elevator.Elevator, floor_sens int, timer_chan chan bool) {
@@ -66,12 +67,12 @@ func Obstuction(e elevator.Elevator, obstr bool) {
 func StopButtonPressed(e elevator.Elevator) {
 	// fjerne hele køen?
 	requests.DeleteAllOrdes(&e)
-	
+
 	// vente ellerno?
 }
 
-func DefaultState(e *elevator.Elevator, broadcast_elevator_chan chan elevator.Elevator) {
-	broadcast_elevator_chan <- *e
+func DefaultState(e *elevator.Elevator, broadcast_elevator_chan chan network.Packet) {
+	broadcast_elevator_chan <- network.Elevator_to_packet(*e)
 	e.Display()
 	if e.Dirn == elevio.MD_Stop {
 		if requests.RequestsAbove(*e) {
