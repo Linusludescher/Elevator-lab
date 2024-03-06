@@ -27,20 +27,7 @@ func TimerState(e *elevator.Elevator) {
 
 func ButtonPressed(e *elevator.Elevator, buttn elevio.ButtonEvent) {
 	requests.SetOrderHere(e, buttn) // tuple her etterhvert
-	e.Display()
-
-	//sjekke om timer er ferdig
-
-	if e.Dirn == elevio.MD_Stop {
-		fmt.Printf("test1\n")
-		if requests.RequestsAbove(*e) {
-			fmt.Printf("test2\n")
-			e.UpdateDirection(elevio.MD_Up)
-		} else if requests.RequestsBelow(*e) {
-			fmt.Printf("test3\n")
-			e.UpdateDirection(elevio.MD_Down)
-		}
-	}
+	e.Display()	
 }
 
 func FloorSensed(e *elevator.Elevator, floor_sens int, timer_chan chan bool) {

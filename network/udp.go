@@ -17,10 +17,10 @@ const (
 
 // Information to send over UDP broadcast
 type Packet struct {
-	Version     int                      `json:"Version"`
-	ElevatorNum int                      `json:"ElevatorNum"`
-	Guid        int                      `json:"Guid"`
-	Queue       [][]int `json:"Queue"`
+	Version     uint64    `json:"Version"`
+	ElevatorNum int       `json:"ElevatorNum"`
+	Guid        int       `json:"Guid"`
+	Queue       [][]uint8 `json:"Queue"`
 }
 
 type UDPPorts struct {

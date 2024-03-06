@@ -1,10 +1,10 @@
 package elevator
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"project/elevio"
-	"encoding/json"
 )
 
 const N_FLOORS int = 4
@@ -18,14 +18,14 @@ const (
 	EB_Moving
 )
 
-type ConfigData struct{
-	N_FLOORS int	`json:"Floors"`
-	N_BUTTONS int	`json:"Buttons"`
-	ElevatorNum int	`json:"ElevNum"`
+type ConfigData struct {
+	N_FLOORS    uint8 `json:"Floors"`
+	N_BUTTONS   uint8 `json:"Buttons"`
+	ElevatorNum int   `json:"ElevNum"`
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
-	jsonData , err := os.ReadFile("config.json")
+	jsonData, err := os.ReadFile("config.json")
 
 	// can't read the config file, try again
 	if err != nil {
@@ -47,18 +47,22 @@ func readElevatorConfig() (elevatorData ConfigData) {
 }
 
 type Elevator struct {
-	ElevNum int
-	Version int
+	ElevNum    int
+	Version    uint64
 	Dirn       elevio.MotorDirection
-    Last_dir   elevio.MotorDirection
+	Last_dir   elevio.MotorDirection
 	Last_Floor int
-	Requests   [][]int
+	Requests   [][]uint8
 }
 
 func Elevator_uninitialized() (elevator Elevator) {
 	elevatorConfig := readElevatorConfig()
-	matrix := make([][]int, elevatorConfig.N_FLOORS, elevatorConfig.N_BUTTONS)
-	elevator = Elevator{elevatorConfig.ElevatorNum,0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
+	matrix := make([][]uint8, elevatorConfig.N_FLOORS)
+	for i := range matrix {
+		matrix[i] = make([]uint8, elevatorConfig.N_BUTTONS)
+	}
+
+	elevator = Elevator{elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
 	}
@@ -68,7 +72,7 @@ func Elevator_uninitialized() (elevator Elevator) {
 
 func (elevator *Elevator) Display() {
 	fmt.Printf("Direction: %v\n", elevator.Dirn)
-    fmt.Printf("Last Direction: %v\n", elevator.Last_dir)
+	fmt.Printf("Last Direction: %v\n", elevator.Last_dir)
 	fmt.Printf("Last Floor: %v\n", elevator.Last_Floor)
 	fmt.Println("Requests")
 	fmt.Println("Floor \t Hall Up \t Hall Down \t Cab")
@@ -77,7 +81,7 @@ func (elevator *Elevator) Display() {
 	}
 }
 
-func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection){
+func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection) {
 	elevio.SetMotorDirection(dir)
 	elevator.Last_dir = dir
 	elevator.Dirn = dir

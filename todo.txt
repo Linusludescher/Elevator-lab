@@ -1,7 +1,6 @@
 Notater om hva som har blitt neglisjert/må gjøres
 
--timerbug: når man trykker mens timer går, går heisen allikevel
--fikse obstruction og stop
+-fikse obstruction og stop og timer
 -modulisere?->ikke inkludere moduler i hverandre?
 -bug: går ikke an å sette en order til last floor
 -endre dirn type fra elevio.MD_Up til noe annet i et høyere lag. Alle burde ikke være avhenging av elevio.
@@ -37,3 +36,11 @@ reconnect_merge
 
 
 TUPLES I QUEUE
+
+fikse opp i funksjons- og variabelnavn. enten camelCase eller under_strek. Fikse opp i små og store bokstaver for funksjoner. Konsistens på methods vs funksjoner. 
+
+
+lenke lveshare: 
+
+https://prod.liveshare.vsengsaas.visualstudio.com/join?967C1DBC6B1709C6F1F98788207DE46ED416
+

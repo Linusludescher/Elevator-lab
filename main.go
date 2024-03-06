@@ -6,7 +6,7 @@ import (
 	"project/elevio"
 	"project/network"
 	"project/stm"
-	"project/version_control"
+	versioncontrol "project/version_control"
 )
 
 //Todo rydding: samle ting i funkdjonrt
