@@ -73,7 +73,7 @@ func StopButtonPressed(e elevator.Elevator) {
 
 func DefaultState(e *elevator.Elevator, broadcast_elevator_chan chan network.Packet) {
 	broadcast_elevator_chan <- network.Elevator_to_packet(*e)
-	e.Display()
+	//e.Display()
 	if e.Dirn == elevio.MD_Stop {
 		if requests.RequestsAbove(*e) {
 			fmt.Printf("test2\n")

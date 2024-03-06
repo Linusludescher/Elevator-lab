@@ -9,7 +9,6 @@ import (
 	"project/network/bcast"
 	"project/network/localip"
 	"project/network/peers"
-	"time"
 )
 
 // Globals
@@ -27,10 +26,10 @@ type Packet struct {
 }
 
 type UDPPorts struct {
-	UDPTx         int   `json:"UDPTx"`
-	UDPRx         []int `json:"UDPRx"`
-	Id            string   `json:"ElevNum"`
-	UDPstatusPort int   `json:"StatusPort"`
+	UDPTx         int    `json:"UDPTx"`
+	UDPRx         []int  `json:"UDPRx"`
+	Id            string `json:"ElevNum"`
+	UDPstatusPort int    `json:"StatusPort"`
 }
 
 type NetworkChan struct {
@@ -116,16 +115,6 @@ func Init_network() (networkChan NetworkChan) {
 	for rxPort := range ports.UDPRx {
 		go bcast.Receiver(rxPort, networkChan.PacketRx)
 	}
-
-	// The example message. We just send one of these every second.
-	go func() {
-		var packet Packet
-		for {
-			packet.Version++
-			networkChan.PacketTx <- packet
-			time.Sleep(1 * time.Second)
-		}
-	}()
 
 	// midlertidlig, slik at vi ikke må skrive så mye kode for å teste
 	go func() {
