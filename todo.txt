@@ -40,3 +40,6 @@ TUPLES I QUEUE: problem løst: vi bare bruker ints! 0 for ingen ordre, 10 for or
 fikse opp i funksjons- og variabelnavn. enten camelCase eller under_strek. Fikse opp i små og store bokstaver for funksjoner. Konsistens på methods vs funksjoner. 
 
 Mangler LYS 
+
+/network/upd.go: Error unmarshal json data to ElevatorPorts struct: json: cannot unmarshal number into Go struct field UDPPorts.ElevNum of type^Csignal: interrupt
+/network/upd.go: Error unmarshal json data to ElevatorPorts struct: json: cannot unmarshal number into Go struct field UDPPorts.ElevNum of type string

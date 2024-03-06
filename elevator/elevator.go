@@ -48,6 +48,7 @@ func readElevatorConfig() (elevatorData ConfigData) {
 
 type Elevator struct {
 	ElevNum    int
+    Sender     int
 	Version    uint64
 	Dirn       elevio.MotorDirection
 	Last_dir   elevio.MotorDirection
@@ -62,7 +63,7 @@ func Elevator_uninitialized() (elevator Elevator) {
 		matrix[i] = make([]uint8, elevatorConfig.N_BUTTONS)
 	}
 
-	elevator = Elevator{elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
+	elevator = Elevator{elevatorConfig.ElevatorNum,0, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
 	}
