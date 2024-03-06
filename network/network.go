@@ -27,10 +27,10 @@ type Packet struct {
 }
 
 type UDPPorts struct {
-	UDPTx         int    `json:"UDPTx"`
-	UDPRx         []int  `json:"UDPRx"`
-	Id            string `json:"ElevNum"`
-	UDPstatusPort int    `json:"StatusPort"`
+	UDPTx         int   `json:"UDPTx"`
+	UDPRx         []int `json:"UDPRx"`
+	Id            string   `json:"ElevNum"`
+	UDPstatusPort int   `json:"StatusPort"`
 }
 
 type NetworkChan struct {

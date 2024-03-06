@@ -1,7 +1,9 @@
 {
         "Floors": 4,
         "Buttons": 3,
-        "ElevNum": 1,
-        "UDPBroadcastPort": "255.255.255.255:20024",
-        "UDPRecevePorts":["255.255.255.255:20025", "255.255.255.255:20026"]
+        "ElevNum": "1", 
+        "ElevNum2": 1,
+        "UDPTx": 20024,
+        "UDPRx":[20025, 20026],
+        "StatusPort": 3000
 }

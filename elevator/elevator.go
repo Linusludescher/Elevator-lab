@@ -21,7 +21,7 @@ const (
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
 	N_BUTTONS   uint8 `json:"Buttons"`
-	ElevatorNum int   `json:"ElevNum"`
+	ElevatorNum int   `json:"ElevNum2"`
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
