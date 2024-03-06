@@ -2,5 +2,4 @@
 helikopterlab
 
 ny lenke:
-https://prod.liveshare.vsengsaas.visualstudio.com/join?838E9CBB0E15DF5865375B2FBD17CFC41292
-
+https://prod.liveshare.vsengsaas.visualstudio.com/join?4E5D7F3C27B9216AB9F29C77A002C421CF18
