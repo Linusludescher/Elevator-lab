@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"project/elevator"
 	"project/elevio"
-	"project/network"
 	"project/requests"
 )
 
@@ -71,8 +70,8 @@ func StopButtonPressed(e elevator.Elevator) {
 	// vente ellerno?
 }
 
-func DefaultState(e *elevator.Elevator, broadcast_elevator_chan chan network.Packet) {
-	broadcast_elevator_chan <- network.Elevator_to_packet(*e)
+func DefaultState(e *elevator.Elevator, broadcast_elevator_chan chan elevator.Elevator) {
+	broadcast_elevator_chan <- *e
 	//e.Display()
 	if e.Dirn == elevio.MD_Stop {
 		if requests.RequestsAbove(*e) {

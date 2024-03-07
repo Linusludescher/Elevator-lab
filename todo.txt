@@ -49,3 +49,6 @@ Mangler logikk på når en heis kommer tilbake
 
 Endre packet til å bare være samme som heis?
 
+Logikk når en heis mistes, må legge orders ut til alle igjen
+
+Nå endres hele queue når vi får en ny versjon. Skal bare endre global queue. Dette må også endres i Check if samme queue.

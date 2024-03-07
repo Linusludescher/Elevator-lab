@@ -35,8 +35,8 @@ type UDPPorts struct {
 type NetworkChan struct {
 	PeerUpdateCh chan peers.PeerUpdate
 	PeerTxEnable chan bool
-	PacketTx     chan Packet
-	PacketRx     chan Packet
+	PacketTx     chan elevator.Elevator
+	PacketRx     chan elevator.Elevator
 }
 
 func getNetworkConfig() (elevatorUDPPorts UDPPorts) {
@@ -105,8 +105,8 @@ func Init_network() (networkChan NetworkChan) {
 	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdateCh)
 
 	// We make channels for sending and receiving our custom data types
-	networkChan.PacketTx = make(chan Packet)
-	networkChan.PacketRx = make(chan Packet)
+	networkChan.PacketTx = make(chan elevator.Elevator)
+	networkChan.PacketRx = make(chan elevator.Elevator)
 	// ... and start the transmitter/receiver pair on some port
 	// These functions can take any number of channels! It is also possible to
 	//  start multiple transmitters/receivers on the same port.
@@ -134,15 +134,4 @@ func Init_network() (networkChan NetworkChan) {
 		}
 	}()
 	return
-}
-
-func Elevator_to_packet(e elevator.Elevator) Packet {
-	packet := Packet{
-		Version:     e.Version,
-		ElevatorNum: e.ElevNum,
-		Guid:        0,
-		Queue:       e.Requests,
-	}
-
-	return packet
 }
