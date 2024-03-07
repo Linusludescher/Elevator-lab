@@ -206,7 +206,7 @@ func TestVersion_control(t *testing.T) {
                 Lost: []string{},
             },
             current_elevators_version: []elevator.Elevator{
-                elevator.Elevator{
+                {
                     ElevNum: 1,
                     Sender: 2,
                     Version: 100,
@@ -219,7 +219,7 @@ func TestVersion_control(t *testing.T) {
                         {0, 0, 0, 0},
                     },
                 },
-                elevator.Elevator{
+               {
                     ElevNum: 2,
                     Sender: 2,
                     Version: 100,
@@ -232,7 +232,7 @@ func TestVersion_control(t *testing.T) {
                         {0, 0, 0, 0},
                     },
                 },
-                elevator.Elevator{
+                {
                     ElevNum: 3,
                     Sender: 3,
                     Version: 99,
