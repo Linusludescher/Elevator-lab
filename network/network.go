@@ -9,27 +9,22 @@ import (
 	"project/network/bcast"
 	"project/network/localip"
 	"project/network/peers"
+	"strconv"
 )
 
-// Globals
-const (
-	N_FLOORS  int = 4
-	N_BUTTONS int = 3
-)
+// // Globals
+// const (
+// 	N_FLOORS  int = 4
+// 	N_BUTTONS int = 3
+// )
 
-// Information to send over UDP broadcast
-type Packet struct {
-	Version     uint64
-	ElevatorNum int
-	Guid        int
-	Queue       [][]uint8
-}
-
-type UDPPorts struct {
-	UDPTx         int    `json:"UDPTx"`
-	UDPRx         []int  `json:"UDPRx"`
-	Id            string `json:"ElevNum"`
-	UDPstatusPort int    `json:"StatusPort"`
+type ConfigUDPPorts struct {
+	UDPBase       int `json:"BasePort"`
+	N_elevators   int `json:"n_elevators"`
+	UDPTx         int
+	UDPRx         []int
+	Id            int `json:"ElevNum"`
+	UDPstatusPort int `json:"StatusPort"`
 }
 
 type NetworkChan struct {
@@ -39,7 +34,7 @@ type NetworkChan struct {
 	PacketRx     chan elevator.Elevator
 }
 
-func getNetworkConfig() (elevatorUDPPorts UDPPorts) {
+func getNetworkConfig() (cp ConfigUDPPorts) {
 	jsonData, err := os.ReadFile("config.json")
 
 	// can't read the config file, try again
@@ -49,8 +44,14 @@ func getNetworkConfig() (elevatorUDPPorts UDPPorts) {
 	}
 
 	// Parse jsonData into ElevatorPorts struct
-	err = json.Unmarshal(jsonData, &elevatorUDPPorts)
-
+	err = json.Unmarshal(jsonData, &cp)
+	for i := 1; i < cp.N_elevators+1; i++ {
+		if i == cp.Id {
+			cp.UDPTx = cp.UDPBase + cp.Id
+		} else {
+			cp.UDPRx = append(cp.UDPRx, cp.UDPBase+i)
+		}
+	}
 	if err != nil {
 		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
 
@@ -62,23 +63,12 @@ func getNetworkConfig() (elevatorUDPPorts UDPPorts) {
 
 }
 
-func (packet *Packet) Display() {
-	fmt.Printf("Elevator number: \t%v\n", packet.ElevatorNum)
-	fmt.Printf("Version: \t\t%v\n", packet.Version)
-	fmt.Printf("ID: \t\t\t%v\n", packet.Guid)
-	fmt.Println("Floor \t Hall Up \t Hall Down \t Cab")
-	for i := 0; i < N_FLOORS; i++ {
-		fmt.Printf("%v \t %v \t\t %v \t\t %v \t\n", i+1, packet.Queue[i][0], packet.Queue[i][1], packet.Queue[i][2])
-	}
-}
-
 func Init_network() (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
 	ports := getNetworkConfig()
-
 	// Our id can be anything. Here we pass it on the command line, using
 	//  `go run main.go -id=our_id`
-	var id string = ports.Id
+	var id string = strconv.Itoa(ports.Id)
 	flag.StringVar(&id, "id", "", "id of this peer")
 	flag.Parse()
 
@@ -113,7 +103,8 @@ func Init_network() (networkChan NetworkChan) {
 	go bcast.Transmitter(ports.UDPTx, networkChan.PacketTx)
 
 	for rxPort := range ports.UDPRx {
-		go bcast.Receiver(rxPort, networkChan.PacketRx)
+		fmt.Printf("rxport %d\n", ports.UDPRx[rxPort])
+		go bcast.Receiver(ports.UDPRx[rxPort], networkChan.PacketRx)
 	}
 
 	// midlertidlig, slik at vi ikke må skrive så mye kode for å teste
@@ -126,9 +117,10 @@ func Init_network() (networkChan NetworkChan) {
 				fmt.Printf("  Peers:    %q\n", p.Peers)
 				fmt.Printf("  New:      %q\n", p.New)
 				fmt.Printf("  Lost:     %q\n", p.Lost)
-
+				fmt.Printf("  UdpTx: 	%d\n", ports.UDPTx)
+				fmt.Printf("  UdpRx: 	%d\n", ports.UDPRx)
 			case a := <-networkChan.PacketRx:
-				fmt.Printf("Received: %#v\n", a)
+				fmt.Println("Received:")
 				a.Display() // feilmelding hvis a ikke er en struct Packet
 			}
 		}
