@@ -47,8 +47,16 @@ Mangler LYS service guarantee.
 
 Mangler logikk på når en heis kommer tilbake
 
-Endre packet til å bare være samme som heis?
+DONE Endre packet til å bare være samme som heis?  DONE
 
 Logikk når en heis mistes, må legge orders ut til alle igjen
 
-Nå endres hele queue når vi får en ny versjon. Skal bare endre global queue. Dette må også endres i Check if samme queue.
+DONE Transmitting rate
+
+Begge heiser kjører på første order. Treigeste heis stopper ikke fordi den første heisen fjerner order.
+
+DONE Må utvide Queue til å inneholde cab for alle heiser.  DONE
+
+Hver heis må legge til cab orders på riktig kolonne
+
+Bug: Går ikke an å sette order i last floor.

@@ -1,9 +1,7 @@
 {
         "Floors": 4,
-        "Buttons": 3,
-        "ElevNum": "1", 
-        "ElevNum2": 1,
-        "UDPTx": 20024,
-        "UDPRx":[20025, 20026],
+        "n_elevators": 2,
+        "ElevNum": 1,
+        "BasePort": 20223,
         "StatusPort": 3000
 }

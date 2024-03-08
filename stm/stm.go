@@ -27,7 +27,6 @@ func TimerState(e *elevator.Elevator) {
 
 func ButtonPressed(e *elevator.Elevator, buttn elevio.ButtonEvent) {
 	requests.SetOrderHere(e, buttn) // tuple her etterhvert
-	e.Display()
 }
 
 func FloorSensed(e *elevator.Elevator, floor_sens int, timer_chan chan bool) {
@@ -71,7 +70,6 @@ func StopButtonPressed(e elevator.Elevator) {
 }
 
 func DefaultState(e *elevator.Elevator, broadcast_elevator_chan chan elevator.Elevator) {
-	broadcast_elevator_chan <- *e
 	//e.Display()
 	if e.Dirn == elevio.MD_Stop {
 		if requests.RequestsAbove(*e) {
