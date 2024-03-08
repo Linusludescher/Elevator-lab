@@ -5,23 +5,16 @@ import (
 	"fmt"
 	"os"
 	"project/elevio"
+	"time"
 )
 
 const N_FLOORS int = 4
 const N_BUTTONS int = 3
 
-type Elevator_behaviour int
-
-const (
-	EB_Idle Elevator_behaviour = iota + 1
-	EB_DoorOpen
-	EB_Moving
-)
-
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
-	N_BUTTONS   uint8 `json:"Buttons"`
-	ElevatorNum int   `json:"ElevNum2"`
+	N_elevators   uint8 `json:"n_elevators"`
+	ElevatorNum int   `json:"ElevNum"`
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
@@ -59,7 +52,7 @@ func Elevator_uninitialized() (elevator Elevator) {
 	elevatorConfig := readElevatorConfig()
 	matrix := make([][]uint8, elevatorConfig.N_FLOORS)
 	for i := range matrix {
-		matrix[i] = make([]uint8, elevatorConfig.N_BUTTONS)
+		matrix[i] = make([]uint8, elevatorConfig.N_elevators + 2)
 	}
 
 	elevator = Elevator{elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
@@ -74,9 +67,10 @@ func (elevator *Elevator) Display() {
 	fmt.Printf("Direction: %v\n", elevator.Dirn)
 	fmt.Printf("Last Direction: %v\n", elevator.Last_dir)
 	fmt.Printf("Last Floor: %v\n", elevator.Last_Floor)
+	fmt.Printf("Version: %v\n", elevator.Version)
 	fmt.Println("Requests")
 	fmt.Println("Floor \t Hall Up \t Hall Down \t Cab")
-	for i := 0; i < N_FLOORS; i++ {
+	for i := N_FLOORS - 1; i >= 0; i-- {
 		fmt.Printf("%v \t %v \t\t %v \t\t %v \t\n", i+1, elevator.Requests[i][0], elevator.Requests[i][1], elevator.Requests[i][2])
 	}
 }
@@ -85,4 +79,11 @@ func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection) {
 	elevio.SetMotorDirection(dir)
 	elevator.Last_dir = dir
 	elevator.Dirn = dir
+}
+
+func BroadcastElevator(bc_chan chan bool, n_ms int) {
+	for {
+		bc_chan <- true
+		time.Sleep(time.Duration(n_ms) * time.Millisecond)
+	}
 }
