@@ -59,4 +59,4 @@ DONE Må utvide Queue til å inneholde cab for alle heiser.  DONE
 
 Hver heis må legge til cab orders på riktig kolonne
 
-Bug: Går ikke an å sette order i last floor.
+Bug: Går ikke an å sette order i last floor. ånei
