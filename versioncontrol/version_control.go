@@ -10,19 +10,30 @@ const (
 	// versionInitVal = 10000 //initialisere på høyere verdi enn 0 for ikke problemer med nullstilling ved tilbakekobling etter utfall
 )
 
-func Version_up(e *elevator.Elevator) {
-	if e.Version < versionLimit {
-		e.Version++
+func Version_up(wv *elevator.Worldview) {
+	if wv.Version < versionLimit {
+		wv.Version++
 	} else {
-		e.Version = 0
+		wv.Version = 0
 	}
 }
 
-func Version_if_equal_queue(e elevator.Elevator, p elevator.Elevator) bool {
+func Version_if_equal_queue(my_wv elevator.Worldview, incoming_wv elevator.Worldview) bool {
 	areEqual := true
-	for i := range e.Requests {
-		for j := range e.Requests[i] {
-			if e.Requests[i][j] != p.Requests[i][j] {
+	for i := range my_wv.HallRequests {
+		for j := range my_wv.HallRequests[i] {
+			if my_wv.HallRequests[i][j] != incoming_wv.HallRequests[i][j] {
+				areEqual = false
+				break
+			}
+		}
+		if !areEqual {
+			break
+		}
+	}
+	for elev := range my_wv.ElevList {
+		for f := range my_wv.ElevList[elev].CabRequests {
+			if my_wv.ElevList[elev].CabRequests[f] != incoming_wv.ElevList[elev].CabRequests[f] {
 				areEqual = false
 				break
 			}
@@ -34,14 +45,16 @@ func Version_if_equal_queue(e elevator.Elevator, p elevator.Elevator) bool {
 	return areEqual
 }
 
-func Version_update_queue(e *elevator.Elevator, p elevator.Elevator) {
-	if p.Version > e.Version { //||  (e.Version > versionLimit-versionStabilityCycles && p.Version < versionStabilityCycles)
-		e.Requests = p.Requests
-		e.Version = p.Version
-	} else if (p.Version == e.Version) || !Version_if_equal_queue(*e, p) {
-		if p.ElevNum > e.ElevNum {
-			e.Requests = p.Requests
-			e.Version = p.Version
+func Version_update_queue(my_wv *elevator.Worldview, incoming_wv elevator.Worldview) {
+	if incoming_wv.Version > my_wv.Version { //||  (e.Version > versionLimit-versionStabilityCycles && p.Version < versionStabilityCycles)
+		my_wv.HallRequests = incoming_wv.HallRequests
+		my_wv.Version = incoming_wv.Version
+		my_wv.ElevList = incoming_wv.ElevList
+	} else if (incoming_wv.Version == my_wv.Version) || !Version_if_equal_queue(*my_wv, incoming_wv) {
+		if incoming_wv.Sender > my_wv.Sender {
+			my_wv.HallRequests = incoming_wv.HallRequests
+			my_wv.Version = incoming_wv.Version
+			my_wv.ElevList = incoming_wv.ElevList
 		}
 	}
 } // må ha noe med når version nullstilles

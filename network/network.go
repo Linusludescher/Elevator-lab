@@ -28,8 +28,8 @@ type ConfigUDPPorts struct {
 type NetworkChan struct {
 	PeerUpdateCh chan peers.PeerUpdate
 	PeerTxEnable chan bool
-	PacketTx     chan elevator.Elevator
-	PacketRx     chan elevator.Elevator
+	PacketTx     chan elevator.Worldview
+	PacketRx     chan elevator.Worldview
 }
 
 func getNetworkConfig() (cp ConfigUDPPorts, Id int) {
@@ -60,7 +60,7 @@ func getNetworkConfig() (cp ConfigUDPPorts, Id int) {
 	return
 }
 
-func Init_network(e *elevator.Elevator) (networkChan NetworkChan) {
+func Init_network(e *elevator.Elevator, wv *elevator.Worldview) (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
 	ports, id := getNetworkConfig()
 
@@ -75,8 +75,8 @@ func Init_network(e *elevator.Elevator) (networkChan NetworkChan) {
 	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdateCh)
 
 	// We make channels for sending and receiving our custom data types
-	networkChan.PacketTx = make(chan elevator.Elevator)
-	networkChan.PacketRx = make(chan elevator.Elevator)
+	networkChan.PacketTx = make(chan elevator.Worldview)
+	networkChan.PacketRx = make(chan elevator.Worldview)
 	// ... and start the transmitter/receiver pair on some port
 	// These functions can take any number of channels! It is also possible to
 	//  start multiple transmitters/receivers on the same port.
@@ -88,7 +88,7 @@ func Init_network(e *elevator.Elevator) (networkChan NetworkChan) {
 	}
 
 	// midlertidlig, slik at vi ikke må skrive så mye kode for å teste
-	go func(e *elevator.Elevator) {
+	go func(e *elevator.Elevator, wv *elevator.Worldview) {
 		fmt.Println("Started")
 		for {
 			select {
@@ -106,18 +106,21 @@ func Init_network(e *elevator.Elevator) (networkChan NetworkChan) {
 						return
 					}
 					for i := 0; i < 2; i++ {
-						for j := range e.Requests[i] {
-							if e.Requests[i][j] == uint8(k) {
+						for j := range e.CabRequests[i] {
+							if e.CabRequests[j] == 1 {
 								//Kost-funksjon
+								if wv.HallRequests[i][j] == uint8(k) {
+									// Kost fuknsjon
+								}
 							}
 						}
 					}
 				}
-			case a := <-networkChan.PacketRx:
+			case <-networkChan.PacketRx:
 				fmt.Println("Received:")
-				a.Display() // feilmelding hvis a ikke er en struct Packet
+				//a.Display() // feilmelding hvis a ikke er en struct Packet
 			}
 		}
-	}(e)
+	}(e, wv)
 	return
 }

@@ -8,12 +8,15 @@ import (
 	"time"
 )
 
-const N_FLOORS int = 4
-const N_BUTTONS int = 3
+const (
+	N_FLOORS     int    = 4
+	N_BUTTONS    int    = 3
+	startVersion uint64 = 5000
+)
 
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
-	N_elevators   uint8 `json:"n_elevators"`
+	N_elevators uint8 `json:"n_elevators"`
 	ElevatorNum int   `json:"ElevNum"`
 }
 
@@ -40,22 +43,32 @@ func readElevatorConfig() (elevatorData ConfigData) {
 }
 
 type Elevator struct {
-	ElevNum    int
-	Version    uint64
-	Dirn       elevio.MotorDirection
-	Last_dir   elevio.MotorDirection
-	Last_Floor int
-	Requests   [][]uint8
+	ElevNum     int
+	Dirn        elevio.MotorDirection
+	Last_dir    elevio.MotorDirection
+	Last_Floor  int
+	CabRequests []uint8
 }
 
-func Elevator_uninitialized() (elevator Elevator) {
-	elevatorConfig := readElevatorConfig()
-	matrix := make([][]uint8, elevatorConfig.N_FLOORS)
-	for i := range matrix {
-		matrix[i] = make([]uint8, elevatorConfig.N_elevators + 2)
-	}
+type Worldview struct {
+	ElevList     []Elevator
+	Sender       int
+	Version      uint64
+	HallRequests [][]uint8 //legge inn N_FLOOR (etter å ha lest) i første klamme
+}
 
-	elevator = Elevator{elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
+func ElevatorInit() (elevator Elevator, world Worldview) {
+	elevatorConfig := readElevatorConfig()
+	hall := make([][]uint8, 2)
+	for i := range hall {
+		hall[i] = make([]uint8, elevatorConfig.N_FLOORS)
+	}
+	cab := make([]uint8, elevatorConfig.N_FLOORS)
+
+	elevator = Elevator{elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+
+	world = Worldview{[]Elevator{elevator}, elevator.ElevNum, startVersion, hall}
+
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
 	}
@@ -63,15 +76,14 @@ func Elevator_uninitialized() (elevator Elevator) {
 	return
 }
 
-func (elevator *Elevator) Display() {
+func (elevator *Elevator) Display() { //lage en for worldview også!
 	fmt.Printf("Direction: %v\n", elevator.Dirn)
 	fmt.Printf("Last Direction: %v\n", elevator.Last_dir)
 	fmt.Printf("Last Floor: %v\n", elevator.Last_Floor)
-	fmt.Printf("Version: %v\n", elevator.Version)
 	fmt.Println("Requests")
-	fmt.Println("Floor \t Hall Up \t Hall Down \t Cab")
-	for i := N_FLOORS - 1; i >= 0; i-- {
-		fmt.Printf("%v \t %v \t\t %v \t\t %v \t\n", i+1, elevator.Requests[i][0], elevator.Requests[i][1], elevator.Requests[i][2])
+	fmt.Println("Floor\t Cab")
+	for i := len(elevator.CabRequests) - 1; i >= 0; i-- {
+		fmt.Printf("%v \t %v \t\n", i+1, elevator.CabRequests[i])
 	}
 }
 

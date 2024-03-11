@@ -28,9 +28,9 @@ func main() {
 	// broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
 	// udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
 
-	my_elevator := elevator.Elevator_uninitialized()
+	my_elevator, my_wv := elevator.ElevatorInit()
 
-	network_channels := network.Init_network(&my_elevator)
+	network_channels := network.Init_network(&my_elevator, &my_wv)
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
@@ -42,13 +42,13 @@ func main() {
 		select {
 		case <-timer_chan:
 			fmt.Println("timer expired")
-			stm.TimerState(&my_elevator)
+			stm.TimerState(&my_elevator, my_wv)
 
 		case buttn := <-drv_buttons:
-			stm.ButtonPressed(&my_elevator, buttn)
+			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
 
 		case floor_sens := <-drv_floors:
-			stm.FloorSensed(&my_elevator, floor_sens, timer_chan)
+			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, timer_chan)
 
 		case obstr := <-drv_obstr:
 			stm.Obstuction(my_elevator, obstr)
@@ -58,10 +58,10 @@ func main() {
 
 		case udp_packet := <-network_channels.PacketRx:
 			fmt.Println("Pakke mottatt")
-			versioncontrol.Version_update_queue(&my_elevator, udp_packet)
+			versioncontrol.Version_update_queue(&my_wv, udp_packet)
 		case <-bc_timer_chan:
-			network_channels.PacketTx <- my_elevator
-			stm.DefaultState(&my_elevator, network_channels.PacketTx)
+			network_channels.PacketTx <- my_wv
+			stm.DefaultState(&my_elevator, &my_wv, network_channels.PacketTx)
 			//default:
 			//stm.DefaultState(&my_elevator, network_channels.PacketTx) // Dårlig navn? beskriver dårlig
 		}
