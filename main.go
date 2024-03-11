@@ -51,7 +51,7 @@ func main() {
 			stm.FloorSensed(&my_elevator, floor_sens, timer_chan)
 
 		case obstr := <-drv_obstr:
-			stm.Obstuction(my_elevator, obstr)
+			stm.Obstruction(my_elevator, obstr)
 
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)

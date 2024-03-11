@@ -1,8 +1,8 @@
 Mandagstodo: 
-- oppdatere elevator-struct med behaviour + teste
+------oppdatere elevator-struct med behaviour + teste
 - lage updateOrders: tar inn info fra hver heis som er lokalt lagret, omformer til input for kostfunksjon, kjører costfunksjon, putter info inn i kø som sendes ut. 
 - Watchdog: passer på hver heis, hvis en faller ut gir den ordre fri og kjører kostfunksjon. Sendes ut med versjonskontroll. 
-- Endre statemachine til å bare ta hensyn til egne ordre. 
+------Endre statemachine til å bare ta hensyn til egne ordre. 
 ------merge til main
 - Endre til å bruke egen IP adresse
 

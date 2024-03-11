@@ -21,6 +21,7 @@ func TimerState(e *elevator.Elevator) {
 			e.UpdateDirection(elevio.MD_Up)
 		}
 	} else {
+		e.Behaviour = elevator.EB_Idle
 		e.Dirn = elevio.MD_Stop
 	}
 }
@@ -35,7 +36,6 @@ func FloorSensed(e *elevator.Elevator, floor_sens int, timer_chan chan bool) {
 		fmt.Println("new floow")
 	}
 	if e.Dirn == elevio.MD_Up && floor_sens != -1 {
-		fmt.Println("Test4")
 		if requests.RequestsHereCabOrUp(*e) {
 			fmt.Println("stopping")
 			requests.ArrivedAtFloor(e, timer_chan)
@@ -44,7 +44,6 @@ func FloorSensed(e *elevator.Elevator, floor_sens int, timer_chan chan bool) {
 		}
 	}
 	if e.Dirn == elevio.MD_Down && floor_sens != -1 {
-		fmt.Println("Test5")
 		if requests.RequestsHereCabOrDown(*e) {
 			fmt.Println("stopping")
 			requests.ArrivedAtFloor(e, timer_chan)
@@ -54,7 +53,7 @@ func FloorSensed(e *elevator.Elevator, floor_sens int, timer_chan chan bool) {
 	}
 }
 
-func Obstuction(e elevator.Elevator, obstr bool) {
+func Obstruction(e elevator.Elevator, obstr bool) {
 	if obstr {
 		elevio.SetMotorDirection(elevio.MD_Stop)
 	} else {

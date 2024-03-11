@@ -13,8 +13,26 @@ const N_BUTTONS int = 3
 
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
-	N_elevators   uint8 `json:"n_elevators"`
+	N_elevators uint8 `json:"n_elevators"`
 	ElevatorNum int   `json:"ElevNum"`
+}
+
+type Behaviour int
+
+const (
+	EB_Idle     Behaviour = 1
+	EB_Moving   Behaviour = -1
+	EB_DoorOpen Behaviour = 0
+)
+
+type Elevator struct {
+    Behaviour  Behaviour
+	ElevNum    int
+	Version    uint64
+	Dirn       elevio.MotorDirection
+	Last_dir   elevio.MotorDirection
+	Last_Floor int
+	Requests   [][]uint8
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
@@ -39,23 +57,14 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-type Elevator struct {
-	ElevNum    int
-	Version    uint64
-	Dirn       elevio.MotorDirection
-	Last_dir   elevio.MotorDirection
-	Last_Floor int
-	Requests   [][]uint8
-}
-
 func Elevator_uninitialized() (elevator Elevator) {
 	elevatorConfig := readElevatorConfig()
 	matrix := make([][]uint8, elevatorConfig.N_FLOORS)
 	for i := range matrix {
-		matrix[i] = make([]uint8, elevatorConfig.N_elevators + 2)
+		matrix[i] = make([]uint8, elevatorConfig.N_elevators+2)
 	}
 
-	elevator = Elevator{elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
+	elevator = Elevator{EB_Idle, elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
 	}
@@ -79,6 +88,11 @@ func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection) {
 	elevio.SetMotorDirection(dir)
 	elevator.Last_dir = dir
 	elevator.Dirn = dir
+    if elevator.Dirn != elevio.MD_Stop{
+        elevator.Behaviour = EB_Moving
+    } else {
+        elevator.Behaviour = EB_Idle
+    }
 }
 
 func BroadcastElevator(bc_chan chan bool, n_ms int) {

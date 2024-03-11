@@ -100,6 +100,7 @@ func ArrivedAtFloor(e *elevator.Elevator, timer_chan chan bool) {
 	e.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e)
 	e.Version++
+	e.Behaviour = elevator.EB_DoorOpen
 	go timer.TimerStart(3, timer_chan)
 }
 
