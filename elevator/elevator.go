@@ -14,10 +14,34 @@ const (
 	startVersion uint64 = 5000
 )
 
+type Behaviour int
+
+const (
+	EB_Idle     Behaviour = 1
+	EB_Moving   Behaviour = -1
+	EB_DoorOpen Behaviour = 0
+)
+
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
 	ElevatorNum int   `json:"ElevNum"`
+}
+
+type Elevator struct {
+	Behaviour   Behaviour
+	ElevNum     int
+	Dirn        elevio.MotorDirection
+	Last_dir    elevio.MotorDirection
+	Last_Floor  int
+	CabRequests []uint8
+}
+
+type Worldview struct {
+	ElevList     []Elevator
+	Sender       int
+	Version      uint64
+	HallRequests [][]uint8 //legge inn N_FLOOR (etter å ha lest) i første klamme
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
@@ -42,21 +66,6 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-type Elevator struct {
-	ElevNum     int
-	Dirn        elevio.MotorDirection
-	Last_dir    elevio.MotorDirection
-	Last_Floor  int
-	CabRequests []uint8
-}
-
-type Worldview struct {
-	ElevList     []Elevator
-	Sender       int
-	Version      uint64
-	HallRequests [][]uint8 //legge inn N_FLOOR (etter å ha lest) i første klamme
-}
-
 func ElevatorInit() (elevator Elevator, world Worldview) {
 	elevatorConfig := readElevatorConfig()
 	hall := make([][]uint8, 2)
@@ -65,7 +74,7 @@ func ElevatorInit() (elevator Elevator, world Worldview) {
 	}
 	cab := make([]uint8, elevatorConfig.N_FLOORS)
 
-	elevator = Elevator{elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+	elevator = Elevator{EB_Idle, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 
 	world = Worldview{[]Elevator{elevator}, elevator.ElevNum, startVersion, hall}
 
@@ -91,6 +100,11 @@ func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection) {
 	elevio.SetMotorDirection(dir)
 	elevator.Last_dir = dir
 	elevator.Dirn = dir
+	if elevator.Dirn != elevio.MD_Stop {
+		elevator.Behaviour = EB_Moving
+	} else {
+		elevator.Behaviour = EB_Idle
+	}
 }
 
 func BroadcastElevator(bc_chan chan bool, n_ms int) {

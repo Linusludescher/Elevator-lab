@@ -97,6 +97,7 @@ func ArrivedAtFloor(e *elevator.Elevator, wv *elevator.Worldview, timer_chan cha
 	e.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e, wv)
 	wv.Version++
+	e.Behaviour = elevator.EB_DoorOpen
 	go timer.TimerStart(3, timer_chan)
 }
 
