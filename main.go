@@ -28,9 +28,9 @@ func main() {
 	// broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
 	// udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
 
-	network_channels := network.Init_network()
-
 	my_elevator := elevator.Elevator_uninitialized()
+
+	network_channels := network.Init_network(&my_elevator)
 
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
