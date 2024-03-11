@@ -11,7 +11,7 @@ import (
 func RequestsAbove(e elevator.Elevator) bool {
 	for f := e.Last_Floor + 1; f < elevator.N_FLOORS; f++ {
 		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-			if e.Requests[f][btn] == 1 {
+			if e.Requests[f][btn] == uint8(e.ElevNum) {
 				return true
 			}
 		}
@@ -22,7 +22,7 @@ func RequestsAbove(e elevator.Elevator) bool {
 func RequestsBelow(e elevator.Elevator) bool {
 	for f := 0; f < e.Last_Floor; f++ {
 		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-			if e.Requests[f][btn] == 1 {
+			if e.Requests[f][btn] == uint8(e.ElevNum) {
 				return true
 			}
 		}
@@ -32,7 +32,7 @@ func RequestsBelow(e elevator.Elevator) bool {
 
 func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
 	for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-		if e.Requests[e.Last_Floor][btn] == 1 {
+		if e.Requests[e.Last_Floor][btn] == uint8(e.ElevNum) {
 			return true
 		}
 	}
@@ -40,20 +40,20 @@ func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med el
 }
 
 func RequestsHereCabOrUp(e elevator.Elevator) bool { // stygt, kan ores på en linje
-	if e.Requests[e.Last_Floor][elevio.BT_HallUp] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_HallUp] == uint8(e.ElevNum) {
 		return true
 	}
-	if e.Requests[e.Last_Floor][elevio.BT_Cab] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_Cab] == uint8(e.ElevNum) {
 		return true
 	}
 	return false
 }
 
 func RequestsHereCabOrDown(e elevator.Elevator) bool {
-	if e.Requests[e.Last_Floor][elevio.BT_HallDown] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_HallDown] == uint8(e.ElevNum) {
 		return true
 	}
-	if e.Requests[e.Last_Floor][elevio.BT_Cab] == 1 {
+	if e.Requests[e.Last_Floor][elevio.BT_Cab] == uint8(e.ElevNum) {
 		return true
 	}
 	return false
