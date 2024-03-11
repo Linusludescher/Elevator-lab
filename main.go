@@ -6,7 +6,7 @@ import (
 	"project/elevio"
 	"project/network"
 	"project/stm"
-	"project/version_control"
+	"project/versioncontrol"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -17,14 +17,18 @@ func main() {
 	numFloors := 4
 
 	elevio.Init("localhost:15657", numFloors)
+	//elevio.Init("localhost:22222", numFloors)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
 	timer_chan := make(chan bool)
-	broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
-	udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
+	bc_timer_chan := make(chan bool)
+	// broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
+	// udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
+
+	network_channels := network.Init_network()
 
 	my_elevator := elevator.Elevator_uninitialized()
 
@@ -32,9 +36,7 @@ func main() {
 	go elevio.PollFloorSensor(drv_floors)
 	go elevio.PollObstructionSwitch(drv_obstr)
 	go elevio.PollStopButton(drv_stop)
-
-	conn := network.NetworkInit(broadcast_elevator_chan, udp_receive_chan)
-	defer conn.Close()
+	go elevator.BroadcastElevator(bc_timer_chan, 10)
 
 	for {
 		select {
@@ -54,11 +56,14 @@ func main() {
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)
 
-		case udp_packet := <-udp_receive_chan:
+		case udp_packet := <-network_channels.PacketRx:
+			fmt.Println("Pakke mottatt")
 			versioncontrol.Version_update_queue(&my_elevator, udp_packet)
-
-		default:
-			stm.DefaultState(&my_elevator, broadcast_elevator_chan) // Dårlig navn? beskriver dårlig
+		case <-bc_timer_chan:
+			network_channels.PacketTx <- my_elevator
+			stm.DefaultState(&my_elevator, network_channels.PacketTx)
+			//default:
+			//stm.DefaultState(&my_elevator, network_channels.PacketTx) // Dårlig navn? beskriver dårlig
 		}
 	}
 }

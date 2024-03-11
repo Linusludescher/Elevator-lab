@@ -2,7 +2,6 @@ package versioncontrol
 
 import (
 	"project/elevator"
-	"project/network"
 )
 
 const (
@@ -19,11 +18,11 @@ func Version_up(e *elevator.Elevator) {
 	}
 }
 
-func Version_if_equal_queue(e elevator.Elevator, p network.Packet) bool {
+func Version_if_equal_queue(e elevator.Elevator, p elevator.Elevator) bool {
 	areEqual := true
 	for i := range e.Requests {
 		for j := range e.Requests[i] {
-			if e.Requests[i][j] != p.Queue[i][j] {
+			if e.Requests[i][j] != p.Requests[i][j] {
 				areEqual = false
 				break
 			}
@@ -35,13 +34,13 @@ func Version_if_equal_queue(e elevator.Elevator, p network.Packet) bool {
 	return areEqual
 }
 
-func Version_update_queue(e *elevator.Elevator, p network.Packet) {
+func Version_update_queue(e *elevator.Elevator, p elevator.Elevator) {
 	if p.Version > e.Version { //||  (e.Version > versionLimit-versionStabilityCycles && p.Version < versionStabilityCycles)
-		e.Requests = p.Queue
+		e.Requests = p.Requests
 		e.Version = p.Version
 	} else if (p.Version == e.Version) || !Version_if_equal_queue(*e, p) {
-		if p.ElevatorNum > e.ElevNum {
-			e.Requests = p.Queue
+		if p.ElevNum > e.ElevNum {
+			e.Requests = p.Requests
 			e.Version = p.Version
 		}
 	}

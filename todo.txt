@@ -48,4 +48,24 @@ TUPLES I QUEUE: problem løst: vi bare bruker ints! 0 for ingen ordre, 10 for or
 
 fikse opp i funksjons- og variabelnavn. enten camelCase eller under_strek. Fikse opp i små og store bokstaver for funksjoner. Konsistens på methods vs funksjoner. 
 
-Mangler LYS 
+
+
+
+
+Mangler LYS service guarantee.
+
+Mangler logikk på når en heis kommer tilbake
+
+DONE Endre packet til å bare være samme som heis?  DONE
+
+Logikk når en heis mistes, må legge orders ut til alle igjen
+
+DONE Transmitting rate
+
+Begge heiser kjører på første order. Treigeste heis stopper ikke fordi den første heisen fjerner order.
+
+DONE Må utvide Queue til å inneholde cab for alle heiser.  DONE
+
+Hver heis må legge til cab orders på riktig kolonne
+
+Bug: Går ikke an å sette order i last floor. ånei
