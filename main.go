@@ -23,7 +23,7 @@ func main() {
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
-	timer_chan := make(chan bool)
+	timer_exp_chan := make(chan bool)
 	bc_timer_chan := make(chan bool)
 	// broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
 	// udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
@@ -40,15 +40,15 @@ func main() {
 
 	for {
 		select {
-		case <-timer_chan:
+		case <-timer_exp_chan:
 			fmt.Println("timer expired")
-			stm.TimerState(&my_elevator, my_wv)
+			stm.TimerExp(&my_elevator, my_wv)
 
 		case buttn := <-drv_buttons:
 			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
 
 		case floor_sens := <-drv_floors:
-			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, timer_chan)
+			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, timer_exp_chan)
 
 		case obstr := <-drv_obstr:
 			stm.Obstruction(my_elevator, obstr)
@@ -56,7 +56,7 @@ func main() {
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)
 
-		case udp_packet := <-network_channels.PacketRx:
+		case udp_packet := <-network_channels.PacketRx: //legge til
 			fmt.Println("Pakke mottatt")
 			versioncontrol.Version_update_queue(&my_wv, udp_packet)
 		case <-bc_timer_chan:

@@ -7,7 +7,10 @@ import (
 	"project/requests"
 )
 
-func TimerState(e_p *elevator.Elevator, wv elevator.Worldview) {
+func TimerExp(e_p *elevator.Elevator, wv elevator.Worldview) {
+	fmt.Println("timer expired")
+	elevio.SetDoorOpenLamp(false)
+	e_p.Blocking = false
 	if e_p.Last_dir == elevio.MD_Up {
 		if requests.RequestsAbove(*e_p, wv) {
 			e_p.UpdateDirection(elevio.MD_Up)
@@ -66,7 +69,7 @@ func StopButtonPressed(e elevator.Elevator) {
 
 func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, broadcast_elevator_chan chan elevator.Worldview) {
 	//e.Display()
-	if e_p.Dirn == elevio.MD_Stop {
+	if (e_p.Dirn == elevio.MD_Stop) && (!e_p.Blocking) {
 		if requests.RequestsAbove(*e_p, *wv_p) {
 			e_p.UpdateDirection(elevio.MD_Up)
 		} else if requests.RequestsBelow(*e_p, *wv_p) {

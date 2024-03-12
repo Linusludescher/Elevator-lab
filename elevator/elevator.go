@@ -30,6 +30,7 @@ type ConfigData struct {
 
 type Elevator struct {
 	Behaviour   Behaviour
+	Blocking	bool
 	ElevNum     int
 	Dirn        elevio.MotorDirection
 	Last_dir    elevio.MotorDirection
@@ -74,7 +75,7 @@ func ElevatorInit() (e Elevator, world Worldview) {
 	}
 	cab := make([]bool, elevatorConfig.N_FLOORS)
 
-	e = Elevator{EB_Idle, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+	e = Elevator{EB_Idle, false, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 
 	world = Worldview{[]Elevator{e}, e.ElevNum, startVersion, hall}
 

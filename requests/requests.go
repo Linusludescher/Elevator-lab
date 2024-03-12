@@ -1,6 +1,7 @@
 package requests
 
 import (
+	"fmt"
 	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
@@ -73,7 +74,9 @@ func RequestsHereCabOrDown(e elevator.Elevator, wv elevator.Worldview) bool {
 
 func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
 	for orderType := 0; orderType < 2; orderType++ {
-		wv_p.HallRequests[e_p.Last_Floor][orderType] = 0
+		if wv_p.HallRequests[e_p.Last_Floor][orderType] == uint8(e_p.ElevNum) {
+			wv_p.HallRequests[e_p.Last_Floor][orderType] = 0
+		}
 		elevio.SetButtonLamp(elevio.ButtonType(orderType), e_p.Last_Floor, false) //det med lys må fikses
 	}
 	e_p.CabRequests[e_p.Last_Floor] = false
@@ -81,11 +84,11 @@ func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
 }
 
 func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent) {
-	if buttn.Floor == e_p.Last_Floor { //her må det gjøres noe, slik at man kan sette order på vei vekk fra en etasje
+	if (buttn.Floor == e_p.Last_Floor) && (elevio.GetFloor() != -1) {
 		return
 	}
 	if buttn.Button == elevio.BT_Cab {
-		e_p.CabRequests[e_p.Last_Floor] = true
+		e_p.CabRequests[buttn.Floor] = true
 	} else {
 		costFunc.CostFunction(wv_p, buttn)
 	}
@@ -94,11 +97,14 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 }
 
 func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan chan bool) {
+	fmt.Println("Arrived at floor")
+	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	e_p.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e_p, wv_p)
 	wv_p.Version++
 	e_p.Behaviour = elevator.EB_DoorOpen
+	e_p.Blocking = true
 	go timer.TimerStart(3, timer_chan)
 }
 
