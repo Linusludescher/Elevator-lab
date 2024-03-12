@@ -95,4 +95,4 @@ Onsdag:
 -Obstruction (restarte timer?)
 -CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
 - Må alle ha sett order for at vi kan gjøre ting?
-- 
+- fiske crabOrders
