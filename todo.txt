@@ -79,3 +79,11 @@ Tirsdag:
     - Da kan en som kommer tilbake hente sine orders fra sin heis element som er "lost"
 - wv og version må kanskje oppdateres hver gang state endres?
 - Må alle ha sett order for at vi kan gjøre ting?
+
+Onsdag: 
+-fiske lyse
+-tilordne nye ordre når heis lost + når heis tilbake (hvertfall cabRequests)
+-Obstruction (restarte timer?)
+-CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
+- Må alle ha sett order for at vi kan gjøre ting?
+- 
