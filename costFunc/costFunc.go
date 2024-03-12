@@ -49,13 +49,26 @@ func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
 		fmt.Printf("%6v :  %+v\n", k, v)
 	}
 	//gjøre noe med output
-	
+
+	for i, e := range *output {
+		for j, r := range e {
+			for k, b := range r {
+				if b {
+					num, err := strconv.Atoi(i)
+					if err != nil {
+						fmt.Println("Error:", err)
+						return
+					}
+					wv.HallRequests[j][k] = uint8(num)
+				}
+			}
+		}
+	}
 }
 
 func wvToCfInput(wv elevator.Worldview, buttn elevio.ButtonEvent) (input HRAInput) {
 	input.States = make(map[string]HRAElevState)
 	for _, elev := range wv.ElevList {
-		fmt.Printf("int to string etc: %s, %d, %v", strconv.Itoa(int(elev.Dirn)), int(elev.Dirn), elev.Dirn)
 		elevstate := HRAElevState{string(elev.Behaviour), elev.Last_Floor, elev.Dirn.String(), elev.CabRequests}
 		input.States[strconv.Itoa(elev.ElevNum)] = elevstate
 	}
