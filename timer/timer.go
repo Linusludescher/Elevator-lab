@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -13,6 +14,7 @@ func GetWallTime() float64 {
 }
 
 func TimerStart(duration time.Duration, timer chan bool) {
+	fmt.Println("timer started")
 	sec_timer := time.NewTimer(duration * time.Second)
 	<-sec_timer.C
 	timer <- true

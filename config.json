@@ -1,7 +1,6 @@
 {
         "Floors": 4,
-        "n_elevators": 2,
-        "ElevNum": 1,
+        "n_elevators": 3,
         "BasePort": 20223,
         "StatusPort": 3000
 }

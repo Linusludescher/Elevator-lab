@@ -2,12 +2,10 @@ package network
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 	"project/elevator"
 	"project/network/bcast"
-	"project/network/localip"
 	"project/network/peers"
 	"strconv"
 )
@@ -23,28 +21,34 @@ type ConfigUDPPorts struct {
 	N_elevators   int `json:"n_elevators"`
 	UDPTx         int
 	UDPRx         []int
-	Id            int `json:"ElevNum"`
+	Id            int
 	UDPstatusPort int `json:"StatusPort"`
 }
 
 type NetworkChan struct {
 	PeerUpdateCh chan peers.PeerUpdate
 	PeerTxEnable chan bool
-	PacketTx     chan elevator.Elevator
-	PacketRx     chan elevator.Elevator
+	PacketTx     chan elevator.Worldview
+	PacketRx     chan elevator.Worldview
 }
 
-func getNetworkConfig() (cp ConfigUDPPorts) {
+func getNetworkConfig(id int) (cp ConfigUDPPorts) {
 	jsonData, err := os.ReadFile("config.json")
-
+	cp.Id = id
 	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
-		getNetworkConfig()
+		getNetworkConfig(id)
 	}
 
 	// Parse jsonData into ElevatorPorts struct
 	err = json.Unmarshal(jsonData, &cp)
+	if err != nil {
+		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
+
+		// try again
+		getNetworkConfig(id)
+	}
 	for i := 1; i < cp.N_elevators+1; i++ {
 		if i == cp.Id {
 			cp.UDPTx = cp.UDPBase + cp.Id
@@ -52,37 +56,12 @@ func getNetworkConfig() (cp ConfigUDPPorts) {
 			cp.UDPRx = append(cp.UDPRx, cp.UDPBase+i)
 		}
 	}
-	if err != nil {
-		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
-
-		// try again
-		getNetworkConfig()
-	}
-
 	return
-
 }
 
-func Init_network() (networkChan NetworkChan) {
+func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
-	ports := getNetworkConfig()
-	// Our id can be anything. Here we pass it on the command line, using
-	//  `go run main.go -id=our_id`
-	var id string = strconv.Itoa(ports.Id)
-	flag.StringVar(&id, "id", "", "id of this peer")
-	flag.Parse()
-
-	// ... or alternatively, we can use the local IP address.
-	// (But since we can run multiple programs on the same PC, we also append the
-	//  process ID)
-	if id == "" {
-		localIP, err := localip.LocalIP()
-		if err != nil {
-			fmt.Println(err)
-			localIP = "DISCONNECTED"
-		}
-		id = fmt.Sprintf("peer-%s-%d", localIP, os.Getpid())
-	}
+	ports := getNetworkConfig(id)
 
 	// We make a channel for receiving updates on the id's of the peers that are
 	//  alive on the network
@@ -91,12 +70,12 @@ func Init_network() (networkChan NetworkChan) {
 	// This could be used to signal that we are somehow "unavailable".
 	networkChan.PeerTxEnable = make(chan bool)
 
-	go peers.Transmitter(ports.UDPstatusPort, id, networkChan.PeerTxEnable)
+	go peers.Transmitter(ports.UDPstatusPort, strconv.Itoa(id), networkChan.PeerTxEnable)
 	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdateCh)
 
 	// We make channels for sending and receiving our custom data types
-	networkChan.PacketTx = make(chan elevator.Elevator)
-	networkChan.PacketRx = make(chan elevator.Elevator)
+	networkChan.PacketTx = make(chan elevator.Worldview)
+	networkChan.PacketRx = make(chan elevator.Worldview)
 	// ... and start the transmitter/receiver pair on some port
 	// These functions can take any number of channels! It is also possible to
 	//  start multiple transmitters/receivers on the same port.
@@ -108,7 +87,7 @@ func Init_network() (networkChan NetworkChan) {
 	}
 
 	// midlertidlig, slik at vi ikke må skrive så mye kode for å teste
-	go func() {
+	go func(e *elevator.Elevator, wv *elevator.Worldview) {
 		fmt.Println("Started")
 		for {
 			select {
@@ -119,11 +98,31 @@ func Init_network() (networkChan NetworkChan) {
 				fmt.Printf("  Lost:     %q\n", p.Lost)
 				fmt.Printf("  UdpTx: 	%d\n", ports.UDPTx)
 				fmt.Printf("  UdpRx: 	%d\n", ports.UDPRx)
-			case a := <-networkChan.PacketRx:
-				fmt.Println("Received:")
-				a.Display() // feilmelding hvis a ikke er en struct Packet
+
+				for _, k := range p.Lost {
+					k_int, err := strconv.Atoi(k)
+					if err != nil {
+						fmt.Println("Error:", err)
+						return
+					}
+					wv.ElevList[k_int-1].Online = false
+					wv.Version++
+					//kostfunksjon her
+				}
+				if p.New != "" {
+					i, err := strconv.Atoi(p.New)
+					if err != nil {
+						fmt.Println("Error:", err)
+						return
+					}
+					wv.ElevList[i-1].Online = true
+					wv.Version++
+				}
+			case <-networkChan.PacketRx:
+				//fmt.Println("Received:")
+				//a.Display() // feilmelding hvis a ikke er en struct Packet
 			}
 		}
-	}()
+	}(e, wv)
 	return
 }
