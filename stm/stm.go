@@ -8,7 +8,6 @@ import (
 )
 
 func TimerExp(e_p *elevator.Elevator, wv elevator.Worldview) {
-	fmt.Println("timer expired")
 	elevio.SetDoorOpenLamp(false)
 	e_p.Blocking = false
 	if e_p.Last_dir == elevio.MD_Up {

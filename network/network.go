@@ -21,7 +21,7 @@ type ConfigUDPPorts struct {
 	N_elevators   int `json:"n_elevators"`
 	UDPTx         int
 	UDPRx         []int
-	Id            int `json:"ElevNum"`
+	Id            int
 	UDPstatusPort int `json:"StatusPort"`
 }
 
@@ -32,13 +32,13 @@ type NetworkChan struct {
 	PacketRx     chan elevator.Worldview
 }
 
-func getNetworkConfig() (cp ConfigUDPPorts, Id int) {
+func getNetworkConfig(id int) (cp ConfigUDPPorts) {
 	jsonData, err := os.ReadFile("config.json")
-
+	cp.Id = id
 	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
-		getNetworkConfig()
+		getNetworkConfig(id)
 	}
 
 	// Parse jsonData into ElevatorPorts struct
@@ -47,7 +47,7 @@ func getNetworkConfig() (cp ConfigUDPPorts, Id int) {
 		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
 
 		// try again
-		getNetworkConfig()
+		getNetworkConfig(id)
 	}
 	for i := 1; i < cp.N_elevators+1; i++ {
 		if i == cp.Id {
@@ -56,13 +56,12 @@ func getNetworkConfig() (cp ConfigUDPPorts, Id int) {
 			cp.UDPRx = append(cp.UDPRx, cp.UDPBase+i)
 		}
 	}
-	Id = cp.Id
 	return
 }
 
-func Init_network(e *elevator.Elevator, wv *elevator.Worldview) (networkChan NetworkChan) {
+func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
-	ports, id := getNetworkConfig()
+	ports := getNetworkConfig(id)
 
 	// We make a channel for receiving updates on the id's of the peers that are
 	//  alive on the network
@@ -99,16 +98,28 @@ func Init_network(e *elevator.Elevator, wv *elevator.Worldview) (networkChan Net
 				fmt.Printf("  Lost:     %q\n", p.Lost)
 				fmt.Printf("  UdpTx: 	%d\n", ports.UDPTx)
 				fmt.Printf("  UdpRx: 	%d\n", ports.UDPRx)
-				// for _, k := range p.Lost {
-				// 	k, err := strconv.Atoi(k)
-				// 	if err != nil {
-				// 		fmt.Println("Error:", err)
-				// 		return
-				// 	}
-				// 	//kostfunksjon her
-				// }
+
+				for _, k := range p.Lost {
+					k_int, err := strconv.Atoi(k)
+					if err != nil {
+						fmt.Println("Error:", err)
+						return
+					}
+					wv.ElevList[k_int-1].Online = false
+					//wv.Version++
+					//kostfunksjon her
+				}
+				if p.New != "" {
+					i, err := strconv.Atoi(p.New)
+					if err != nil {
+						fmt.Println("Error:", err)
+						return
+					}
+					wv.ElevList[i-1].Online = true
+					//wv.Version++
+				}
 			case <-networkChan.PacketRx:
-				fmt.Println("Received:")
+				//fmt.Println("Received:")
 				//a.Display() // feilmelding hvis a ikke er en struct Packet
 			}
 		}

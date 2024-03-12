@@ -71,4 +71,11 @@ Mandagstodo:
 - Endre statemachine til å bare ta hensyn til egne ordre. 
 - merge til main
 
+
+Tirsdag:
+- Legge til heis i ElevList når vi finner en ny
 - Fjerne heisen fra wv når vi mister den, og legge til når vi får en new
+    - Kanskje ikke fjerne, men heller ha et flag som er "lost"
+    - Da kan en som kommer tilbake hente sine orders fra sin heis element som er "lost"
+- wv og version må kanskje oppdateres hver gang state endres?
+- Må alle ha sett order for at vi kan gjøre ting?

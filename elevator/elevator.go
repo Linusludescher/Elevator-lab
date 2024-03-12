@@ -25,12 +25,13 @@ const (
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
-	ElevatorNum int   `json:"ElevNum"`
+	//ElevatorNum int   `json:"ElevNum"`
 }
 
 type Elevator struct {
+	Online      bool
 	Behaviour   Behaviour
-	Blocking	bool
+	Blocking    bool
 	ElevNum     int
 	Dirn        elevio.MotorDirection
 	Last_dir    elevio.MotorDirection
@@ -40,9 +41,32 @@ type Elevator struct {
 
 type Worldview struct {
 	ElevList     []Elevator
-	Sender       int
+	Sender       int //hvorfooor?
 	Version      uint64
-	HallRequests [][2]uint8 //legge inn N_FLOOR (etter å ha lest) i første klamme
+	HallRequests [][2]uint8
+}
+
+func (w Worldview) Display() {
+	fmt.Printf("Sender: %d\n", w.Sender)
+	fmt.Printf("Version: %d\n", w.Version)
+
+	fmt.Println("Elevator List:")
+	for i, elev := range w.ElevList {
+		fmt.Printf("  Elevator %d:\n", i+1)
+		fmt.Printf("    Online: %v\n", elev.Online)
+		fmt.Printf("    Behaviour: %v\n", elev.Behaviour)
+		fmt.Printf("    Blocking: %t\n", elev.Blocking)
+		fmt.Printf("    ElevNum: %d\n", elev.ElevNum)
+		fmt.Printf("    Dirn: %v\n", elev.Dirn)
+		fmt.Printf("    Last_dir: %v\n", elev.Last_dir)
+		fmt.Printf("    Last_Floor: %d\n", elev.Last_Floor)
+		fmt.Printf("    CabRequests: %v\n", elev.CabRequests)
+	}
+
+	fmt.Println("Hall Requests:")
+	for _, request := range w.HallRequests {
+		fmt.Printf("  Floor: %d, Direction: %d\n", request[0], request[1])
+	}
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
@@ -67,7 +91,7 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-func ElevatorInit() (e Elevator, world Worldview) {
+func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	elevatorConfig := readElevatorConfig()
 	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hall {
@@ -75,9 +99,13 @@ func ElevatorInit() (e Elevator, world Worldview) {
 	}
 	cab := make([]bool, elevatorConfig.N_FLOORS)
 
-	e = Elevator{EB_Idle, false, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+	wv = Worldview{[]Elevator{}, e.ElevNum, startVersion, hall}
 
-	world = Worldview{[]Elevator{e}, e.ElevNum, startVersion, hall}
+	for i := 1; i <= int(elevatorConfig.N_elevators); i++ {
+		n := Elevator{false, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+		wv.ElevList = append(wv.ElevList, n)
+	}
+	e = wv.ElevList[id-1]
 
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)

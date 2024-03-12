@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"project/elevator"
 	"project/network/conn"
 	"reflect"
 )
@@ -141,4 +142,10 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 			checkTypeRecursive(val.Field(idx).Type, append(offsets, idx+1))
 		}
 	}
+}
+
+func BcWorldView(e elevator.Elevator, wv elevator.Worldview, bc_chan chan elevator.Worldview) {
+	bcwv := wv
+	bcwv.ElevList[e.ElevNum] = e
+	bc_chan <- bcwv
 }

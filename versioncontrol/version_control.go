@@ -1,6 +1,7 @@
 package versioncontrol
 
 import (
+	"fmt"
 	"project/elevator"
 )
 
@@ -52,6 +53,7 @@ func Version_update_queue(my_wv *elevator.Worldview, incoming_wv elevator.Worldv
 		my_wv.ElevList = incoming_wv.ElevList
 	} else if (incoming_wv.Version == my_wv.Version) || !Version_if_equal_queue(*my_wv, incoming_wv) {
 		if incoming_wv.Sender > my_wv.Sender {
+			fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 			my_wv.HallRequests = incoming_wv.HallRequests
 			my_wv.Version = incoming_wv.Version
 			my_wv.ElevList = incoming_wv.ElevList
