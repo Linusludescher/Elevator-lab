@@ -66,7 +66,7 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-func ElevatorInit() (elevator Elevator, world Worldview) {
+func ElevatorInit() (e Elevator, world Worldview) {
 	elevatorConfig := readElevatorConfig()
 	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hall {
@@ -74,9 +74,9 @@ func ElevatorInit() (elevator Elevator, world Worldview) {
 	}
 	cab := make([]bool, elevatorConfig.N_FLOORS)
 
-	elevator = Elevator{EB_Idle, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+	e = Elevator{EB_Idle, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 
-	world = Worldview{[]Elevator{elevator}, elevator.ElevNum, startVersion, hall}
+	world = Worldview{[]Elevator{e}, e.ElevNum, startVersion, hall}
 
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
@@ -85,25 +85,25 @@ func ElevatorInit() (elevator Elevator, world Worldview) {
 	return
 }
 
-func (elevator *Elevator) Display() { //lage en for worldview også!
-	fmt.Printf("Direction: %v\n", elevator.Dirn)
-	fmt.Printf("Last Direction: %v\n", elevator.Last_dir)
-	fmt.Printf("Last Floor: %v\n", elevator.Last_Floor)
+func (e_p *Elevator) Display() { //lage en for worldview også!
+	fmt.Printf("Direction: %v\n", e_p.Dirn)
+	fmt.Printf("Last Direction: %v\n", e_p.Last_dir)
+	fmt.Printf("Last Floor: %v\n", e_p.Last_Floor)
 	fmt.Println("Requests")
 	fmt.Println("Floor\t Cab")
-	for i := len(elevator.CabRequests) - 1; i >= 0; i-- {
-		fmt.Printf("%v \t %v \t\n", i+1, elevator.CabRequests[i])
+	for i := len(e_p.CabRequests) - 1; i >= 0; i-- {
+		fmt.Printf("%v \t %v \t\n", i+1, e_p.CabRequests[i])
 	}
 }
 
-func (elevator *Elevator) UpdateDirection(dir elevio.MotorDirection) {
+func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection) {
 	elevio.SetMotorDirection(dir)
-	elevator.Last_dir = dir
-	elevator.Dirn = dir
-	if elevator.Dirn != elevio.MD_Stop {
-		elevator.Behaviour = EB_Moving
+	e_p.Last_dir = dir
+	e_p.Dirn = dir
+	if e_p.Dirn != elevio.MD_Stop {
+		e_p.Behaviour = EB_Moving
 	} else {
-		elevator.Behaviour = EB_Idle
+		e_p.Behaviour = EB_Idle
 	}
 }
 

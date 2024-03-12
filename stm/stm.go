@@ -26,32 +26,32 @@ func TimerState(e_p *elevator.Elevator, wv elevator.Worldview) {
 	}
 }
 
-func ButtonPressed(e *elevator.Elevator, wv *elevator.Worldview, buttn elevio.ButtonEvent) {
-	requests.SetOrder(e, wv, buttn)
+func ButtonPressed(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent) {
+	requests.SetOrder(e_p, wv_p, buttn)
 }
 
-func FloorSensed(e *elevator.Elevator, wv *elevator.Worldview, floor_sens int, timer_chan chan bool) {
+func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens int, timer_chan chan bool) {
 	if floor_sens != -1 {
-		e.Last_Floor = floor_sens
+		e_p.Last_Floor = floor_sens
 		fmt.Println("new floow")
 	}
-	if e.Dirn == elevio.MD_Up && floor_sens != -1 {
-		if requests.RequestsHereCabOrUp(*e, *wv) {
-			requests.ArrivedAtFloor(e, wv, timer_chan)
-		} else if (!requests.RequestsAbove(*e, *wv)) && requests.RequestsHere(*e, *wv) {
-			requests.ArrivedAtFloor(e, wv, timer_chan)
+	if e_p.Dirn == elevio.MD_Up && floor_sens != -1 {
+		if requests.RequestsHereCabOrUp(*e_p, *wv_p) {
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
+		} else if (!requests.RequestsAbove(*e_p, *wv_p)) && requests.RequestsHere(*e_p, *wv_p) {
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
 		}
 	}
-	if e.Dirn == elevio.MD_Down && floor_sens != -1 {
-		if requests.RequestsHereCabOrDown(*e, *wv) {
-			requests.ArrivedAtFloor(e, wv, timer_chan)
-		} else if (!requests.RequestsBelow(*e, *wv)) && requests.RequestsHere(*e, *wv) {
-			requests.ArrivedAtFloor(e, wv, timer_chan)
+	if e_p.Dirn == elevio.MD_Down && floor_sens != -1 {
+		if requests.RequestsHereCabOrDown(*e_p, *wv_p) {
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
+		} else if (!requests.RequestsBelow(*e_p, *wv_p)) && requests.RequestsHere(*e_p, *wv_p) {
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
 		}
 	}
 }
 
-func Obstuction(e elevator.Elevator, obstr bool) {
+func Obstruction(e elevator.Elevator, obstr bool) {
 	if obstr {
 		elevio.SetMotorDirection(elevio.MD_Stop)
 	} else {
@@ -64,13 +64,13 @@ func StopButtonPressed(e elevator.Elevator) {
 	// vente ellerno?
 }
 
-func DefaultState(e *elevator.Elevator, wv *elevator.Worldview, broadcast_elevator_chan chan elevator.Worldview) {
+func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, broadcast_elevator_chan chan elevator.Worldview) {
 	//e.Display()
-	if e.Dirn == elevio.MD_Stop {
-		if requests.RequestsAbove(*e, *wv) {
-			e.UpdateDirection(elevio.MD_Up)
-		} else if requests.RequestsBelow(*e, *wv) {
-			e.UpdateDirection(elevio.MD_Down)
+	if e_p.Dirn == elevio.MD_Stop {
+		if requests.RequestsAbove(*e_p, *wv_p) {
+			e_p.UpdateDirection(elevio.MD_Up)
+		} else if requests.RequestsBelow(*e_p, *wv_p) {
+			e_p.UpdateDirection(elevio.MD_Down)
 		}
 	}
 }
