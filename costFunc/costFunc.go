@@ -30,7 +30,7 @@ func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
 		return
 	}
 
-	ret, err := exec.Command("../hall_request_assigner/"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
+	ret, err := exec.Command("../"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
 		fmt.Println("exec.Command error: ", err)
 		fmt.Println(string(ret))
@@ -48,15 +48,20 @@ func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
 	for k, v := range *output {
 		fmt.Printf("%6v :  %+v\n", k, v)
 	}
-
 	//gjøre noe med output
+	
 }
 
 func wvToCfInput(wv elevator.Worldview, buttn elevio.ButtonEvent) (input HRAInput) {
 	input.States = make(map[string]HRAElevState)
 	for _, elev := range wv.ElevList {
-		elevstate := HRAElevState{string(elev.Behaviour), elev.Last_Floor, strconv.Itoa(int(elev.Dirn)), elev.CabRequests}
+		fmt.Printf("int to string etc: %s, %d, %v", strconv.Itoa(int(elev.Dirn)), int(elev.Dirn), elev.Dirn)
+		elevstate := HRAElevState{string(elev.Behaviour), elev.Last_Floor, elev.Dirn.String(), elev.CabRequests}
 		input.States[strconv.Itoa(elev.ElevNum)] = elevstate
+	}
+	input.HallRequests = make([][2]bool, len(wv.HallRequests[0]))
+	for i := range input.HallRequests {
+		input.HallRequests[i] = [2]bool{false, false}
 	}
 	input.HallRequests[buttn.Floor][buttn.Button] = true
 	return

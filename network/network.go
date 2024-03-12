@@ -99,23 +99,14 @@ func Init_network(e *elevator.Elevator, wv *elevator.Worldview) (networkChan Net
 				fmt.Printf("  Lost:     %q\n", p.Lost)
 				fmt.Printf("  UdpTx: 	%d\n", ports.UDPTx)
 				fmt.Printf("  UdpRx: 	%d\n", ports.UDPRx)
-				for _, k := range p.Lost {
-					k, err := strconv.Atoi(k)
-					if err != nil {
-						fmt.Println("Error:", err)
-						return
-					}
-					for i := 0; i < 2; i++ {
-						for j := range e.CabRequests[i] {
-							if e.CabRequests[j] == 1 {
-								//Kost-funksjon
-							}
-							if wv.HallRequests[i][j] == uint8(k) {
-								// Kost fuknsjon
-							}
-						}
-					}
-				}
+				// for _, k := range p.Lost {
+				// 	k, err := strconv.Atoi(k)
+				// 	if err != nil {
+				// 		fmt.Println("Error:", err)
+				// 		return
+				// 	}
+				// 	//kostfunksjon her
+				// }
 			case <-networkChan.PacketRx:
 				fmt.Println("Received:")
 				//a.Display() // feilmelding hvis a ikke er en struct Packet
