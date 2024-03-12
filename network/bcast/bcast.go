@@ -144,8 +144,7 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 	}
 }
 
-func BcWorldView(e elevator.Elevator, wv elevator.Worldview, bc_chan chan elevator.Worldview) {
-	bcwv := wv
-	bcwv.ElevList[e.ElevNum] = e
-	bc_chan <- bcwv
+func BcWorldView(e elevator.Elevator, wv *elevator.Worldview, bc_chan chan elevator.Worldview) {
+	wv.ElevList[e.ElevNum-1] = e
+	bc_chan <- *wv
 }

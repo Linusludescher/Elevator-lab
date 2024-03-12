@@ -15,16 +15,19 @@ func TimerExp(e_p *elevator.Elevator, wv elevator.Worldview) {
 			e_p.UpdateDirection(elevio.MD_Up)
 		} else if requests.RequestsBelow(*e_p, wv) {
 			e_p.UpdateDirection(elevio.MD_Down)
+		} else {
+			e_p.UpdateDirection(elevio.MD_Stop)
 		}
 	} else if e_p.Last_dir == elevio.MD_Down {
 		if requests.RequestsBelow(*e_p, wv) {
 			e_p.UpdateDirection(elevio.MD_Down)
 		} else if requests.RequestsAbove(*e_p, wv) {
 			e_p.UpdateDirection(elevio.MD_Up)
+		} else {
+			e_p.UpdateDirection(elevio.MD_Stop)
 		}
 	} else {
-		e_p.Dirn = elevio.MD_Stop
-		e_p.Behaviour = elevator.EB_Idle
+		e_p.UpdateDirection(elevio.MD_Stop)
 	}
 }
 

@@ -106,7 +106,7 @@ func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (network
 						return
 					}
 					wv.ElevList[k_int-1].Online = false
-					//wv.Version++
+					wv.Version++
 					//kostfunksjon her
 				}
 				if p.New != "" {
@@ -116,7 +116,7 @@ func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (network
 						return
 					}
 					wv.ElevList[i-1].Online = true
-					//wv.Version++
+					wv.Version++
 				}
 			case <-networkChan.PacketRx:
 				//fmt.Println("Received:")

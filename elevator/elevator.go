@@ -99,13 +99,14 @@ func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	}
 	cab := make([]bool, elevatorConfig.N_FLOORS)
 
-	wv = Worldview{[]Elevator{}, e.ElevNum, startVersion, hall}
+	wv = Worldview{[]Elevator{}, id, startVersion, hall}
 
 	for i := 1; i <= int(elevatorConfig.N_elevators); i++ {
 		n := Elevator{false, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 		wv.ElevList = append(wv.ElevList, n)
 	}
 	e = wv.ElevList[id-1]
+	e.Online = true
 
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
