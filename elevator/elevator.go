@@ -41,7 +41,7 @@ type Worldview struct {
 	ElevList     []Elevator
 	Sender       int
 	Version      uint64
-	HallRequests [][]uint8 //legge inn N_FLOOR (etter å ha lest) i første klamme
+	HallRequests [][2]uint8 //legge inn N_FLOOR (etter å ha lest) i første klamme
 }
 
 func readElevatorConfig() (elevatorData ConfigData) {
@@ -68,9 +68,9 @@ func readElevatorConfig() (elevatorData ConfigData) {
 
 func ElevatorInit() (elevator Elevator, world Worldview) {
 	elevatorConfig := readElevatorConfig()
-	hall := make([][]uint8, 2)
+	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hall {
-		hall[i] = make([]uint8, elevatorConfig.N_FLOORS)
+		hall[i] = [2]uint8{0, 0}
 	}
 	cab := make([]bool, elevatorConfig.N_FLOORS)
 

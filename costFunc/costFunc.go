@@ -72,7 +72,7 @@ func wvToCfInput(wv elevator.Worldview, buttn elevio.ButtonEvent) (input HRAInpu
 		elevstate := HRAElevState{string(elev.Behaviour), elev.Last_Floor, elev.Dirn.String(), elev.CabRequests}
 		input.States[strconv.Itoa(elev.ElevNum)] = elevstate
 	}
-	input.HallRequests = make([][2]bool, len(wv.HallRequests[0]))
+	input.HallRequests = make([][2]bool, len(wv.HallRequests))
 	for i := range input.HallRequests {
 		input.HallRequests[i] = [2]bool{false, false}
 	}
