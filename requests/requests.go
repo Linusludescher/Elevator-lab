@@ -9,7 +9,7 @@ import (
 
 func RequestsAbove(e elevator.Elevator, wv elevator.Worldview) bool {
 	for f := e.Last_Floor + 1; f < elevator.N_FLOORS; f++ {
-		if e.CabRequests[f] == 1 {
+		if e.CabRequests[f] == true {
 			return true
 		}
 		if wv.HallRequests[elevio.BT_HallUp][f] > 0 {
@@ -24,7 +24,7 @@ func RequestsAbove(e elevator.Elevator, wv elevator.Worldview) bool {
 
 func RequestsBelow(e elevator.Elevator, wv elevator.Worldview) bool {
 	for f := 0; f < e.Last_Floor; f++ {
-		if e.CabRequests[f] == 1 {
+		if e.CabRequests[f] == true {
 			return true
 		}
 		if wv.HallRequests[elevio.BT_HallUp][f] > uint8(e.ElevNum) {
@@ -38,7 +38,7 @@ func RequestsBelow(e elevator.Elevator, wv elevator.Worldview) bool {
 }
 
 func RequestsHere(e elevator.Elevator, wv elevator.Worldview) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
-	if e.CabRequests[e.Last_Floor] == 1 {
+	if e.CabRequests[e.Last_Floor] == true {
 		return true
 	}
 	if wv.HallRequests[elevio.BT_HallUp][e.Last_Floor] == uint8(e.ElevNum) {
@@ -54,7 +54,7 @@ func RequestsHereCabOrUp(e elevator.Elevator, wv elevator.Worldview) bool { // s
 	if wv.HallRequests[elevio.BT_HallUp][e.Last_Floor] == uint8(e.ElevNum) {
 		return true
 	}
-	if e.CabRequests[e.Last_Floor] == 1 {
+	if e.CabRequests[e.Last_Floor] == true {
 		return true
 	}
 	return false
@@ -64,7 +64,7 @@ func RequestsHereCabOrDown(e elevator.Elevator, wv elevator.Worldview) bool {
 	if wv.HallRequests[elevio.BT_HallDown][e.Last_Floor] == uint8(e.ElevNum) {
 		return true
 	}
-	if e.CabRequests[e.Last_Floor] == 1 {
+	if e.CabRequests[e.Last_Floor] == true {
 		return true
 	}
 	return false
@@ -75,7 +75,7 @@ func DeleteOrdersHere(e *elevator.Elevator, wv *elevator.Worldview) {
 		wv.HallRequests[orderType][e.Last_Floor] = 0
 		elevio.SetButtonLamp(elevio.ButtonType(orderType), e.Last_Floor, false) //det med lys må fikses
 	}
-	e.CabRequests[e.Last_Floor] = 0
+	e.CabRequests[e.Last_Floor] = false
 	wv.Version++
 }
 
@@ -84,7 +84,7 @@ func SetOrderHere(e *elevator.Elevator, wv *elevator.Worldview, buttn elevio.But
 		return
 	}
 	if buttn.Button == elevio.BT_Cab {
-		e.CabRequests[e.Last_Floor] = 1
+		e.CabRequests[e.Last_Floor] = true
 	} else {
 		wv.HallRequests[buttn.Button][e.Last_Floor] = uint8(e.ElevNum)
 	}

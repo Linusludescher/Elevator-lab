@@ -109,9 +109,9 @@ func Init_network(e *elevator.Elevator, wv *elevator.Worldview) (networkChan Net
 						for j := range e.CabRequests[i] {
 							if e.CabRequests[j] == 1 {
 								//Kost-funksjon
-								if wv.HallRequests[i][j] == uint8(k) {
-									// Kost fuknsjon
-								}
+							}
+							if wv.HallRequests[i][j] == uint8(k) {
+								// Kost fuknsjon
 							}
 						}
 					}

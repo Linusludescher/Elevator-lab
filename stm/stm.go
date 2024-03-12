@@ -2,6 +2,7 @@ package stm
 
 import (
 	"fmt"
+	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
 	"project/requests"
@@ -22,10 +23,12 @@ func TimerState(e *elevator.Elevator, wv elevator.Worldview) {
 		}
 	} else {
 		e.Dirn = elevio.MD_Stop
+		e.Behaviour = elevator.EB_Idle
 	}
 }
 
 func ButtonPressed(e *elevator.Elevator, wv *elevator.Worldview, buttn elevio.ButtonEvent) {
+	costFunc.CostFunction(wv, buttn)
 	requests.SetOrderHere(e, wv, buttn)
 }
 

@@ -14,12 +14,12 @@ const (
 	startVersion uint64 = 5000
 )
 
-type Behaviour int
+type Behaviour string
 
 const (
-	EB_Idle     Behaviour = 1
-	EB_Moving   Behaviour = -1
-	EB_DoorOpen Behaviour = 0
+	EB_Idle     Behaviour = "idle"
+	EB_Moving   Behaviour = "moving"
+	EB_DoorOpen Behaviour = "doorOpen"
 )
 
 type ConfigData struct {
@@ -34,7 +34,7 @@ type Elevator struct {
 	Dirn        elevio.MotorDirection
 	Last_dir    elevio.MotorDirection
 	Last_Floor  int
-	CabRequests []uint8
+	CabRequests []bool
 }
 
 type Worldview struct {
@@ -72,7 +72,7 @@ func ElevatorInit() (elevator Elevator, world Worldview) {
 	for i := range hall {
 		hall[i] = make([]uint8, elevatorConfig.N_FLOORS)
 	}
-	cab := make([]uint8, elevatorConfig.N_FLOORS)
+	cab := make([]bool, elevatorConfig.N_FLOORS)
 
 	elevator = Elevator{EB_Idle, elevatorConfig.ElevatorNum, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 
