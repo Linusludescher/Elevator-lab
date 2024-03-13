@@ -83,7 +83,7 @@ Tirsdag:
 Onsdag: 
 - fiske lyse
     - for en heis når alene
-    - Må alle ha sett order for at vi kan gjøre ting?
+    ------------------------------------------------------------------------------ Må alle ha sett order for at vi kan gjøre ting?
 ---------------------------------------------------------------------------------- tilordne nye ordre når heis lost
 ---------------------------------------------------------------------------------- når heis tilbake (hvertfall cabRequests)
 ---------------------------------------------------------------------------------- Obstruction (restarte timer?)
@@ -94,7 +94,7 @@ Onsdag:
 ---------------------------------------------------------------------------------- teste med packetloss????
 ---------------------------------------------------------------------------------- hard stop på 1 og 4 etasje?
 - Fiske billett til inter-napooooooli
-- fiske andre-er-i-etasje-og-vi-trykker-deres-etasje-hallrequest-bug
+---------------------------------------------------------------------------------- fiske andre-er-i-etasje-og-vi-trykker-deres-etasje-hallrequest-bug
 - Hvordan merge to systemer som har vært adskilt
 
 Pynt og secondary
