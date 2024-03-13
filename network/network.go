@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"project/costFunc"
 	"project/elevator"
+	"project/elevio"
 	"project/network/bcast"
 	"project/network/peers"
 	"strconv"
@@ -88,8 +90,7 @@ func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (network
 	return
 }
 
-
-func PeersOnline(e *elevator.Elevator, wv *elevator.Worldview, network_chan NetworkChan) {
+func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan NetworkChan) {
 	fmt.Println("Started")
 	for {
 		select {
@@ -107,9 +108,19 @@ func PeersOnline(e *elevator.Elevator, wv *elevator.Worldview, network_chan Netw
 					fmt.Println("Error:", err)
 					return
 				}
-				wv.ElevList[k_int-1].Online = false
-				wv.Version++
-				//kostfunksjon her
+				wv_p.ElevList[k_int-1].Online = false
+
+				//Assign hall orders to other:
+				for floor, f := range wv_p.HallRequests {
+					for buttonType, o := range f {
+						if o == uint8(k_int) {
+							buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
+							costFunc.CostFunction(wv_p, buttn)
+						}
+					}
+				}
+				wv_p.Version++
+
 			}
 			if p.New != "" {
 				i, err := strconv.Atoi(p.New)
@@ -117,8 +128,8 @@ func PeersOnline(e *elevator.Elevator, wv *elevator.Worldview, network_chan Netw
 					fmt.Println("Error:", err)
 					return
 				}
-				wv.ElevList[i-1].Online = true
-				wv.Version++
+				wv_p.ElevList[i-1].Online = true
+				wv_p.Version++
 			}
 		case <-network_chan.PacketRx:
 			//fmt.Println("Received:")
