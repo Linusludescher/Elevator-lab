@@ -95,14 +95,15 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 	wv_p.Version_up()
 }
 
-func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan chan bool, obstruction_chan chan bool) {
+func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan chan bool, obstr_chan chan bool, wd_chan chan bool) {
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	e_p.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e_p, wv_p)
 	wv_p.Version_up()
 	e_p.Behaviour = elevator.EB_DoorOpen
-	go timer.TimerStart(e_p, wv_p, 3, timer_chan, obstruction_chan)
+	wd_chan <- true
+	go timer.TimerStart(e_p, wv_p, 3, timer_chan, obstr_chan)
 }
 
 func DisplayQueueCont(e_p *elevator.Elevator) {

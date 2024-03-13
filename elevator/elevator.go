@@ -30,6 +30,7 @@ type ConfigData struct {
 
 type Elevator struct {
 	Online      bool
+	Operative   bool
 	Behaviour   Behaviour
 	Obstruction bool
 	ElevNum     int
@@ -47,8 +48,8 @@ type Worldview struct {
 }
 
 const (
-	V_l = 18446744073709551615 //2e64-1
-	V_s_c = 100000 //maks antall sykler ny versjon kan være foran for at e.Version settes godtar lavere p.Version (ved Version overflow)
+	V_l   = 18446744073709551615 //2e64-1
+	V_s_c = 100000               //maks antall sykler ny versjon kan være foran for at e.Version settes godtar lavere p.Version (ved Version overflow)
 	// versionInitVal = 10000 //initialisere på høyere verdi enn 0 for ikke problemer med nullstilling ved tilbakekobling etter utfall
 )
 
@@ -68,6 +69,7 @@ func (w Worldview) Display() {
 	for i, elev := range w.ElevList {
 		fmt.Printf("  Elevator %d:\n", i+1)
 		fmt.Printf("    Online: %v\n", elev.Online)
+		fmt.Printf("    Operative: %v\n", elev.Operative)
 		fmt.Printf("    Behaviour: %v\n", elev.Behaviour)
 		fmt.Printf("    Obstruction: %t\n", elev.Obstruction)
 		fmt.Printf("    ElevNum: %d\n", elev.ElevNum)
@@ -78,8 +80,8 @@ func (w Worldview) Display() {
 	}
 
 	fmt.Println("Hall Requests:")
-	for _, request := range w.HallRequests {
-		fmt.Printf("  Floor: %d, Direction: %d\n", request[0], request[1])
+	for i := len(w.HallRequests); i > 0; i-- {
+		fmt.Printf("floor: %d \thall up: %d\t, halldown: %d\n", i-1, w.HallRequests[i-1][0], w.HallRequests[i-1][1])
 	}
 }
 
@@ -116,7 +118,7 @@ func ElevatorInit(id int) (e Elevator, wv Worldview) {
 
 	for i := 1; i <= int(elevatorConfig.N_elevators); i++ {
 		cab := make([]bool, elevatorConfig.N_FLOORS)
-		n := Elevator{false, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
+		n := Elevator{false, true, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 		wv.ElevList = append(wv.ElevList, n)
 	}
 	e = wv.ElevList[id-1]
@@ -140,12 +142,15 @@ func (e Elevator) Display() { //lage en for worldview også!
 	}
 }
 
-func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection) {
+func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan bool) {
 	elevio.SetMotorDirection(dir)
 	e_p.Last_dir = dir
 	e_p.Dirn = dir
 	if e_p.Dirn != elevio.MD_Stop {
 		e_p.Behaviour = EB_Moving
+		fmt.Println("update før sending")
+		wd_chan <- true
+		fmt.Println("etter sending")
 	} else {
 		e_p.Behaviour = EB_Idle
 	}

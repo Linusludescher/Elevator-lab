@@ -2,7 +2,9 @@ package timer
 
 import (
 	"fmt"
+	"project/costFunc"
 	"project/elevator"
+	"project/elevio"
 	"time"
 )
 
@@ -32,6 +34,39 @@ func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.
 				}
 				sec_timer.Reset(duration * time.Second)
 			}
+		}
+	}
+}
+
+func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.Duration, wd_chan chan bool) {
+	wd_over := time.NewTimer(0)
+	defer wd_over.Stop()
+	wd_over.Stop()
+	var test int = 0
+	for {
+		select {
+		case msg := <-wd_chan:
+			test++
+			fmt.Printf("Wd mottat: %v\t nr: %d\n", msg, test)
+			if msg {
+				wd_over.Reset(d * time.Second)
+			} else {
+				wd_over.Stop()
+				e_p.Operative = true
+			}
+		case <-wd_over.C:
+			e_p.Operative = false
+			wv_p.ElevList[e_p.ElevNum-1].Operative = false
+			for floor, f := range wv_p.HallRequests {
+				for buttonType, o := range f {
+					if o == uint8(e_p.ElevNum) {
+						fmt.Println("Cost kjøres")
+						buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
+						costFunc.CostFunction(wv_p, buttn)
+					}
+				}
+			}
+			wv_p.Version_up()
 		}
 	}
 }

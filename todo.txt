@@ -82,11 +82,19 @@ Tirsdag:
 
 Onsdag: 
 - fiske lyse
+    - Må alle ha sett order for at vi kan gjøre ting?
 ----------------------------------------------------------------------------------tilordne nye ordre når heis lost
 ---------------------------------------------------------------------------------------------------- når heis tilbake (hvertfall cabRequests)
 -----------------------------------------------------------------------------------Obstruction (restarte timer?)
-- CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
-- Må alle ha sett order for at vi kan gjøre ting?
 ---------------------------------------------------------------------------------- Fiske Crab
 - Timer på hvis en heis ikke fullfører en timer
+- Timer på obstruction?
 ---------------------------------------------------------------------------------- Verson limit
+- teste med packetloss????
+
+Pynt og secondary
+- flag for bitcoin symbol i terminal
+- implementere stop-knapp
+- CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
+- Process pairs?
+- Teste med packetloss
