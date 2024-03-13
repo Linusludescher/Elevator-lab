@@ -129,6 +129,7 @@ func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan 
 					return
 				}
 				wv_p.ElevList[i-1].Online = true
+				
 				wv_p.Version++
 			}
 		case <-network_chan.PacketRx:

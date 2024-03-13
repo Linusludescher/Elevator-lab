@@ -65,14 +65,14 @@ func main() {
 			stm.StopButtonPressed(my_elevator)
 
 		case udp_packet := <-network_channels.PacketRx: //legge til
-			versioncontrol.Version_update_queue(&my_wv, udp_packet)
+			versioncontrol.Version_update_queue(&my_elevator, &my_wv, udp_packet)
 
 		case <-bc_timer_chan:
 			bcast.BcWorldView(my_elevator, &my_wv, network_channels.PacketTx)
 
 			stm.DefaultState(&my_elevator, &my_wv, network_channels.PacketTx)
 			//default:
-			my_wv.Display()
+			//my_wv.Display()
 		}
 	}
 }

@@ -41,7 +41,7 @@ type Elevator struct {
 
 type Worldview struct {
 	ElevList     []Elevator
-	Sender       int //hvorfooor?
+	Sender       int
 	Version      uint64
 	HallRequests [][2]uint8
 }
