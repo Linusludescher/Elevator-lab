@@ -82,6 +82,7 @@ Tirsdag:
 
 Onsdag: 
 - fiske lyse
+    - for en heis når alene
     - Må alle ha sett order for at vi kan gjøre ting?
 ----------------------------------------------------------------------------------tilordne nye ordre når heis lost
 ---------------------------------------------------------------------------------------------------- når heis tilbake (hvertfall cabRequests)
@@ -90,8 +91,10 @@ Onsdag:
 ---------------------------------------------------------------------------------- Timer på hvis en heis ikke fullfører en timer
 ---------------------------------------------------------------------------------- Timer på obstruction?
 ---------------------------------------------------------------------------------- Verson limit
-- teste med packetloss????
+---------------------------------------------------------------------------------- teste med packetloss????
 - hard stop på 1 og 4 etasje?
+- fiske andre-er-i-etasje-og-vi-trykker-deres-etasje-hallrequest-bug
+- Hvordan merge to systemer som har vært adskilt
 
 Pynt og secondary
 - flag for bitcoin symbol i terminal
@@ -100,3 +103,11 @@ Pynt og secondary
 - Process pairs?
 - Teste med packetloss
 - litt rart forhold melloom lokal wv og elevator
+
+
+
+Kode kvalitet
+- moduler, noen må deles opp, enkelt godt navn
+- kommunikasjon mellom moduler, få moduler snakker med elevio for eks
+- Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor
+- mer forklarende navn til parametre, kortere imports

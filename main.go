@@ -9,6 +9,7 @@ import (
 	"project/stm"
 	"project/timer"
 	"project/versioncontrol"
+	"strconv"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -22,11 +23,11 @@ func main() {
 
 	// Retrieve the value of the idFlag
 	id := *idFlag
+	localhostnr := strconv.Itoa(18657 + id)
 
 	numFloors := 4 //endre dette??? fjerne??
 
-	//elevio.Init("localhost:15657", numFloors)
-	elevio.Init("localhost:22222", numFloors)
+	elevio.Init("localhost:"+localhostnr, numFloors)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)

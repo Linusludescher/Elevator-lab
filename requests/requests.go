@@ -76,6 +76,7 @@ func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
 		if wv_p.HallRequests[e_p.Last_Floor][orderType] == uint8(e_p.ElevNum) {
 			wv_p.HallRequests[e_p.Last_Floor][orderType] = 0
 		}
+		elevio.SetButtonLamp(elevio.ButtonType(orderType), e_p.Last_Floor, false) //det med lys må fikses
 	}
 	e_p.CabRequests[e_p.Last_Floor] = false
 	wv_p.Version_up()
@@ -90,6 +91,7 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 	} else {
 		costFunc.CostFunction(wv_p, buttn)
 	}
+	elevio.SetButtonLamp(buttn.Button, buttn.Floor, true) // må endres når flere heiser
 	wv_p.Version_up()
 }
 

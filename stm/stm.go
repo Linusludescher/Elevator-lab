@@ -53,6 +53,9 @@ func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens in
 			requests.ArrivedAtFloor(e_p, wv_p, timer_chan, obstr_chan, wd_chan)
 		}
 	}
+	if (floor_sens == 1 && e_p.Last_dir == elevio.MD_Down) || (floor_sens == 4 && e_p.Last_dir == elevio.MD_Up) {
+		e_p.UpdateDirection(elevio.MD_Stop, wd_chan)
+	}
 }
 
 func Obstruction(e_p *elevator.Elevator, wv_p *elevator.Worldview, obstr bool) {
@@ -66,6 +69,13 @@ func StopButtonPressed(e elevator.Elevator) {
 }
 
 func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, wd_chan chan bool) {
+	// for floor := range wv_p.HallRequests {
+	// 	for _, l := range wv_p.HallRequests[floor] {
+	// 		if l == uint8(e_p.ElevNum) && floor == e_p.Last_Floor {
+
+	// 		}
+	// 	}
+	// }
 	if (e_p.Dirn == elevio.MD_Stop) && (e_p.Behaviour != elevator.EB_DoorOpen) {
 		if requests.RequestsAbove(*e_p, *wv_p) {
 			e_p.UpdateDirection(elevio.MD_Up, wd_chan)
