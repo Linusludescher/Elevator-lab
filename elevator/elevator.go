@@ -148,9 +148,7 @@ func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan boo
 	e_p.Dirn = dir
 	if e_p.Dirn != elevio.MD_Stop {
 		e_p.Behaviour = EB_Moving
-		fmt.Println("update før sending")
 		wd_chan <- true
-		fmt.Println("etter sending")
 	} else {
 		e_p.Behaviour = EB_Idle
 	}
@@ -160,5 +158,21 @@ func BroadcastElevator(bc_chan chan bool, n_ms int) {
 	for {
 		bc_chan <- true
 		time.Sleep(time.Duration(n_ms) * time.Millisecond)
+	}
+}
+
+func SetHallLights(wv Worldview, elevnum int) {
+	for floor, f := range wv.HallRequests {
+		for buttonType, o := range f {
+			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, o != 0)
+		}
+	}
+	for i, elev := range wv.ElevList {
+		if i+1 != elevnum {
+			continue
+		}
+		for floor, f := range elev.CabRequests {
+			elevio.SetButtonLamp(elevio.BT_Cab, floor, f)
+		}
 	}
 }

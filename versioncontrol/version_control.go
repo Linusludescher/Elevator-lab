@@ -43,7 +43,10 @@ func Version_update_queue(e_p *elevator.Elevator, my_wv_p *elevator.Worldview, i
 		my_wv_p.Version = incoming_wv.Version
 		my_wv_p.ElevList = incoming_wv.ElevList
 		e_p.CabRequests = incoming_wv.ElevList[e_p.ElevNum-1].CabRequests //La til dette
-
+		// Slå av og på lys
+		elevator.SetHallLights(*my_wv_p, e_p.ElevNum)
+	} else if incoming_wv.Version == my_wv_p.Version {
+		elevator.SetHallLights(*my_wv_p, e_p.ElevNum)
 	} else if (incoming_wv.Version == my_wv_p.Version) && !Version_if_equal_queue(*e_p, *my_wv_p, incoming_wv) {
 		fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 		if incoming_wv.Sender > my_wv_p.Sender {

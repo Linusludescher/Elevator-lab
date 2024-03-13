@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"project/elevator"
 	"project/elevio"
 	"project/network"
@@ -26,8 +25,8 @@ func main() {
 
 	numFloors := 4 //endre dette??? fjerne??
 
-	elevio.Init("localhost:15657", numFloors)
-	//elevio.Init("localhost:22222", numFloors)
+	//elevio.Init("localhost:15657", numFloors)
+	elevio.Init("localhost:22222", numFloors)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -52,7 +51,6 @@ func main() {
 	for {
 		select {
 		case <-timer_exp_chan:
-			fmt.Println("timer expired")
 			stm.TimerExp(&my_elevator, my_wv, wd_chan)
 
 		case buttn := <-drv_buttons:
@@ -74,7 +72,7 @@ func main() {
 			stm.DefaultState(&my_elevator, &my_wv, wd_chan)
 			bcast.BcWorldView(my_elevator, &my_wv, network_channels.PacketTx)
 			//default:
-			//my_wv.Display()
+			my_wv.Display()
 		}
 	}
 }

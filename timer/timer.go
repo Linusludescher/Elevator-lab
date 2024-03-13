@@ -1,7 +1,6 @@
 package timer
 
 import (
-	"fmt"
 	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
@@ -9,7 +8,6 @@ import (
 )
 
 func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.Duration, timer chan bool, obstruction chan bool) {
-	fmt.Println("timer started")
 	obstructed := e_p.Obstruction
 	sec_timer := time.NewTimer(duration * time.Second)
 	defer sec_timer.Stop()
@@ -47,7 +45,6 @@ func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.
 		select {
 		case msg := <-wd_chan:
 			test++
-			fmt.Printf("Wd mottat: %v\t nr: %d\n", msg, test)
 			if msg {
 				wd_over.Reset(d * time.Second)
 			} else {
@@ -60,7 +57,6 @@ func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.
 			for floor, f := range wv_p.HallRequests {
 				for buttonType, o := range f {
 					if o == uint8(e_p.ElevNum) {
-						fmt.Println("Cost kjøres")
 						buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
 						costFunc.CostFunction(wv_p, buttn)
 					}

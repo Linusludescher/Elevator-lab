@@ -87,10 +87,11 @@ Onsdag:
 ---------------------------------------------------------------------------------------------------- når heis tilbake (hvertfall cabRequests)
 -----------------------------------------------------------------------------------Obstruction (restarte timer?)
 ---------------------------------------------------------------------------------- Fiske Crab
-- Timer på hvis en heis ikke fullfører en timer
-- Timer på obstruction?
+---------------------------------------------------------------------------------- Timer på hvis en heis ikke fullfører en timer
+---------------------------------------------------------------------------------- Timer på obstruction?
 ---------------------------------------------------------------------------------- Verson limit
 - teste med packetloss????
+- hard stop på 1 og 4 etasje?
 
 Pynt og secondary
 - flag for bitcoin symbol i terminal
@@ -98,3 +99,4 @@ Pynt og secondary
 - CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
 - Process pairs?
 - Teste med packetloss
+- litt rart forhold melloom lokal wv og elevator

@@ -1,16 +1,13 @@
 package stm
 
 import (
-	"fmt"
 	"project/elevator"
 	"project/elevio"
 	"project/requests"
 )
 
 func TimerExp(e_p *elevator.Elevator, wv elevator.Worldview, wd_chan chan bool) { //kalle denne for door closed
-	fmt.Println("timer exp før false")
 	wd_chan <- false
-	fmt.Println("timer exp etter false")
 	elevio.SetDoorOpenLamp(false)
 	if e_p.Last_dir == elevio.MD_Up {
 		if requests.RequestsAbove(*e_p, wv) {
