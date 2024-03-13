@@ -68,14 +68,14 @@ func StopButtonPressed(e elevator.Elevator) {
 	// vente ellerno?
 }
 
-func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, wd_chan chan bool) {
-	// for floor := range wv_p.HallRequests {
-	// 	for _, l := range wv_p.HallRequests[floor] {
-	// 		if l == uint8(e_p.ElevNum) && floor == e_p.Last_Floor {
-
-	// 		}
-	// 	}
-	// }
+func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan, obstr_chan, wd_chan chan bool) {
+	for floor := range wv_p.HallRequests {
+		for _, l := range wv_p.HallRequests[floor] {
+			if l == uint8(e_p.ElevNum) && floor == e_p.Last_Floor {
+				requests.ArrivedAtFloor(e_p, wv_p, timer_chan, obstr_chan, wd_chan)
+			}
+		}
+	}
 	if (e_p.Dirn == elevio.MD_Stop) && (e_p.Behaviour != elevator.EB_DoorOpen) {
 		if requests.RequestsAbove(*e_p, *wv_p) {
 			e_p.UpdateDirection(elevio.MD_Up, wd_chan)

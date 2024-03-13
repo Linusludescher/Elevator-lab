@@ -93,6 +93,7 @@ Onsdag:
 ---------------------------------------------------------------------------------- Verson limit
 ---------------------------------------------------------------------------------- teste med packetloss????
 ---------------------------------------------------------------------------------- hard stop på 1 og 4 etasje?
+- Fiske billett til inter-napooooooli
 - fiske andre-er-i-etasje-og-vi-trykker-deres-etasje-hallrequest-bug
 - Hvordan merge to systemer som har vært adskilt
 

@@ -23,7 +23,7 @@ func main() {
 
 	// Retrieve the value of the idFlag
 	id := *idFlag
-	localhostnr := strconv.Itoa(18657 + id)
+	localhostnr := strconv.Itoa(19657 + id)
 
 	numFloors := 4 //endre dette??? fjerne??
 
@@ -70,7 +70,7 @@ func main() {
 			versioncontrol.Version_update_queue(&my_elevator, &my_wv, udp_packet)
 
 		case <-bc_timer_chan:
-			stm.DefaultState(&my_elevator, &my_wv, wd_chan)
+			stm.DefaultState(&my_elevator, &my_wv, timer_exp_chan, drv_obstr, wd_chan)
 			bcast.BcWorldView(my_elevator, &my_wv, network_channels.PacketTx)
 			//default:
 			my_wv.Display()
