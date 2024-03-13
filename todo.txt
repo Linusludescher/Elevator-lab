@@ -90,9 +90,34 @@ Tirsdag:
 - Må alle ha sett order for at vi kan gjøre ting?
 
 Onsdag: 
--fiske lyse
--tilordne nye ordre når heis lost + når heis tilbake (hvertfall cabRequests)
--Obstruction (restarte timer?)
--CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
-- Må alle ha sett order for at vi kan gjøre ting?
-- fiske crabOrders
+- fiske lyse
+    - for en heis når alene
+    ------------------------------------------------------------------------------ Må alle ha sett order for at vi kan gjøre ting?
+---------------------------------------------------------------------------------- tilordne nye ordre når heis lost
+---------------------------------------------------------------------------------- når heis tilbake (hvertfall cabRequests)
+---------------------------------------------------------------------------------- Obstruction (restarte timer?)
+---------------------------------------------------------------------------------- Fiske Crab
+---------------------------------------------------------------------------------- Timer på hvis en heis ikke fullfører en timer
+---------------------------------------------------------------------------------- Timer på obstruction?
+---------------------------------------------------------------------------------- Verson limit
+---------------------------------------------------------------------------------- teste med packetloss????
+---------------------------------------------------------------------------------- hard stop på 1 og 4 etasje?
+- Fiske billett til inter-napooooooli
+---------------------------------------------------------------------------------- fiske andre-er-i-etasje-og-vi-trykker-deres-etasje-hallrequest-bug
+- Hvordan merge to systemer som har vært adskilt
+
+Pynt og secondary
+- flag for bitcoin symbol i terminal
+- implementere stop-knapp
+- CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
+- Process pairs?
+- Teste med packetloss
+- litt rart forhold melloom lokal wv og elevator
+
+
+
+Kode kvalitet
+- moduler, noen må deles opp, enkelt godt navn
+- kommunikasjon mellom moduler, få moduler snakker med elevio for eks
+- Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor
+- mer forklarende navn til parametre, kortere imports

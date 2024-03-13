@@ -48,7 +48,7 @@ func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
 	for k, v := range *output {
 		fmt.Printf("%6v :  %+v\n", k, v)
 	}
-	//gjøre noe med output
+	
 
 	for i, e := range *output {
 		for j, r := range e {
@@ -69,7 +69,7 @@ func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
 func wvToCfInput(wv elevator.Worldview, buttn elevio.ButtonEvent) (input HRAInput) {
 	input.States = make(map[string]HRAElevState)
 	for _, elev := range wv.ElevList {
-		if elev.Online {
+		if elev.Online && elev.Operative {
 			elevstate := HRAElevState{string(elev.Behaviour), elev.Last_Floor, elev.Dirn.String(), elev.CabRequests}
 			input.States[strconv.Itoa(elev.ElevNum)] = elevstate
 		}

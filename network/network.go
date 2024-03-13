@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"project/costFunc"
 	"project/elevator"
+	"project/elevio"
 	"project/network/bcast"
 	"project/network/peers"
 	"strconv"
@@ -85,44 +87,54 @@ func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (network
 		fmt.Printf("rxport %d\n", ports.UDPRx[rxPort])
 		go bcast.Receiver(ports.UDPRx[rxPort], networkChan.PacketRx)
 	}
-
-	// midlertidlig, slik at vi ikke må skrive så mye kode for å teste
-	go func(e *elevator.Elevator, wv *elevator.Worldview) {
-		fmt.Println("Started")
-		for {
-			select {
-			case p := <-networkChan.PeerUpdateCh:
-				fmt.Printf("Peer update:\n")
-				fmt.Printf("  Peers:    %q\n", p.Peers)
-				fmt.Printf("  New:      %q\n", p.New)
-				fmt.Printf("  Lost:     %q\n", p.Lost)
-				fmt.Printf("  UdpTx: 	%d\n", ports.UDPTx)
-				fmt.Printf("  UdpRx: 	%d\n", ports.UDPRx)
-
-				for _, k := range p.Lost {
-					k_int, err := strconv.Atoi(k)
-					if err != nil {
-						fmt.Println("Error:", err)
-						return
-					}
-					wv.ElevList[k_int-1].Online = false
-					wv.Version++
-					//kostfunksjon her
-				}
-				if p.New != "" {
-					i, err := strconv.Atoi(p.New)
-					if err != nil {
-						fmt.Println("Error:", err)
-						return
-					}
-					wv.ElevList[i-1].Online = true
-					wv.Version++
-				}
-			case <-networkChan.PacketRx:
-				//fmt.Println("Received:")
-				//a.Display() // feilmelding hvis a ikke er en struct Packet
-			}
-		}
-	}(e, wv)
 	return
+}
+
+func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan NetworkChan) {
+	fmt.Println("Started")
+	for {
+		select {
+		case p := <-network_chan.PeerUpdateCh:
+			fmt.Printf("Peer update:\n")
+			fmt.Printf("  Peers:    %q\n", p.Peers)
+			fmt.Printf("  New:      %q\n", p.New)
+			fmt.Printf("  Lost:     %q\n", p.Lost)
+			fmt.Printf("  UdpTx: 	%d\n", network_chan.PacketTx)
+			fmt.Printf("  UdpRx: 	%d\n", network_chan.PacketRx)
+
+			for _, k := range p.Lost {
+				k_int, err := strconv.Atoi(k)
+				if err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+				wv_p.ElevList[k_int-1].Online = false
+
+				//Assign hall orders to other:
+				for floor, f := range wv_p.HallRequests {
+					for buttonType, o := range f {
+						if o == uint8(k_int) {
+							buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
+							costFunc.CostFunction(wv_p, buttn)
+						}
+					}
+				}
+				wv_p.Version_up()
+
+			}
+			if p.New != "" {
+				i, err := strconv.Atoi(p.New)
+				if err != nil {
+					fmt.Println("Error:", err)
+					return
+				}
+				wv_p.ElevList[i-1].Online = true
+				
+				wv_p.Version_up()
+			}
+		case <-network_chan.PacketRx:
+			//fmt.Println("Received:")
+			//a.Display() // feilmelding hvis a ikke er en struct Packet
+		}
+	}
 }
