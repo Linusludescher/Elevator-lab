@@ -39,6 +39,7 @@ func main() {
 
 	network_channels := network.Init_network(id, &my_elevator, &my_wv)
 
+	go network.PeersOnline(&my_elevator, &my_wv, network_channels)
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
 	go elevio.PollObstructionSwitch(drv_obstr)
@@ -55,10 +56,10 @@ func main() {
 			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
 
 		case floor_sens := <-drv_floors:
-			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, timer_exp_chan)
+			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, timer_exp_chan, drv_obstr)
 
 		case obstr := <-drv_obstr:
-			stm.Obstruction(my_elevator, obstr)
+			stm.Obstruction(&my_elevator, &my_wv, obstr)
 
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)

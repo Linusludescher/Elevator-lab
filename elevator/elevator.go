@@ -31,7 +31,7 @@ type ConfigData struct {
 type Elevator struct {
 	Online      bool
 	Behaviour   Behaviour
-	Blocking    bool
+	Obstruction	bool
 	ElevNum     int
 	Dirn        elevio.MotorDirection
 	Last_dir    elevio.MotorDirection
@@ -55,7 +55,7 @@ func (w Worldview) Display() {
 		fmt.Printf("  Elevator %d:\n", i+1)
 		fmt.Printf("    Online: %v\n", elev.Online)
 		fmt.Printf("    Behaviour: %v\n", elev.Behaviour)
-		fmt.Printf("    Blocking: %t\n", elev.Blocking)
+		fmt.Printf("    Obstruction: %t\n", elev.Obstruction)
 		fmt.Printf("    ElevNum: %d\n", elev.ElevNum)
 		fmt.Printf("    Dirn: %v\n", elev.Dirn)
 		fmt.Printf("    Last_dir: %v\n", elev.Last_dir)

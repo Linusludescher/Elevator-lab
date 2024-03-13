@@ -9,7 +9,6 @@ import (
 
 func TimerExp(e_p *elevator.Elevator, wv elevator.Worldview) {
 	elevio.SetDoorOpenLamp(false)
-	e_p.Blocking = false
 	if e_p.Last_dir == elevio.MD_Up {
 		if requests.RequestsAbove(*e_p, wv) {
 			e_p.UpdateDirection(elevio.MD_Up)
@@ -35,33 +34,30 @@ func ButtonPressed(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevi
 	requests.SetOrder(e_p, wv_p, buttn)
 }
 
-func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens int, timer_chan chan bool) {
+func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens int, timer_chan chan bool, obstruction_chan chan bool) {
 	if floor_sens != -1 {
 		e_p.Last_Floor = floor_sens
 		fmt.Println("new floow")
 	}
 	if e_p.Dirn == elevio.MD_Up && floor_sens != -1 {
 		if requests.RequestsHereCabOrUp(*e_p, *wv_p) {
-			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan, obstruction_chan)
 		} else if (!requests.RequestsAbove(*e_p, *wv_p)) && requests.RequestsHere(*e_p, *wv_p) {
-			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan, obstruction_chan)
 		}
 	}
 	if e_p.Dirn == elevio.MD_Down && floor_sens != -1 {
 		if requests.RequestsHereCabOrDown(*e_p, *wv_p) {
-			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan, obstruction_chan)
 		} else if (!requests.RequestsBelow(*e_p, *wv_p)) && requests.RequestsHere(*e_p, *wv_p) {
-			requests.ArrivedAtFloor(e_p, wv_p, timer_chan)
+			requests.ArrivedAtFloor(e_p, wv_p, timer_chan, obstruction_chan)
 		}
 	}
 }
 
-func Obstruction(e elevator.Elevator, obstr bool) {
-	if obstr {
-		elevio.SetMotorDirection(elevio.MD_Stop)
-	} else {
-		elevio.SetMotorDirection(e.Dirn)
-	}
+func Obstruction(e_p *elevator.Elevator,wv_p *elevator.Worldview, obstr bool) {
+	e_p.Obstruction = obstr
+	wv_p.Version++
 }
 
 func StopButtonPressed(e elevator.Elevator) {
@@ -71,7 +67,7 @@ func StopButtonPressed(e elevator.Elevator) {
 
 func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, broadcast_elevator_chan chan elevator.Worldview) {
 	//e.Display()
-	if (e_p.Dirn == elevio.MD_Stop) && (!e_p.Blocking) {
+	if (e_p.Dirn == elevio.MD_Stop) && (e_p.Behaviour != elevator.EB_DoorOpen) {
 		if requests.RequestsAbove(*e_p, *wv_p) {
 			e_p.UpdateDirection(elevio.MD_Up)
 		} else if requests.RequestsBelow(*e_p, *wv_p) {

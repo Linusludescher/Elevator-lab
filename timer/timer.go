@@ -2,28 +2,36 @@ package timer
 
 import (
 	"fmt"
+	"project/elevator"
 	"time"
 )
 
-var timerEndTime float64
-var timerActive bool
-
-func GetWallTime() float64 {
-	now := time.Now()
-	return float64(now.Unix()) + float64(now.Nanosecond())*1e-9
-}
-
-func TimerStart(duration time.Duration, timer chan bool) {
+func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.Duration, timer chan bool, obstruction chan bool) {
 	fmt.Println("timer started")
+	obstructed := e_p.Obstruction
 	sec_timer := time.NewTimer(duration * time.Second)
-	<-sec_timer.C
-	timer <- true
-}
-
-func TimerStop() {
-	timerActive = false
-}
-
-func TimerTimedOut() bool {
-	return timerActive && GetWallTime() > timerEndTime
+	defer sec_timer.Stop()
+	for {
+		select {
+		case <-sec_timer.C:
+			if !obstructed {
+				timer <- true
+				return
+			} else {
+				// Restart the timer if obstructed is true
+				sec_timer.Reset(duration * time.Second)
+			}
+		case obstr := <-obstruction:
+			obstructed = obstr
+			e_p.Obstruction = obstr
+			wv_p.Version++
+			if obstructed {
+				// If obstructed becomes true, restart the timer
+				if !sec_timer.Stop() {
+					<-sec_timer.C // Drain the timer channel if the timer has already expired
+				}
+				sec_timer.Reset(duration * time.Second)
+			}
+		}
+	}
 }
