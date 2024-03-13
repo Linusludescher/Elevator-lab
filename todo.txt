@@ -89,4 +89,4 @@ Onsdag:
 - Må alle ha sett order for at vi kan gjøre ting?
 ---------------------------------------------------------------------------------- Fiske Crab
 - Timer på hvis en heis ikke fullfører en timer
-- Verson limit
+---------------------------------------------------------------------------------- Verson limit

@@ -46,6 +46,20 @@ type Worldview struct {
 	HallRequests [][2]uint8
 }
 
+const (
+	V_l = 18446744073709551615 //2e64-1
+	V_s_c = 100000 //maks antall sykler ny versjon kan være foran for at e.Version settes godtar lavere p.Version (ved Version overflow)
+	// versionInitVal = 10000 //initialisere på høyere verdi enn 0 for ikke problemer med nullstilling ved tilbakekobling etter utfall
+)
+
+func (wv *Worldview) Version_up() {
+	if wv.Version < V_l {
+		wv.Version++
+	} else {
+		wv.Version = 0
+	}
+}
+
 func (w Worldview) Display() {
 	fmt.Printf("Sender: %d\n", w.Sender)
 	fmt.Printf("Version: %d\n", w.Version)

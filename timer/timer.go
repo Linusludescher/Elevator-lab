@@ -24,7 +24,7 @@ func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.
 		case obstr := <-obstruction:
 			obstructed = obstr
 			e_p.Obstruction = obstr
-			wv_p.Version++
+			wv_p.Version_up()
 			if obstructed {
 				// If obstructed becomes true, restart the timer
 				if !sec_timer.Stop() {

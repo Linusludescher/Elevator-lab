@@ -79,7 +79,7 @@ func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
 		elevio.SetButtonLamp(elevio.ButtonType(orderType), e_p.Last_Floor, false) //det med lys må fikses
 	}
 	e_p.CabRequests[e_p.Last_Floor] = false
-	wv_p.Version++
+	wv_p.Version_up()
 }
 
 func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent) {
@@ -92,7 +92,7 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 		costFunc.CostFunction(wv_p, buttn)
 	}
 	elevio.SetButtonLamp(buttn.Button, buttn.Floor, true) // må endres når flere heiser
-	wv_p.Version++
+	wv_p.Version_up()
 }
 
 func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan chan bool, obstruction_chan chan bool) {
@@ -100,7 +100,7 @@ func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	e_p.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e_p, wv_p)
-	wv_p.Version++
+	wv_p.Version_up()
 	e_p.Behaviour = elevator.EB_DoorOpen
 	go timer.TimerStart(e_p, wv_p, 3, timer_chan, obstruction_chan)
 }

@@ -55,7 +55,7 @@ func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens in
 
 func Obstruction(e_p *elevator.Elevator, wv_p *elevator.Worldview, obstr bool) {
 	e_p.Obstruction = obstr
-	wv_p.Version++
+	wv_p.Version_up()
 }
 
 func StopButtonPressed(e elevator.Elevator) {

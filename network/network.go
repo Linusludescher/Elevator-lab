@@ -119,7 +119,7 @@ func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan 
 						}
 					}
 				}
-				wv_p.Version++
+				wv_p.Version_up()
 
 			}
 			if p.New != "" {
@@ -130,7 +130,7 @@ func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan 
 				}
 				wv_p.ElevList[i-1].Online = true
 				
-				wv_p.Version++
+				wv_p.Version_up()
 			}
 		case <-network_chan.PacketRx:
 			//fmt.Println("Received:")
