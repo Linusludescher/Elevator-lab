@@ -25,8 +25,8 @@ func main() {
 
 	numFloors := 4 //endre dette??? fjerne??
 
-	//elevio.Init("localhost:15657", numFloors)
-	elevio.Init("localhost:22222", numFloors)
+	elevio.Init("localhost:15657", numFloors)
+	//elevio.Init("localhost:22222", numFloors)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -69,7 +69,7 @@ func main() {
 
 		case <-bc_timer_chan:
 			bcast.BcWorldView(my_elevator, &my_wv, network_channels.PacketTx)
-			//vil kjøre bcWorldView(wv, e)
+
 			stm.DefaultState(&my_elevator, &my_wv, network_channels.PacketTx)
 			//default:
 			my_wv.Display()

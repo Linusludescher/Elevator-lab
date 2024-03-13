@@ -1,7 +1,6 @@
 package stm
 
 import (
-	"fmt"
 	"project/elevator"
 	"project/elevio"
 	"project/requests"
@@ -37,7 +36,6 @@ func ButtonPressed(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevi
 func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens int, timer_chan chan bool, obstruction_chan chan bool) {
 	if floor_sens != -1 {
 		e_p.Last_Floor = floor_sens
-		fmt.Println("new floow")
 	}
 	if e_p.Dirn == elevio.MD_Up && floor_sens != -1 {
 		if requests.RequestsHereCabOrUp(*e_p, *wv_p) {
@@ -55,7 +53,7 @@ func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens in
 	}
 }
 
-func Obstruction(e_p *elevator.Elevator,wv_p *elevator.Worldview, obstr bool) {
+func Obstruction(e_p *elevator.Elevator, wv_p *elevator.Worldview, obstr bool) {
 	e_p.Obstruction = obstr
 	wv_p.Version++
 }
@@ -66,7 +64,6 @@ func StopButtonPressed(e elevator.Elevator) {
 }
 
 func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, broadcast_elevator_chan chan elevator.Worldview) {
-	//e.Display()
 	if (e_p.Dirn == elevio.MD_Stop) && (e_p.Behaviour != elevator.EB_DoorOpen) {
 		if requests.RequestsAbove(*e_p, *wv_p) {
 			e_p.UpdateDirection(elevio.MD_Up)

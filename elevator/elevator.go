@@ -31,7 +31,7 @@ type ConfigData struct {
 type Elevator struct {
 	Online      bool
 	Behaviour   Behaviour
-	Obstruction	bool
+	Obstruction bool
 	ElevNum     int
 	Dirn        elevio.MotorDirection
 	Last_dir    elevio.MotorDirection
@@ -97,11 +97,11 @@ func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	for i := range hall {
 		hall[i] = [2]uint8{0, 0}
 	}
-	cab := make([]bool, elevatorConfig.N_FLOORS)
 
 	wv = Worldview{[]Elevator{}, id, startVersion, hall}
 
 	for i := 1; i <= int(elevatorConfig.N_elevators); i++ {
+		cab := make([]bool, elevatorConfig.N_FLOORS)
 		n := Elevator{false, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
 		wv.ElevList = append(wv.ElevList, n)
 	}
@@ -115,14 +115,14 @@ func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	return
 }
 
-func (e_p *Elevator) Display() { //lage en for worldview også!
-	fmt.Printf("Direction: %v\n", e_p.Dirn)
-	fmt.Printf("Last Direction: %v\n", e_p.Last_dir)
-	fmt.Printf("Last Floor: %v\n", e_p.Last_Floor)
+func (e Elevator) Display() { //lage en for worldview også!
+	fmt.Printf("Direction: %v\n", e.Dirn)
+	fmt.Printf("Last Direction: %v\n", e.Last_dir)
+	fmt.Printf("Last Floor: %v\n", e.Last_Floor)
 	fmt.Println("Requests")
 	fmt.Println("Floor\t Cab")
-	for i := len(e_p.CabRequests) - 1; i >= 0; i-- {
-		fmt.Printf("%v \t %v \t\n", i+1, e_p.CabRequests[i])
+	for i := len(e.CabRequests) - 1; i >= 0; i-- {
+		fmt.Printf("%v \t %v \t\n", i+1, e.CabRequests[i])
 	}
 }
 

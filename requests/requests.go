@@ -1,7 +1,6 @@
 package requests
 
 import (
-	"fmt"
 	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
@@ -97,7 +96,6 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 }
 
 func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan chan bool, obstruction_chan chan bool) {
-	fmt.Println("Arrived at floor")
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	e_p.Dirn = elevio.MD_Stop
