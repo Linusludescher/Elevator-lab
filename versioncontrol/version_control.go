@@ -38,7 +38,7 @@ func Version_if_equal_queue(e elevator.Elevator, my_wv elevator.Worldview, incom
 }
 
 func Version_update_queue(e_p *elevator.Elevator, my_wv_p *elevator.Worldview, incoming_wv elevator.Worldview) {
-	if incoming_wv.Version > my_wv_p.Version || ((my_wv_p.Version > elevator.V_l-elevator.V_s_c) && incoming_wv.Version < elevator.V_s_c) { //||  (e.Version > versionLimit-versionStabilityCycles && p.Version < versionStabilityCycles)
+	if incoming_wv.Version > my_wv_p.Version || ((my_wv_p.Version > elevator.V_l-elevator.V_s_c) && incoming_wv.Version < elevator.V_s_c) { 
 		my_wv_p.HallRequests = incoming_wv.HallRequests
 		my_wv_p.Version = incoming_wv.Version
 		my_wv_p.ElevList = incoming_wv.ElevList

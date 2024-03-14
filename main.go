@@ -9,13 +9,13 @@ import (
 	"project/stm"
 	"project/timer"
 	"project/versioncontrol"
-	// "strconv"
 )
 
 //Todo rydding: samle ting i funkdjonrt
 //og endre objektnavn på elevator- heter nå e eller my_elevator eller elevator
 
 func main() {
+
 	idFlag := flag.Int("id", 1, "Specifies an ID number")
 
 	// Parse the command-line flags
@@ -28,7 +28,7 @@ func main() {
 	numFloors := 4 //endre dette??? fjerne??
 
 	//elevio.Init("localhost:"+localhostnr, numFloors)
-	elevio.Init("localhost:15658", numFloors)
+	elevio.Init("localhost:15657", numFloors)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -53,7 +53,7 @@ func main() {
 	for {
 		select {
 		case <-timer_exp_chan:
-			stm.ClosingDoor(&my_elevator, my_wv, wd_chan)
+			stm.TimerExp(&my_elevator, my_wv, wd_chan)
 
 		case buttn := <-drv_buttons:
 			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
@@ -72,9 +72,9 @@ func main() {
 
 		case <-bc_timer_chan:
 			stm.DefaultState(&my_elevator, &my_wv, timer_exp_chan, drv_obstr, wd_chan)
-			bcast.BcWorldView(my_elevator, &my_wv, network_channels.PacketTx)
+			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
 			//default:
-			my_wv.Display()
+			//my_wv.Display()
 		}
 	}
 }

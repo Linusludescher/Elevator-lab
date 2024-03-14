@@ -98,11 +98,14 @@ Onsdag:
 
 
 Torsdag: 
-- fiske etasjelys
-- fiske en lys når en heis alene
+---------------------------------------------------------------------------------- fiske etasjelys
+---------------------------------------------------------------------------------- fiske en lys når en heis alene
 - Hvordan merge to systemer som har vært adskilt
-- Få 3 heiser til å funger
+---------------------------------------------------------------------------------- Få 3 heiser til å funger
 - trykker hall order i samme etasje som egen heis er i, åpner ikke døren
+- noen ganger går den i idle i stede for door open
+- trykker hall i last floor -> åpner dør midt mellom etasjer
+
 
 Pynt og secondary
 - flag for bitcoin symbol i terminal
