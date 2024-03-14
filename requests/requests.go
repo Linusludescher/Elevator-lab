@@ -80,8 +80,9 @@ func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
 	wv_p.Version_up()
 }
 
-func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent) {
+func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent, resetTimer_chan chan bool, wd_chan chan bool) {
 	if (buttn.Floor == e_p.Last_Floor) && (elevio.GetFloor() != -1) {
+		ArrivedAtFloor(e_p, wv_p, resetTimer_chan, wd_chan)
 		return
 	}
 	if buttn.Button == elevio.BT_Cab {

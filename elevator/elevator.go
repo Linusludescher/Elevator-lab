@@ -22,10 +22,11 @@ const (
 	EB_DoorOpen Behaviour = "doorOpen"
 )
 
-type ConfigData struct {
+type ConfigData struct { //Reader config 2 steder: En gang her, en gang i network!
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
 	//ElevatorNum int   `json:"ElevNum"`
+	UDPBase		int    `json:"BasePort"`
 }
 
 type Elevator struct {
@@ -85,14 +86,14 @@ func (w Worldview) Display() {
 	}
 }
 
-func readElevatorConfig() (elevatorData ConfigData) {
+func ReadElevatorConfig() (elevatorData ConfigData) {
 	jsonData, err := os.ReadFile("config.json")
 
 	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("elevator.go: Error reading config file: %s\n", err)
 		// tyr again
-		readElevatorConfig()
+		ReadElevatorConfig()
 	}
 
 	// Parse jsonData into ElevatorData struct
@@ -102,13 +103,13 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	if err != nil {
 		fmt.Printf("elevator.go: Error unmarshal json data to ElevatorData struct: %s\n", err)
 		// tyr again
-		readElevatorConfig()
+		ReadElevatorConfig()
 	}
 	return
 }
 
 func ElevatorInit(id int) (e Elevator, wv Worldview) {
-	elevatorConfig := readElevatorConfig()
+	elevatorConfig := ReadElevatorConfig()
 	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hall {
 		hall[i] = [2]uint8{0, 0}
@@ -163,8 +164,8 @@ func BroadcastElevator(bc_chan chan bool, n_ms int) {
 
 func UpdateLights(wv Worldview, elevnum int) {
 	for floor, f := range wv.HallRequests {
-		for buttonType, o := range f {
-			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, o != 0)
+		for buttonType, order := range f {
+			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, order != 0)
 		}
 	}
 	for i, elev := range wv.ElevList {

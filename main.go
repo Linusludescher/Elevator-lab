@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"project/elevator"
 	"project/elevio"
 	"project/network"
@@ -25,8 +26,12 @@ func main() {
 	// Retrieve the value of the idFlag
 	id := *idFlag
 	// localhostnr := strconv.Itoa(19657 + id)
+	fmt.Println(id)
 
-	numFloors := 4 //endre dette??? fjerne??
+	elevatorConf := elevator.ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
+	numFloors := int(elevatorConf.N_FLOORS)
+
+	//processPairConn := bcast.ProcessPairListner(id)
 
 	// elevio.Init("localhost:"+localhostnr, numFloors)
 	elevio.Init("localhost:15657", numFloors) //15657
@@ -41,7 +46,6 @@ func main() {
 	resetTimer_chan := make(chan bool)
 
 	my_elevator, my_wv := elevator.ElevatorInit(id)
-
 	network_channels := network.Init_network(id, &my_elevator, &my_wv)
 
 	go network.PeersOnline(&my_elevator, &my_wv, network_channels)
@@ -59,7 +63,7 @@ func main() {
 			stm.ClosingDoor(&my_elevator, my_wv, wd_chan)
 
 		case buttn := <-drv_buttons:
-			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
+			stm.ButtonPressed(&my_elevator, &my_wv, buttn, resetTimer_chan, wd_chan)
 
 		case floor_sens := <-drv_floors:
 			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, resetTimer_chan, wd_chan)
@@ -76,6 +80,7 @@ func main() {
 		case <-bc_timer_chan:
 			stm.DefaultState(&my_elevator, &my_wv, resetTimer_chan, wd_chan)
 			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
+			// processPairConn.Write([]byte("42"))
 			//default:
 			my_wv.Display()
 		}

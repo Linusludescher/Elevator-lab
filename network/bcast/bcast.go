@@ -4,9 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os/exec"
+	"path/filepath"
 	"project/elevator"
 	"project/network/conn"
 	"reflect"
+	"runtime"
+	"strconv"
+	"time"
 )
 
 const bufSize = 1024
@@ -147,4 +152,64 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 func BcWorldView(e elevator.Elevator, wv elevator.Worldview, bc_chan chan elevator.Worldview) {
 	wv.ElevList[e.ElevNum-1] = e
 	bc_chan <- wv
+}
+
+func ProcessPairListner(id int) (udpConn *net.UDPConn) {
+	broadcastAddr, err := net.ResolveUDPAddr("udp", "localhost:8091")
+	if err != nil {
+		panic(err)
+	}
+
+	// backup, lytter på UDP
+	listen_conn, err := net.ListenUDP("udp", broadcastAddr)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Listening..")
+
+	buffer := make([]byte, 1024)
+
+	for {
+		timeout := time.Now().Add(10 * time.Second)
+		listen_conn.SetReadDeadline(timeout)
+		_, _, err := listen_conn.ReadFromUDP(buffer)
+		if err != nil {
+			// Check if the error is a timeout
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				fmt.Println("Read timeout occurred. Breaking...")
+				break
+			}
+			// maybe panic?==?????
+			fmt.Println("Error reading data:", err)
+			return
+		}
+	}
+
+	listen_conn.Close()
+
+	// starte nytt vindu
+	time.Sleep(1000 * time.Millisecond)
+	flag := "-id"
+	value := strconv.Itoa(id)
+
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic(ok)
+	}
+	path_to_main := filepath.Join(filepath.Dir(filename), "..", "..", "main.go")
+	cmd := exec.Command("gnome-terminal", "--", "go", "run", path_to_main, flag, value)
+	fmt.Println(cmd.Args)
+
+	// Run the command
+	err = cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Im the primary")
+	udpConn, err = net.DialUDP("udp", nil, broadcastAddr)
+	if err != nil {
+		panic(err)
+	}
+	return
 }
