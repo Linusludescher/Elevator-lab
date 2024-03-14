@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"project/elevator"
 	"project/elevio"
 	"project/network"
@@ -25,10 +26,10 @@ func main() {
 	// Retrieve the value of the idFlag
 	id := *idFlag
 	// localhostnr := strconv.Itoa(19657 + id)
-
+	fmt.Println(id)
 	numFloors := 4 //endre dette??? fjerne??
 
-	processPairConn := bcast.ProcessPairListner()
+	processPairConn := bcast.ProcessPairListner(id)
 
 	// elevio.Init("localhost:"+localhostnr, numFloors)
 	elevio.Init("localhost:15657", numFloors) //15657

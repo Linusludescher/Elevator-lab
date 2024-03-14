@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"net"
 	"os/exec"
+	"path/filepath"
 	"project/elevator"
 	"project/network/conn"
 	"reflect"
+	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -151,8 +154,8 @@ func BcWorldView(e elevator.Elevator, wv elevator.Worldview, bc_chan chan elevat
 	bc_chan <- wv
 }
 
-func ProcessPairListner() (udpConn *net.UDPConn) {
-	broadcastAddr, err := net.ResolveUDPAddr("udp", "localhost:8000")
+func ProcessPairListner(id int) (udpConn *net.UDPConn) {
+	broadcastAddr, err := net.ResolveUDPAddr("udp", "localhost:8090")
 	if err != nil {
 		panic(err)
 	}
@@ -168,7 +171,7 @@ func ProcessPairListner() (udpConn *net.UDPConn) {
 	buffer := make([]byte, 1024)
 
 	for {
-		timeout := time.Now().Add(2 * time.Second)
+		timeout := time.Now().Add(10 * time.Second)
 		listen_conn.SetReadDeadline(timeout)
 		_, _, err := listen_conn.ReadFromUDP(buffer)
 		if err != nil {
@@ -177,6 +180,7 @@ func ProcessPairListner() (udpConn *net.UDPConn) {
 				fmt.Println("Read timeout occurred. Breaking...")
 				break
 			}
+			// maybe panic?==?????
 			fmt.Println("Error reading data:", err)
 			return
 		}
@@ -186,16 +190,23 @@ func ProcessPairListner() (udpConn *net.UDPConn) {
 
 	// starte nytt vindu
 	time.Sleep(1000 * time.Millisecond)
-	cmd := exec.Command("osascript", "-e", `tell app "Terminal" to do script "go run `+"/Users/macbookpro13/Desktop/NTNU/Vår24/Sanntid/Øving4/terminate"+`.go"`)
+	flag := "-id"
+	value := strconv.Itoa(id)
+
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		panic(ok)
+	}
+	path_to_main := filepath.Join(filepath.Dir(filename), "..", "..", "main.go")
+	cmd := exec.Command("gnome-terminal", "--", "go", "run", path_to_main, flag, value)
+	fmt.Println(cmd.Args)
 
 	// Run the command
 	err = cmd.Run()
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		panic(err)
 	}
 	fmt.Println("Im the primary")
-
 	udpConn, err = net.DialUDP("udp", nil, broadcastAddr)
 	if err != nil {
 		panic(err)

@@ -109,6 +109,8 @@ Torsdag:
 - Ikke bruke hardcodet numFloors i main 
 - tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> lage en softstop før hardstoppen kicker inn
 - process pairs- fette nice
+- setter obstr uten at door open, da skjer dårlige ting
+
 
 Pynt og secondary
 - flag for bitcoin symbol i terminal
