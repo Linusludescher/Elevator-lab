@@ -6,7 +6,7 @@ import (
 	"project/requests"
 )
 
-func TimerExp(e_p *elevator.Elevator, wv elevator.Worldview, wd_chan chan bool) { //kalle denne for door closed
+func ClosingDoor(e_p *elevator.Elevator, wv elevator.Worldview, wd_chan chan bool) { //kalle denne for door closed
 	wd_chan <- false
 	elevio.SetDoorOpenLamp(false)
 	if e_p.Last_dir == elevio.MD_Up {
@@ -38,6 +38,7 @@ func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens in
 	wd_chan <- false
 	if floor_sens != -1 {
 		e_p.Last_Floor = floor_sens
+		elevio.SetFloorIndicator(floor_sens)
 	}
 	if e_p.Dirn == elevio.MD_Up && floor_sens != -1 {
 		if requests.RequestsHereCabOrUp(*e_p, *wv_p) {

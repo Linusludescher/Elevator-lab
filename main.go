@@ -9,7 +9,7 @@ import (
 	"project/stm"
 	"project/timer"
 	"project/versioncontrol"
-	"strconv"
+	// "strconv"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -23,11 +23,12 @@ func main() {
 
 	// Retrieve the value of the idFlag
 	id := *idFlag
-	localhostnr := strconv.Itoa(19657 + id)
+	//localhostnr := strconv.Itoa(19657 + id)
 
 	numFloors := 4 //endre dette??? fjerne??
 
-	elevio.Init("localhost:"+localhostnr, numFloors)
+	//elevio.Init("localhost:"+localhostnr, numFloors)
+	elevio.Init("localhost:15658", numFloors)
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
@@ -52,7 +53,7 @@ func main() {
 	for {
 		select {
 		case <-timer_exp_chan:
-			stm.TimerExp(&my_elevator, my_wv, wd_chan)
+			stm.ClosingDoor(&my_elevator, my_wv, wd_chan)
 
 		case buttn := <-drv_buttons:
 			stm.ButtonPressed(&my_elevator, &my_wv, buttn)

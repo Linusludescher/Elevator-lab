@@ -95,7 +95,14 @@ Onsdag:
 ---------------------------------------------------------------------------------- hard stop på 1 og 4 etasje?
 - Fiske billett til inter-napooooooli
 ---------------------------------------------------------------------------------- fiske andre-er-i-etasje-og-vi-trykker-deres-etasje-hallrequest-bug
+
+
+Torsdag: 
+- fiske etasjelys
+- fiske en lys når en heis alene
 - Hvordan merge to systemer som har vært adskilt
+- Få 3 heiser til å funger
+- trykker hall order i samme etasje som egen heis er i, åpner ikke døren
 
 Pynt og secondary
 - flag for bitcoin symbol i terminal
@@ -110,5 +117,5 @@ Pynt og secondary
 Kode kvalitet
 - moduler, noen må deles opp, enkelt godt navn
 - kommunikasjon mellom moduler, få moduler snakker med elevio for eks
-- Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor
+- Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor 
 - mer forklarende navn til parametre, kortere imports
