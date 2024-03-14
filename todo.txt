@@ -121,11 +121,6 @@ Fredag: Kodekvalitet, Kodekvalitet, Kodekvalitet
 
 
 
-
-
-
-
-
 Pynt og secondary
 - flag for bitcoin symbol i terminal
 - implementere stop-knapp
