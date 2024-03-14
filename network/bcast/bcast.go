@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
+	"os/exec"
 	"project/elevator"
 	"project/network/conn"
 	"reflect"
+	"time"
 )
 
 const bufSize = 1024
@@ -147,4 +149,56 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 func BcWorldView(e elevator.Elevator, wv elevator.Worldview, bc_chan chan elevator.Worldview) {
 	wv.ElevList[e.ElevNum-1] = e
 	bc_chan <- wv
+}
+
+func ProcessPairListner() (udpConn *net.UDPConn) {
+	broadcastAddr, err := net.ResolveUDPAddr("udp", "localhost:8000")
+	if err != nil {
+		panic(err)
+	}
+
+	// backup, lytter på UDP
+	listen_conn, err := net.ListenUDP("udp", broadcastAddr)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Listening..")
+
+	buffer := make([]byte, 1024)
+
+	for {
+		timeout := time.Now().Add(2 * time.Second)
+		listen_conn.SetReadDeadline(timeout)
+		_, _, err := listen_conn.ReadFromUDP(buffer)
+		if err != nil {
+			// Check if the error is a timeout
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				fmt.Println("Read timeout occurred. Breaking...")
+				break
+			}
+			fmt.Println("Error reading data:", err)
+			return
+		}
+	}
+
+	listen_conn.Close()
+
+	// starte nytt vindu
+	time.Sleep(1000 * time.Millisecond)
+	cmd := exec.Command("osascript", "-e", `tell app "Terminal" to do script "go run `+"/Users/macbookpro13/Desktop/NTNU/Vår24/Sanntid/Øving4/terminate"+`.go"`)
+
+	// Run the command
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("Im the primary")
+
+	udpConn, err = net.DialUDP("udp", nil, broadcastAddr)
+	if err != nil {
+		panic(err)
+	}
+	return
 }

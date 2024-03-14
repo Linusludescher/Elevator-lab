@@ -28,6 +28,8 @@ func main() {
 
 	numFloors := 4 //endre dette??? fjerne??
 
+	processPairConn := bcast.ProcessPairListner()
+
 	// elevio.Init("localhost:"+localhostnr, numFloors)
 	elevio.Init("localhost:15657", numFloors) //15657
 
@@ -76,6 +78,7 @@ func main() {
 		case <-bc_timer_chan:
 			stm.DefaultState(&my_elevator, &my_wv, resetTimer_chan, wd_chan)
 			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
+			processPairConn.Write([]byte("42"))
 			//default:
 			my_wv.Display()
 		}

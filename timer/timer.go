@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"os"
 	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
@@ -63,6 +64,7 @@ func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.
 				}
 			}
 			wv_p.Version_up()
+			os.Exit(1)
 		}
 	}
 }

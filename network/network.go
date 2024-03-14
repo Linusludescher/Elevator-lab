@@ -12,12 +12,6 @@ import (
 	"strconv"
 )
 
-// // Globals
-// const (
-// 	N_FLOORS  int = 4
-// 	N_BUTTONS int = 3
-// )
-
 type ConfigUDPPorts struct {
 	UDPBase       int `json:"BasePort"`
 	N_elevators   int `json:"n_elevators"`
@@ -129,7 +123,7 @@ func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan 
 					return
 				}
 				wv_p.ElevList[i-1].Online = true
-				
+
 				wv_p.Version_up()
 			}
 		case <-network_chan.PacketRx:
