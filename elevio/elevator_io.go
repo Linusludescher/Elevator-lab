@@ -35,6 +35,19 @@ type ButtonEvent struct {
 	Button ButtonType
 }
 
+func (md MotorDirection) String() string {
+    switch md {
+    case MD_Up:
+        return "up"
+    case MD_Down:
+        return "down"
+    case MD_Stop:
+        return "stop"
+    default:
+        return "unknown"
+    }
+}
+
 func Init(addr string, numFloors int) {
 	if _initialized {
 		fmt.Println("Driver already initialized!")

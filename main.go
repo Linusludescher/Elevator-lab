@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"project/elevator"
 	"project/elevio"
 	"project/network"
+	"project/network/bcast"
 	"project/stm"
+	"project/timer"
 	"project/versioncontrol"
+	// "strconv"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -14,56 +17,67 @@ import (
 
 func main() {
 
-	numFloors := 4
+	idFlag := flag.Int("id", 1, "Specifies an ID number")
 
-	elevio.Init("localhost:15657", numFloors)
-	//elevio.Init("localhost:22222", numFloors)
+	// Parse the command-line flags
+	flag.Parse()
+
+	// Retrieve the value of the idFlag
+	id := *idFlag
+	// localhostnr := strconv.Itoa(19657 + id)
+
+	numFloors := 4 //endre dette??? fjerne??
+
+	// elevio.Init("localhost:"+localhostnr, numFloors)
+	elevio.Init("localhost:15657", numFloors) //15657
 
 	drv_buttons := make(chan elevio.ButtonEvent)
 	drv_floors := make(chan int)
 	drv_obstr := make(chan bool)
 	drv_stop := make(chan bool)
-	timer_chan := make(chan bool)
+	timer_exp_chan := make(chan bool)
 	bc_timer_chan := make(chan bool)
-	// broadcast_elevator_chan := make(chan elevator.Elevator) //kanskje en buffer her?
-	// udp_receive_chan := make(chan network.Packet)           //kanskje en buffer her og?
+	wd_chan := make(chan bool)
+	resetTimer_chan := make(chan bool)
 
-	network_channels := network.Init_network()
+	my_elevator, my_wv := elevator.ElevatorInit(id)
 
-	my_elevator := elevator.Elevator_uninitialized()
+	network_channels := network.Init_network(id, &my_elevator, &my_wv)
 
+	go network.PeersOnline(&my_elevator, &my_wv, network_channels)
 	go elevio.PollButtons(drv_buttons)
 	go elevio.PollFloorSensor(drv_floors)
 	go elevio.PollObstructionSwitch(drv_obstr)
 	go elevio.PollStopButton(drv_stop)
 	go elevator.BroadcastElevator(bc_timer_chan, 10)
+	go timer.OperativeWatchdog(&my_elevator, &my_wv, 10, wd_chan)
+	go timer.TimerStart(&my_elevator, &my_wv, 3, timer_exp_chan, drv_obstr, resetTimer_chan)
 
 	for {
 		select {
-		case <-timer_chan:
-			fmt.Println("timer expired")
-			stm.TimerState(&my_elevator)
+		case <-timer_exp_chan:
+			stm.ClosingDoor(&my_elevator, my_wv, wd_chan)
 
 		case buttn := <-drv_buttons:
-			stm.ButtonPressed(&my_elevator, buttn)
+			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
 
 		case floor_sens := <-drv_floors:
-			stm.FloorSensed(&my_elevator, floor_sens, timer_chan)
+			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, resetTimer_chan, wd_chan)
 
 		case obstr := <-drv_obstr:
-			stm.Obstruction(my_elevator, obstr)
+			stm.Obstuction(my_elevator, obstr)
 
 		case <-drv_stop:
 			stm.StopButtonPressed(my_elevator)
 
-		case udp_packet := <-network_channels.PacketRx:
-			fmt.Println("Pakke mottatt")
-			versioncontrol.Version_update_queue(&my_elevator, udp_packet)
+		case udp_packet := <-network_channels.PacketRx: //legge til
+			versioncontrol.Version_update_queue(&my_elevator, &my_wv, udp_packet)
+
 		case <-bc_timer_chan:
-			network_channels.PacketTx <- my_elevator
-			stm.DefaultState(&my_elevator, network_channels.PacketTx)
+			stm.DefaultState(&my_elevator, &my_wv, resetTimer_chan, wd_chan)
+			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
 			//default:
-			//stm.DefaultState(&my_elevator, network_channels.PacketTx) // Dårlig navn? beskriver dårlig
+			my_wv.Display()
 		}
 	}
 }

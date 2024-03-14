@@ -1,28 +1,31 @@
 package versioncontrol
 
 import (
+	"fmt"
 	"project/elevator"
 )
 
-const (
-	versionLimit = 18446744073709551615 //2e64-1
-	// versionStabilityCycles = 100 //maks antall sykler ny versjon kan være foran for at e.Version settes godtar lavere p.Version (ved Version overflow)
-	// versionInitVal = 10000 //initialisere på høyere verdi enn 0 for ikke problemer med nullstilling ved tilbakekobling etter utfall
-)
-
-func Version_up(e *elevator.Elevator) {
-	if e.Version < versionLimit {
-		e.Version++
-	} else {
-		e.Version = 0
-	}
-}
-
-func Version_if_equal_queue(e elevator.Elevator, p elevator.Elevator) bool {
+func Version_if_equal_queue(e elevator.Elevator, my_wv elevator.Worldview, incoming_wv elevator.Worldview) bool {
 	areEqual := true
-	for i := range e.Requests {
-		for j := range e.Requests[i] {
-			if e.Requests[i][j] != p.Requests[i][j] {
+	for i := range my_wv.HallRequests {
+		for j := range my_wv.HallRequests[i] {
+			if my_wv.HallRequests[i][j] != incoming_wv.HallRequests[i][j] {
+				areEqual = false
+				break
+			}
+		}
+		if !areEqual {
+			break
+		}
+	}
+	for elev := range my_wv.ElevList {
+		for f := range my_wv.ElevList[elev].CabRequests {
+			if elev == e.ElevNum-1 {
+				if e.CabRequests[f] != incoming_wv.ElevList[elev].CabRequests[f] {
+					areEqual = false
+					break
+				}
+			} else if my_wv.ElevList[elev].CabRequests[f] != incoming_wv.ElevList[elev].CabRequests[f] {
 				areEqual = false
 				break
 			}
@@ -34,14 +37,24 @@ func Version_if_equal_queue(e elevator.Elevator, p elevator.Elevator) bool {
 	return areEqual
 }
 
-func Version_update_queue(e *elevator.Elevator, p elevator.Elevator) {
-	if p.Version > e.Version { //||  (e.Version > versionLimit-versionStabilityCycles && p.Version < versionStabilityCycles)
-		e.Requests = p.Requests
-		e.Version = p.Version
-	} else if (p.Version == e.Version) || !Version_if_equal_queue(*e, p) {
-		if p.ElevNum > e.ElevNum {
-			e.Requests = p.Requests
-			e.Version = p.Version
+func Version_update_queue(e_p *elevator.Elevator, my_wv_p *elevator.Worldview, incoming_wv elevator.Worldview) {
+	if incoming_wv.Version > my_wv_p.Version || ((my_wv_p.Version > elevator.V_l-elevator.V_s_c) && incoming_wv.Version < elevator.V_s_c) {
+		my_wv_p.HallRequests = incoming_wv.HallRequests
+		my_wv_p.Version = incoming_wv.Version
+		my_wv_p.ElevList = incoming_wv.ElevList
+		e_p.CabRequests = incoming_wv.ElevList[e_p.ElevNum-1].CabRequests //La til dette
+		// Slå av og på lys
+		go elevator.UpdateLights(*my_wv_p, e_p.ElevNum)
+	} else if incoming_wv.Version == my_wv_p.Version {
+		go elevator.UpdateLights(*my_wv_p, e_p.ElevNum)
+	} else if (incoming_wv.Version == my_wv_p.Version) && !Version_if_equal_queue(*e_p, *my_wv_p, incoming_wv) {
+		fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+		if incoming_wv.Sender > my_wv_p.Sender {
+			my_wv_p.HallRequests = incoming_wv.HallRequests
+			my_wv_p.Version = incoming_wv.Version
+			my_wv_p.ElevList = incoming_wv.ElevList
+			e_p.CabRequests = incoming_wv.ElevList[e_p.ElevNum-1].CabRequests //La til dette
+			my_wv_p.Version_up()
 		}
 	}
 } // må ha noe med når version nullstilles

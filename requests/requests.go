@@ -1,26 +1,37 @@
 package requests
 
 import (
-	"fmt"
+	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
-	"project/timer"
 	"time"
 )
 
-func RequestsAbove(e elevator.Elevator) bool {
+func RequestsAbove(e elevator.Elevator, wv elevator.Worldview) bool {
 	for f := e.Last_Floor + 1; f < elevator.N_FLOORS; f++ {
+<<<<<<< HEAD
 		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
 			if e.Requests[f][btn] == uint8(e.ElevNum) {
 				return true
 			}
+=======
+		if e.CabRequests[f] {
+			return true
+		}
+		if wv.HallRequests[f][elevio.BT_HallUp] == uint8(e.ElevNum) {
+			return true
+		}
+		if wv.HallRequests[f][elevio.BT_HallDown] == uint8(e.ElevNum) {
+			return true
+>>>>>>> main
 		}
 	}
 	return false
 }
 
-func RequestsBelow(e elevator.Elevator) bool {
+func RequestsBelow(e elevator.Elevator, wv elevator.Worldview) bool {
 	for f := 0; f < e.Last_Floor; f++ {
+<<<<<<< HEAD
 		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
 			if e.Requests[f][btn] == uint8(e.ElevNum) {
 				return true
@@ -33,78 +44,112 @@ func RequestsBelow(e elevator.Elevator) bool {
 func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
 	for btn := 0; btn < elevator.N_BUTTONS; btn++ {
 		if e.Requests[e.Last_Floor][btn] == uint8(e.ElevNum) {
+=======
+		if e.CabRequests[f] {
+			return true
+		}
+		if wv.HallRequests[f][elevio.BT_HallUp] == uint8(e.ElevNum) {
+			return true
+		}
+		if wv.HallRequests[f][elevio.BT_HallDown] == uint8(e.ElevNum) {
+>>>>>>> main
 			return true
 		}
 	}
 	return false
 }
 
+<<<<<<< HEAD
 func RequestsHereCabOrUp(e elevator.Elevator) bool { // stygt, kan ores på en linje
 	if e.Requests[e.Last_Floor][elevio.BT_HallUp] == uint8(e.ElevNum) {
 		return true
 	}
 	if e.Requests[e.Last_Floor][elevio.BT_Cab] == uint8(e.ElevNum) {
+=======
+func RequestsHere(e elevator.Elevator, wv elevator.Worldview) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
+	if e.CabRequests[e.Last_Floor] {
+		return true
+	}
+	if wv.HallRequests[e.Last_Floor][elevio.BT_HallUp] == uint8(e.ElevNum) {
+		return true
+	}
+	if wv.HallRequests[e.Last_Floor][elevio.BT_HallDown] == uint8(e.ElevNum) {
+>>>>>>> main
 		return true
 	}
 	return false
 }
 
+<<<<<<< HEAD
 func RequestsHereCabOrDown(e elevator.Elevator) bool {
 	if e.Requests[e.Last_Floor][elevio.BT_HallDown] == uint8(e.ElevNum) {
 		return true
 	}
 	if e.Requests[e.Last_Floor][elevio.BT_Cab] == uint8(e.ElevNum) {
+=======
+func RequestsHereCabOrUp(e elevator.Elevator, wv elevator.Worldview) bool { // stygt, kan ores på en linje
+	if wv.HallRequests[e.Last_Floor][elevio.BT_HallUp] == uint8(e.ElevNum) {
+		return true
+	}
+	if e.CabRequests[e.Last_Floor] {
+>>>>>>> main
 		return true
 	}
 	return false
 }
 
-func DeleteOrdersHere(e *elevator.Elevator) {
-	for orderType := 0; orderType < 3; orderType++ {
-		e.Requests[e.Last_Floor][orderType] = 0
-		elevio.SetButtonLamp(elevio.ButtonType(orderType), e.Last_Floor, false)
+func RequestsHereCabOrDown(e elevator.Elevator, wv elevator.Worldview) bool {
+	if wv.HallRequests[e.Last_Floor][elevio.BT_HallDown] == uint8(e.ElevNum) {
+		return true
 	}
-	e.Version++
+	if e.CabRequests[e.Last_Floor] {
+		return true
+	}
+	return false
 }
 
-func DeleteAllOrdes(e *elevator.Elevator) {
-	for floor := 0; floor < 4; floor++ {
-		for orderType := 0; orderType < 3; orderType++ {
-			e.Requests[floor][orderType] = 0
-			elevio.SetButtonLamp(elevio.ButtonType(orderType), floor, false)
+func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
+	for orderType := 0; orderType < 2; orderType++ {
+		if wv_p.HallRequests[e_p.Last_Floor][orderType] == uint8(e_p.ElevNum) {
+			wv_p.HallRequests[e_p.Last_Floor][orderType] = 0
 		}
 	}
-	e.Version++
+	e_p.CabRequests[e_p.Last_Floor] = false
+	wv_p.Version_up()
 }
 
-func SetOrderHere(e *elevator.Elevator, buttn elevio.ButtonEvent) {
-	if buttn.Floor == e.Last_Floor {
+func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent) {
+	if (buttn.Floor == e_p.Last_Floor) && (elevio.GetFloor() != -1) {
 		return
 	}
-	e.Requests[buttn.Floor][buttn.Button] = 1
-	elevio.SetButtonLamp(buttn.Button, buttn.Floor, true) // må endres når flere heiser
-	e.Version++
-}
-
-func PrintRequests(e elevator.Elevator) {
-	for f := 0; f < elevator.N_FLOORS; f++ {
-		fmt.Printf("\n")
-		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-			fmt.Print(e.Requests[f][btn])
-		}
+	if buttn.Button == elevio.BT_Cab {
+		e_p.CabRequests[buttn.Floor] = true
+	} else if wv_p.HallRequests[buttn.Floor][buttn.Button] == 0 {
+		costFunc.CostFunction(wv_p, buttn)
 	}
+	wv_p.Version_up()
 }
 
-func ArrivedAtFloor(e *elevator.Elevator, timer_chan chan bool) {
+func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, reset_ch chan bool, wd_chan chan bool) {
+	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
+<<<<<<< HEAD
 	e.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e)
 	e.Version++
 	e.Behaviour = elevator.EB_DoorOpen
 	go timer.TimerStart(3, timer_chan)
+=======
+	e_p.Dirn = elevio.MD_Stop
+	DeleteOrdersHere(e_p, wv_p)
+	wv_p.Version_up()
+	e_p.Behaviour = elevator.EB_DoorOpen
+	wd_chan <- true
+	reset_ch <- true
+>>>>>>> main
 }
 
-func DisplayQueueCont(e *elevator.Elevator){
-	e.Display()
+func DisplayQueueCont(e_p *elevator.Elevator) {
+	e_p.Display()
 	time.Sleep(time.Second)
 }
