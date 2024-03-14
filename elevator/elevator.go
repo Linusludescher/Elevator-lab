@@ -163,8 +163,8 @@ func BroadcastElevator(bc_chan chan bool, n_ms int) {
 
 func UpdateLights(wv Worldview, elevnum int) {
 	for floor, f := range wv.HallRequests {
-		for buttonType, o := range f {
-			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, o != 0)
+		for buttonType, order := range f {
+			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, order != 0)
 		}
 	}
 	for i, elev := range wv.ElevList {

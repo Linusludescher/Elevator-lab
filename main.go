@@ -29,7 +29,7 @@ func main() {
 	fmt.Println(id)
 	numFloors := 4 //endre dette??? fjerne??
 
-	processPairConn := bcast.ProcessPairListner(id)
+	//processPairConn := bcast.ProcessPairListner(id)
 
 	// elevio.Init("localhost:"+localhostnr, numFloors)
 	elevio.Init("localhost:15657", numFloors) //15657
@@ -62,7 +62,7 @@ func main() {
 			stm.ClosingDoor(&my_elevator, my_wv, wd_chan)
 
 		case buttn := <-drv_buttons:
-			stm.ButtonPressed(&my_elevator, &my_wv, buttn)
+			stm.ButtonPressed(&my_elevator, &my_wv, buttn, resetTimer_chan, wd_chan)
 
 		case floor_sens := <-drv_floors:
 			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, resetTimer_chan, wd_chan)
@@ -79,7 +79,7 @@ func main() {
 		case <-bc_timer_chan:
 			stm.DefaultState(&my_elevator, &my_wv, resetTimer_chan, wd_chan)
 			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
-			processPairConn.Write([]byte("42"))
+			// processPairConn.Write([]byte("42"))
 			//default:
 			my_wv.Display()
 		}

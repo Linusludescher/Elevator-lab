@@ -108,8 +108,21 @@ Torsdag:
 ---------------------------------------------------------------------------------- få en heis til å funke ..!!! fette bra
 - Ikke bruke hardcodet numFloors i main 
 - tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> lage en softstop før hardstoppen kicker inn
-- process pairs- fette nice
+---------------------------------------------------------------------------------- process pairs- fette nice
 - setter obstr uten at door open, da skjer dårlige ting
+- wd funker ikke med 1 heis
+
+Fredag: Kodekvalitet, Kodekvalitet, Kodekvalitet
+- Teste med 3 fysiske heiser
+- Gå gjennom checkliste på blackboard, nederst i sources?
+- Gjøre det som står under kode kvalitet her nede
+- lage en ReadMe fil
+
+
+
+
+
+
 
 
 Pynt og secondary

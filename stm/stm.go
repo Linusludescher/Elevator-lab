@@ -30,8 +30,8 @@ func ClosingDoor(e_p *elevator.Elevator, wv elevator.Worldview, wd_chan chan boo
 	}
 }
 
-func ButtonPressed(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent) {
-	requests.SetOrder(e_p, wv_p, buttn)
+func ButtonPressed(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.ButtonEvent, resetTimer_chan chan bool, wd_chan chan bool) {
+	requests.SetOrder(e_p, wv_p, buttn, resetTimer_chan, wd_chan)
 }
 
 func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens int, resetTimer_chan chan bool, wd_chan chan bool) {
