@@ -25,9 +25,6 @@ const (
 type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
-<<<<<<< HEAD
-	ElevatorNum int   `json:"ElevNum"`
-=======
 	//ElevatorNum int   `json:"ElevNum"`
 }
 
@@ -86,7 +83,6 @@ func (w Worldview) Display() {
 	for i := len(w.HallRequests); i > 0; i-- {
 		fmt.Printf("floor: %d \thall up: %d\t, halldown: %d\n", i-1, w.HallRequests[i-1][0], w.HallRequests[i-1][1])
 	}
->>>>>>> main
 }
 
 type Behaviour int
@@ -129,16 +125,6 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-<<<<<<< HEAD
-func Elevator_uninitialized() (elevator Elevator) {
-	elevatorConfig := readElevatorConfig()
-	matrix := make([][]uint8, elevatorConfig.N_FLOORS)
-	for i := range matrix {
-		matrix[i] = make([]uint8, elevatorConfig.N_elevators+2)
-	}
-
-	elevator = Elevator{EB_Idle, elevatorConfig.ElevatorNum, 0, elevio.MD_Stop, elevio.MD_Stop, 0, matrix}
-=======
 func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	elevatorConfig := readElevatorConfig()
 	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
@@ -156,7 +142,6 @@ func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	e = wv.ElevList[id-1]
 	e.Online = true
 
->>>>>>> main
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
 	}
@@ -177,15 +162,6 @@ func (e Elevator) Display() { //lage en for worldview også!
 
 func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan bool) {
 	elevio.SetMotorDirection(dir)
-<<<<<<< HEAD
-	elevator.Last_dir = dir
-	elevator.Dirn = dir
-    if elevator.Dirn != elevio.MD_Stop{
-        elevator.Behaviour = EB_Moving
-    } else {
-        elevator.Behaviour = EB_Idle
-    }
-=======
 	e_p.Last_dir = dir
 	e_p.Dirn = dir
 	if e_p.Dirn != elevio.MD_Stop {
@@ -194,7 +170,6 @@ func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan boo
 	} else {
 		e_p.Behaviour = EB_Idle
 	}
->>>>>>> main
 }
 
 func BroadcastElevator(bc_chan chan bool, n_ms int) {

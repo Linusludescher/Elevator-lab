@@ -9,12 +9,6 @@ import (
 
 func RequestsAbove(e elevator.Elevator, wv elevator.Worldview) bool {
 	for f := e.Last_Floor + 1; f < elevator.N_FLOORS; f++ {
-<<<<<<< HEAD
-		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-			if e.Requests[f][btn] == uint8(e.ElevNum) {
-				return true
-			}
-=======
 		if e.CabRequests[f] {
 			return true
 		}
@@ -23,7 +17,6 @@ func RequestsAbove(e elevator.Elevator, wv elevator.Worldview) bool {
 		}
 		if wv.HallRequests[f][elevio.BT_HallDown] == uint8(e.ElevNum) {
 			return true
->>>>>>> main
 		}
 	}
 	return false
@@ -31,20 +24,6 @@ func RequestsAbove(e elevator.Elevator, wv elevator.Worldview) bool {
 
 func RequestsBelow(e elevator.Elevator, wv elevator.Worldview) bool {
 	for f := 0; f < e.Last_Floor; f++ {
-<<<<<<< HEAD
-		for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-			if e.Requests[f][btn] == uint8(e.ElevNum) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
-	for btn := 0; btn < elevator.N_BUTTONS; btn++ {
-		if e.Requests[e.Last_Floor][btn] == uint8(e.ElevNum) {
-=======
 		if e.CabRequests[f] {
 			return true
 		}
@@ -52,20 +31,12 @@ func RequestsHere(e elevator.Elevator) bool { //kan bytte ut alle e.Floor med el
 			return true
 		}
 		if wv.HallRequests[f][elevio.BT_HallDown] == uint8(e.ElevNum) {
->>>>>>> main
 			return true
 		}
 	}
 	return false
 }
 
-<<<<<<< HEAD
-func RequestsHereCabOrUp(e elevator.Elevator) bool { // stygt, kan ores på en linje
-	if e.Requests[e.Last_Floor][elevio.BT_HallUp] == uint8(e.ElevNum) {
-		return true
-	}
-	if e.Requests[e.Last_Floor][elevio.BT_Cab] == uint8(e.ElevNum) {
-=======
 func RequestsHere(e elevator.Elevator, wv elevator.Worldview) bool { //kan bytte ut alle e.Floor med elevio.getFloor!!!!
 	if e.CabRequests[e.Last_Floor] {
 		return true
@@ -74,25 +45,16 @@ func RequestsHere(e elevator.Elevator, wv elevator.Worldview) bool { //kan bytte
 		return true
 	}
 	if wv.HallRequests[e.Last_Floor][elevio.BT_HallDown] == uint8(e.ElevNum) {
->>>>>>> main
 		return true
 	}
 	return false
 }
 
-<<<<<<< HEAD
-func RequestsHereCabOrDown(e elevator.Elevator) bool {
-	if e.Requests[e.Last_Floor][elevio.BT_HallDown] == uint8(e.ElevNum) {
-		return true
-	}
-	if e.Requests[e.Last_Floor][elevio.BT_Cab] == uint8(e.ElevNum) {
-=======
 func RequestsHereCabOrUp(e elevator.Elevator, wv elevator.Worldview) bool { // stygt, kan ores på en linje
 	if wv.HallRequests[e.Last_Floor][elevio.BT_HallUp] == uint8(e.ElevNum) {
 		return true
 	}
 	if e.CabRequests[e.Last_Floor] {
->>>>>>> main
 		return true
 	}
 	return false
@@ -133,20 +95,12 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, reset_ch chan bool, wd_chan chan bool) {
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
-<<<<<<< HEAD
-	e.Dirn = elevio.MD_Stop
-	DeleteOrdersHere(e)
-	e.Version++
-	e.Behaviour = elevator.EB_DoorOpen
-	go timer.TimerStart(3, timer_chan)
-=======
 	e_p.Dirn = elevio.MD_Stop
 	DeleteOrdersHere(e_p, wv_p)
 	wv_p.Version_up()
 	e_p.Behaviour = elevator.EB_DoorOpen
 	wd_chan <- true
 	reset_ch <- true
->>>>>>> main
 }
 
 func DisplayQueueCont(e_p *elevator.Elevator) {
