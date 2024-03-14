@@ -4,7 +4,6 @@ import (
 	"project/costFunc"
 	"project/elevator"
 	"project/elevio"
-	"project/timer"
 	"time"
 )
 
@@ -76,7 +75,6 @@ func DeleteOrdersHere(e_p *elevator.Elevator, wv_p *elevator.Worldview) {
 		if wv_p.HallRequests[e_p.Last_Floor][orderType] == uint8(e_p.ElevNum) {
 			wv_p.HallRequests[e_p.Last_Floor][orderType] = 0
 		}
-		elevio.SetButtonLamp(elevio.ButtonType(orderType), e_p.Last_Floor, false) //det med lys må fikses
 	}
 	e_p.CabRequests[e_p.Last_Floor] = false
 	wv_p.Version_up()
@@ -88,14 +86,13 @@ func SetOrder(e_p *elevator.Elevator, wv_p *elevator.Worldview, buttn elevio.But
 	}
 	if buttn.Button == elevio.BT_Cab {
 		e_p.CabRequests[buttn.Floor] = true
-	} else {
+	} else if wv_p.HallRequests[buttn.Floor][buttn.Button] == 0 {
 		costFunc.CostFunction(wv_p, buttn)
 	}
-	elevio.SetButtonLamp(buttn.Button, buttn.Floor, true) // må endres når flere heiser
 	wv_p.Version_up()
 }
 
-func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan chan bool, obstr_chan chan bool, wd_chan chan bool) {
+func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, reset_ch chan bool, wd_chan chan bool) {
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	e_p.Dirn = elevio.MD_Stop
@@ -103,7 +100,7 @@ func ArrivedAtFloor(e_p *elevator.Elevator, wv_p *elevator.Worldview, timer_chan
 	wv_p.Version_up()
 	e_p.Behaviour = elevator.EB_DoorOpen
 	wd_chan <- true
-	go timer.TimerStart(e_p, wv_p, 3, timer_chan, obstr_chan)
+	reset_ch <- true
 }
 
 func DisplayQueueCont(e_p *elevator.Elevator) {
