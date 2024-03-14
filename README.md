@@ -9,6 +9,7 @@ For processPairs:
 // processPairConn := bcast.ProcessPairListner(id)
 - i default case:
 // processPairConn.Write([]byte("42"))
+- fjerne panic() i ved watchdog time out! og flere steder sikkert
 
   
 
