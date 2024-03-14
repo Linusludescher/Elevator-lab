@@ -55,9 +55,9 @@ func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens in
 			requests.ArrivedAtFloor(e_p, wv_p, resetTimer_chan, wd_chan)
 		}
 	}
-	// if (floor_sens == -1 && e_p.Last_dir == elevio.MD_Down && e_p.Last_Floor == 0) || (floor_sens == -1 && e_p.Last_dir == elevio.MD_Up && e_p.Last_Floor == 3) {
-	// 	e_p.UpdateDirection(elevio.MD_Stop, wd_chan)
-	// }
+	if (floor_sens == -1 && e_p.Last_dir == elevio.MD_Down && e_p.Last_Floor == 0) || (floor_sens == -1 && e_p.Last_dir == elevio.MD_Up && e_p.Last_Floor == 3) {
+		e_p.UpdateDirection(elevio.MD_Stop, wd_chan)
+	}
 }
 
 func Obstruction(e_p *elevator.Elevator, wv_p *elevator.Worldview, obstr bool) {

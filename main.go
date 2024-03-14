@@ -82,7 +82,7 @@ func main() {
 			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
 			// processPairConn.Write([]byte("42"))
 			//default:
-			//my_wv.Display()
+			my_wv.Display()
 		}
 	}
 }

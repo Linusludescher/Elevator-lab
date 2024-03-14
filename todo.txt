@@ -111,6 +111,7 @@ Torsdag:
 ---------------------------------------------------------------------------------- process pairs- fette nice
 - setter obstr uten at door open, da skjer dårlige ting
 - wd funker ikke med 1 heis
+- ny bug: må cleare andres andres hall-ordre når vi er i etasje
 
 Fredag: Kodekvalitet, Kodekvalitet, Kodekvalitet
 - Teste med 3 fysiske heiser
