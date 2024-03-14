@@ -74,7 +74,7 @@ func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, resetTimer_c
 	go aloneUpdateLights(*wv_p, *e_p)
 	for floor := range wv_p.HallRequests {
 		for _, l := range wv_p.HallRequests[floor] {
-			if l == uint8(e_p.ElevNum) && floor == e_p.Last_Floor && elevio.GetFloor() != -1 {
+			if l == uint8(e_p.ElevNum) && floor == e_p.Last_Floor && uint8(elevio.GetFloor()) == l {
 				requests.ArrivedAtFloor(e_p, wv_p, resetTimer_chan, wd_chan)
 			}
 		}
