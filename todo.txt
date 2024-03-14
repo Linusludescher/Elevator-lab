@@ -102,11 +102,11 @@ Torsdag:
 ---------------------------------------------------------------------------------- fiske en lys når en heis alene
 - Hvordan merge to systemer som har vært adskilt
 ---------------------------------------------------------------------------------- Få 3 heiser til å funger
-- trykker hall order i samme etasje som egen heis er i, åpner ikke døren
+---------------------------------------------------------------------------------- trykker hall order i samme etasje som egen heis er i, åpner ikke døren
 ---------------------------------------------------------------------------------- noen ganger går den i idle i stede for door open
 ---------------------------------------------------------------------------------- trykker hall i last floor -> åpner dør midt mellom etasjer
 ---------------------------------------------------------------------------------- få en heis til å funke ..!!! fette bra
-- Ikke bruke hardcodet numFloors i main 
+---------------------------------------------------------------------------------- Ikke bruke hardcodet numFloors i main 
 - tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> lage en softstop før hardstoppen kicker inn
 ---------------------------------------------------------------------------------- process pairs- fette nice
 - setter obstr uten at door open, da skjer dårlige ting

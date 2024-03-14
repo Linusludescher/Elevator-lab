@@ -85,14 +85,14 @@ func (w Worldview) Display() {
 	}
 }
 
-func readElevatorConfig() (elevatorData ConfigData) {
+func ReadElevatorConfig() (elevatorData ConfigData) {
 	jsonData, err := os.ReadFile("config.json")
 
 	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("elevator.go: Error reading config file: %s\n", err)
 		// tyr again
-		readElevatorConfig()
+		ReadElevatorConfig()
 	}
 
 	// Parse jsonData into ElevatorData struct
@@ -102,13 +102,13 @@ func readElevatorConfig() (elevatorData ConfigData) {
 	if err != nil {
 		fmt.Printf("elevator.go: Error unmarshal json data to ElevatorData struct: %s\n", err)
 		// tyr again
-		readElevatorConfig()
+		ReadElevatorConfig()
 	}
 	return
 }
 
 func ElevatorInit(id int) (e Elevator, wv Worldview) {
-	elevatorConfig := readElevatorConfig()
+	elevatorConfig := ReadElevatorConfig()
 	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hall {
 		hall[i] = [2]uint8{0, 0}

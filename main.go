@@ -27,7 +27,9 @@ func main() {
 	id := *idFlag
 	// localhostnr := strconv.Itoa(19657 + id)
 	fmt.Println(id)
-	numFloors := 4 //endre dette??? fjerne??
+
+	elevatorConf := elevator.ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
+	numFloors := int(elevatorConf.N_FLOORS)
 
 	//processPairConn := bcast.ProcessPairListner(id)
 
@@ -44,7 +46,6 @@ func main() {
 	resetTimer_chan := make(chan bool)
 
 	my_elevator, my_wv := elevator.ElevatorInit(id)
-
 	network_channels := network.Init_network(id, &my_elevator, &my_wv)
 
 	go network.PeersOnline(&my_elevator, &my_wv, network_channels)
@@ -81,7 +82,7 @@ func main() {
 			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx)
 			// processPairConn.Write([]byte("42"))
 			//default:
-			my_wv.Display()
+			//my_wv.Display()
 		}
 	}
 }
