@@ -22,10 +22,11 @@ const (
 	EB_DoorOpen Behaviour = "doorOpen"
 )
 
-type ConfigData struct {
+type ConfigData struct { //Reader config 2 steder: En gang her, en gang i network!
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
 	//ElevatorNum int   `json:"ElevNum"`
+	UDPBase		int    `json:"BasePort"`
 }
 
 type Elevator struct {

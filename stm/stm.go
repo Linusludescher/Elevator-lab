@@ -55,6 +55,7 @@ func FloorSensed(e_p *elevator.Elevator, wv_p *elevator.Worldview, floor_sens in
 			requests.ArrivedAtFloor(e_p, wv_p, resetTimer_chan, wd_chan)
 		}
 	}
+	//softstop
 	if (floor_sens == -1 && e_p.Last_dir == elevio.MD_Down && e_p.Last_Floor == 0) || (floor_sens == -1 && e_p.Last_dir == elevio.MD_Up && e_p.Last_Floor == 3) {
 		e_p.UpdateDirection(elevio.MD_Stop, wd_chan)
 	}
@@ -73,8 +74,8 @@ func StopButtonPressed(e elevator.Elevator) {
 func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, resetTimer_chan chan bool, wd_chan chan bool) {
 	go aloneUpdateLights(*wv_p, *e_p)
 	for floor := range wv_p.HallRequests {
-		for _, l := range wv_p.HallRequests[floor] {
-			if l == uint8(e_p.ElevNum) && floor == e_p.Last_Floor && uint8(elevio.GetFloor()) == l {
+		for _, order := range wv_p.HallRequests[floor] {
+			if order == uint8(e_p.ElevNum) && floor == e_p.Last_Floor && elevio.GetFloor() == floor {
 				requests.ArrivedAtFloor(e_p, wv_p, resetTimer_chan, wd_chan)
 			}
 		}
@@ -89,7 +90,6 @@ func DefaultState(e_p *elevator.Elevator, wv_p *elevator.Worldview, resetTimer_c
 }
 
 func aloneUpdateLights(wv elevator.Worldview, e elevator.Elevator) {
-	// Lys med kun en heis
 	only_elev := true
 	for i := range wv.ElevList {
 		if wv.ElevList[i].Online && wv.ElevList[i].ElevNum != e.ElevNum {
@@ -99,5 +99,4 @@ func aloneUpdateLights(wv elevator.Worldview, e elevator.Elevator) {
 	if only_elev {
 		elevator.UpdateLights(wv, e.ElevNum)
 	}
-	// Lys med en heis ferdig
 }

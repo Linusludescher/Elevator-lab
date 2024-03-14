@@ -28,7 +28,7 @@ type NetworkChan struct {
 	PacketRx     chan elevator.Worldview
 }
 
-func getNetworkConfig(id int) (cp ConfigUDPPorts) {
+func getNetworkConfig(id int) (cp ConfigUDPPorts) { //mer beskrivende navn til cp!
 	jsonData, err := os.ReadFile("config.json")
 	cp.Id = id
 	// can't read the config file, try again

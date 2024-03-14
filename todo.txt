@@ -107,11 +107,11 @@ Torsdag:
 ---------------------------------------------------------------------------------- trykker hall i last floor -> åpner dør midt mellom etasjer
 ---------------------------------------------------------------------------------- få en heis til å funke ..!!! fette bra
 ---------------------------------------------------------------------------------- Ikke bruke hardcodet numFloors i main 
-- tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> lage en softstop før hardstoppen kicker inn
+- tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> ---------lage en softstop før hardstoppen kicker inn
 ---------------------------------------------------------------------------------- process pairs- fette nice
 - setter obstr uten at door open, da skjer dårlige ting
-- wd funker ikke med 1 heis
-- ny bug: må cleare andres andres hall-ordre når vi er i etasje
+- wd funker ikke med 1 heis (men må det?)
+---------------------------------------------------------------------------------- ny bug: må cleare andres andres hall-ordre når vi er i etasje
 
 Fredag: Kodekvalitet, Kodekvalitet, Kodekvalitet
 - Teste med 3 fysiske heiser
