@@ -7,16 +7,16 @@ import (
 	"time"
 )
 
-func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.Duration, timer chan bool, obstruction chan bool) {
+func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.Duration, timer_exp_chan chan<- bool, obstruction chan bool, reset_ch <-chan bool) {
 	obstructed := e_p.Obstruction
 	sec_timer := time.NewTimer(duration * time.Second)
 	defer sec_timer.Stop()
+	sec_timer.Stop()
 	for {
 		select {
 		case <-sec_timer.C:
 			if !obstructed {
-				timer <- true
-				return
+				timer_exp_chan <- true
 			} else {
 				// Restart the timer if obstructed is true
 				sec_timer.Reset(duration * time.Second)
@@ -32,6 +32,8 @@ func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.
 				}
 				sec_timer.Reset(duration * time.Second)
 			}
+		case <-reset_ch:
+			sec_timer.Reset(duration * time.Second)
 		}
 	}
 }
@@ -40,11 +42,9 @@ func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.
 	wd_over := time.NewTimer(0)
 	defer wd_over.Stop()
 	wd_over.Stop()
-	var test int = 0
 	for {
 		select {
 		case msg := <-wd_chan:
-			test++
 			if msg {
 				wd_over.Reset(d * time.Second)
 			} else {
