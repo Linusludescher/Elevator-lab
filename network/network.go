@@ -111,7 +111,7 @@ func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 					}
 				}
 			}
-			worldView_p.Version_up()
+			worldView_p.VersionUp()
 		}
 		if p.New != "" {
 			i, err := strconv.Atoi(p.New)
@@ -120,7 +120,7 @@ func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 			}
 			worldView_p.ElevList[i-1].Online = true
 
-			worldView_p.Version_up()
+			worldView_p.VersionUp()
 		}
 	}
 }

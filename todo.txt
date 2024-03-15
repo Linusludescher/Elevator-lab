@@ -144,7 +144,7 @@ Kode kvalitet
 
 Navn parametre
 ------------------------------------------------------------------------------- Funksjoner: camelCase
-- konstanter: CAPS
+------------------------------------------------------------------------------- konstanter: CAPS
 - channels: snake, slutte på channels; broadcast_chan
 - pekere: snake_p; elev_p, worldview_p
 - forkorte import navn

@@ -25,7 +25,7 @@ func TimerStart(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, dura
 		case obstr := <-obstruction:
 			obstructed = obstr
 			elev_p.Obstruction = obstr
-			worldView_p.Version_up()
+			worldView_p.VersionUp()
 			if obstructed {
 				// If obstructed becomes true, restart the timer
 				if !sec_timer.Stop() {
@@ -63,7 +63,7 @@ func OperativeWatchdog(elev_p *elevator.Elevator, worldView_p *elevator.Worldvie
 					}
 				}
 			}
-			worldView_p.Version_up()
+			worldView_p.VersionUp()
 			os.Exit(1)
 		}
 	}

@@ -38,7 +38,7 @@ func versionIfEqualQueue(elev elevator.Elevator, my_worldView elevator.Worldview
 }
 
 func VersionUpdateQueue(elev_p *elevator.Elevator, my_worldView_p *elevator.Worldview, incoming_worldView elevator.Worldview) {
-	if incoming_worldView.Version > my_worldView_p.Version || ((my_worldView_p.Version > elevator.V_l-elevator.V_s_c) && incoming_worldView.Version < elevator.V_s_c) {
+	if incoming_worldView.Version > my_worldView_p.Version || ((my_worldView_p.Version > elevator.VERSIONLIMIT-elevator.VERSIONBUFFER) && incoming_worldView.Version < elevator.VERSIONBUFFER) {
 		my_worldView_p.HallRequests = incoming_worldView.HallRequests
 		my_worldView_p.Version = incoming_worldView.Version
 		my_worldView_p.ElevList = incoming_worldView.ElevList
@@ -54,7 +54,7 @@ func VersionUpdateQueue(elev_p *elevator.Elevator, my_worldView_p *elevator.Worl
 			my_worldView_p.Version = incoming_worldView.Version
 			my_worldView_p.ElevList = incoming_worldView.ElevList
 			elev_p.CabRequests = incoming_worldView.ElevList[elev_p.ElevNum-1].CabRequests //La til dette
-			my_worldView_p.Version_up()
+			my_worldView_p.VersionUp()
 		}
 	}
 } // må ha noe med når version nullstilles
