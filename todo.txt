@@ -144,7 +144,7 @@ Kode kvalitet
 - moduler, noen må deles opp, enkelt godt navn
 - kommunikasjon mellom moduler, få moduler snakker med elevio for eks
 - Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor 
-- mer forklarende navn til parametre, kortere imports
+- mer forklarende navn til parametre
 ------------------------------------------------------------------------------- spesifisere retning på channels som parametre
 ------------------------------------------------------------------------------- panic som errorhandling
 - rydde i kommentarer og prints. Legge til noen forklarende kommentarer der det trengs
