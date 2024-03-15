@@ -143,7 +143,7 @@ func (elev Elevator) Display() { //lage en for worldview også!
 	}
 }
 
-func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan bool) {
+func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan<- bool) {
 	elevio.SetMotorDirection(dir)
 	elev_p.Last_dir = dir
 	elev_p.Dirn = dir
@@ -155,7 +155,7 @@ func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan 
 	}
 }
 
-func BroadcastElevator(bc_chan chan bool, n_ms int) {
+func BroadcastElevator(bc_chan chan<- bool, n_ms int) {
 	for {
 		bc_chan <- true
 		time.Sleep(time.Duration(n_ms) * time.Millisecond)

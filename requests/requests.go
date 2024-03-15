@@ -93,7 +93,7 @@ func SetOrder(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn 
 	worldView_p.Version_up()
 }
 
-func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_ch chan bool, wd_chan chan bool) {
+func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_ch chan<- bool, wd_chan chan<- bool) {
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_Stop)
 	elev_p.Dirn = elevio.MD_Stop

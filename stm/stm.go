@@ -34,7 +34,7 @@ func ButtonPressed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, b
 	requests.SetOrder(elev_p, worldView_p, buttn, resetTimer_chan, wd_chan)
 }
 
-func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, floor_sens int, resetTimer_chan chan bool, wd_chan chan bool) {
+func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, floor_sens int, resetTimer_chan chan bool, wd_chan chan<- bool) {
 	wd_chan <- false
 
 	if floor_sens != -1 {
