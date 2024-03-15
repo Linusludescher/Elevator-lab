@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func TimerStart(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, duration time.Duration, timer_exp_chan chan<- bool, obstruction <-chan bool, reset_ch <-chan bool) {
+func TimerStart(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, duration time.Duration, timer_exp_chan chan<- bool, obstruction_chan <-chan bool, reset_timer_chan <-chan bool) {
 	obstructed := elev_p.Obstruction
 	sec_timer := time.NewTimer(duration * time.Second)
 	defer sec_timer.Stop()
@@ -22,7 +22,7 @@ func TimerStart(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, dura
 				// Restart the timer if obstructed is true
 				sec_timer.Reset(duration * time.Second)
 			}
-		case obstr := <-obstruction:
+		case obstr := <-obstruction_chan:
 			obstructed = obstr
 			elev_p.Obstruction = obstr
 			worldView_p.VersionUp()
@@ -33,7 +33,7 @@ func TimerStart(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, dura
 				}
 				sec_timer.Reset(duration * time.Second)
 			}
-		case <-reset_ch:
+		case <-reset_timer_chan:
 			sec_timer.Reset(duration * time.Second)
 		}
 	}

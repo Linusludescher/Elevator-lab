@@ -80,9 +80,9 @@ func DeleteOrdersHere(elev_p *elevator.Elevator, worldView_p *elevator.Worldview
 	worldView_p.VersionUp()
 }
 
-func SetOrder(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, resetTimer_chan chan bool, wd_chan chan bool) {
+func SetOrder(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, reset_timer_chan chan bool, wd_chan chan bool) {
 	if (buttn.Floor == elev_p.Last_Floor) && (elevio.GetFloor() != -1) {
-		ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+		ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 		return
 	}
 	if buttn.Button == elevio.BT_CAB {
@@ -93,7 +93,7 @@ func SetOrder(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn 
 	worldView_p.VersionUp()
 }
 
-func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_ch chan<- bool, wd_chan chan<- bool) {
+func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_timer_chan chan<- bool, wd_chan chan<- bool) {
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_STOP)
 	elev_p.Dirn = elevio.MD_STOP
@@ -101,7 +101,7 @@ func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, 
 	worldView_p.VersionUp()
 	elev_p.Behaviour = elevator.EB_DOOR_OPEN
 	wd_chan <- true
-	reset_ch <- true
+	reset_timer_chan <- true
 }
 
 func DisplayQueueCont(elev_p *elevator.Elevator) {

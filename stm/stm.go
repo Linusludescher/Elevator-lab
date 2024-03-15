@@ -30,11 +30,11 @@ func ClosingDoor(elev_p *elevator.Elevator, worldView elevator.Worldview, wd_cha
 	}
 }
 
-func ButtonPressed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, resetTimer_chan chan bool, wd_chan chan bool) {
-	requests.SetOrder(elev_p, worldView_p, buttn, resetTimer_chan, wd_chan)
+func ButtonPressed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, reset_timer_chan chan bool, wd_chan chan bool) {
+	requests.SetOrder(elev_p, worldView_p, buttn, reset_timer_chan, wd_chan)
 }
 
-func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, floor_sens int, resetTimer_chan chan bool, wd_chan chan<- bool) {
+func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, floor_sens int, reset_timer_chan chan bool, wd_chan chan<- bool) {
 	wd_chan <- false
 
 	if floor_sens != -1 {
@@ -43,16 +43,16 @@ func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, flo
 	}
 	if elev_p.Dirn == elevio.MD_UP && floor_sens != -1 {
 		if requests.RequestsHereCabOrUp(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 		} else if (!requests.RequestsAbove(*elev_p, *worldView_p)) && requests.RequestsHere(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 		}
 	}
 	if elev_p.Dirn == elevio.MD_DOWN && floor_sens != -1 {
 		if requests.RequestsHereCabOrDown(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 		} else if (!requests.RequestsBelow(*elev_p, *worldView_p)) && requests.RequestsHere(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 		}
 	}
 	//softstop
@@ -71,12 +71,12 @@ func Obstruction(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, obs
 	}
 }
 
-func DefaultState(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, resetTimer_chan chan bool, wd_chan chan bool) {
+func DefaultState(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_timer_chan chan bool, wd_chan chan bool) {
 	go aloneUpdateLights(*worldView_p, *elev_p)
 	for floor := range worldView_p.HallRequests {
 		for _, order := range worldView_p.HallRequests[floor] {
 			if order == uint8(elev_p.ElevNum) && floor == elev_p.Last_Floor && elevio.GetFloor() == floor {
-				requests.ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+				requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 			}
 		}
 	}
