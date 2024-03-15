@@ -173,7 +173,8 @@ func UpdateLights(worldView Worldview, elevnum int) {
 			continue
 		}
 		for floor, f := range elev.CabRequests {
-			elevio.SetButtonLamp(elevio.BT_CAB, floor, f)
+			elevio.SetButtonLamp(elevio.BT_CAB, floor, f) //TODO sende noe sånt <- elevio.ButtonLampOrder{1,2,true}
+
 		}
 	}
 }
