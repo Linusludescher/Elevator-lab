@@ -45,7 +45,7 @@ func main() {
 	resetTimer_chan := make(chan bool)
 
 	my_elevator, my_wv := elevator.ElevatorInit(id)
-	network_channels := network.Init_network(id)
+	network_channels := network.InitNetwork(id)
 
 	go network.PeersOnline(&my_wv, network_channels)
 	go elevio.PollButtons(drv_buttons)
@@ -70,7 +70,7 @@ func main() {
 			stm.Obstruction(&my_elevator, &my_wv, obstr)
 
 		case udp_packet := <-network_channels.PacketRx: //legge til
-			versioncontrol.Version_update_queue(&my_elevator, &my_wv, udp_packet)
+			versioncontrol.VersionUpdateQueue(&my_elevator, &my_wv, udp_packet)
 
 		case <-bc_timer_chan:
 			stm.DefaultState(&my_elevator, &my_wv, resetTimer_chan, wd_chan)

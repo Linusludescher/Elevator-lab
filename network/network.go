@@ -55,7 +55,7 @@ func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende n
 	return
 }
 
-func Init_network(id int) (networkChan NetworkChan) {
+func InitNetwork(id int) (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
 	ports := getNetworkConfig(id)
 

@@ -5,7 +5,7 @@ import (
 	"project/elevator"
 )
 
-func Version_if_equal_queue(elev elevator.Elevator, my_worldView elevator.Worldview, incoming_worldView elevator.Worldview) bool {
+func versionIfEqualQueue(elev elevator.Elevator, my_worldView elevator.Worldview, incoming_worldView elevator.Worldview) bool {
 	areEqual := true
 	for i := range my_worldView.HallRequests {
 		for j := range my_worldView.HallRequests[i] {
@@ -37,7 +37,7 @@ func Version_if_equal_queue(elev elevator.Elevator, my_worldView elevator.Worldv
 	return areEqual
 }
 
-func Version_update_queue(elev_p *elevator.Elevator, my_worldView_p *elevator.Worldview, incoming_worldView elevator.Worldview) {
+func VersionUpdateQueue(elev_p *elevator.Elevator, my_worldView_p *elevator.Worldview, incoming_worldView elevator.Worldview) {
 	if incoming_worldView.Version > my_worldView_p.Version || ((my_worldView_p.Version > elevator.V_l-elevator.V_s_c) && incoming_worldView.Version < elevator.V_s_c) {
 		my_worldView_p.HallRequests = incoming_worldView.HallRequests
 		my_worldView_p.Version = incoming_worldView.Version
@@ -47,7 +47,7 @@ func Version_update_queue(elev_p *elevator.Elevator, my_worldView_p *elevator.Wo
 		go elevator.UpdateLights(*my_worldView_p, elev_p.ElevNum)
 	} else if incoming_worldView.Version == my_worldView_p.Version {
 		go elevator.UpdateLights(*my_worldView_p, elev_p.ElevNum)
-	} else if (incoming_worldView.Version == my_worldView_p.Version) && !Version_if_equal_queue(*elev_p, *my_worldView_p, incoming_worldView) {
+	} else if (incoming_worldView.Version == my_worldView_p.Version) && !versionIfEqualQueue(*elev_p, *my_worldView_p, incoming_worldView) {
 		fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 		if incoming_worldView.Sender > my_worldView_p.Sender {
 			my_worldView_p.HallRequests = incoming_worldView.HallRequests
