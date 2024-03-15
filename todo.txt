@@ -137,7 +137,7 @@ Kode kvalitet
 - Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor 
 - mer forklarende navn til parametre, kortere imports
 - spesifisere retning på channels som parametre
-- panic som errorhandling
+------------------------------------------------------------------------------- panic som errorhandling
 - rydde i kommentarer og prints. Legge til noen forklarende kommentarer der det trengs
 - peersOnline har en switch som ikke trengs? kanskje onstruktureres?
 

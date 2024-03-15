@@ -87,46 +87,40 @@ func Init_network(id int) (networkChan NetworkChan) {
 func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 	fmt.Println("Started")
 	for {
-		select {
-		case p := <-network_chan.PeerUpdateCh:
-			fmt.Printf("Peer update:\n")
-			fmt.Printf("  Peers:    %q\n", p.Peers)
-			fmt.Printf("  New:      %q\n", p.New)
-			fmt.Printf("  Lost:     %q\n", p.Lost)
-			fmt.Printf("  UdpTx: 	%d\n", network_chan.PacketTx)
-			fmt.Printf("  UdpRx: 	%d\n", network_chan.PacketRx)
+		p := <-network_chan.PeerUpdateCh
+		fmt.Printf("Peer update:\n")
+		fmt.Printf("  Peers:    %q\n", p.Peers)
+		fmt.Printf("  New:      %q\n", p.New)
+		fmt.Printf("  Lost:     %q\n", p.Lost)
+		fmt.Printf("  UdpTx: 	%d\n", network_chan.PacketTx)
+		fmt.Printf("  UdpRx: 	%d\n", network_chan.PacketRx)
 
-			for _, k := range p.Lost {
-				k_int, err := strconv.Atoi(k)
-				if err != nil {
-					panic(err)
-				}
-				worldView_p.ElevList[k_int-1].Online = false
+		for _, k := range p.Lost {
+			k_int, err := strconv.Atoi(k)
+			if err != nil {
+				panic(err)
+			}
+			worldView_p.ElevList[k_int-1].Online = false
 
-				//Assign hall orders to other:
-				for floor, f := range worldView_p.HallRequests {
-					for buttonType, o := range f {
-						if o == uint8(k_int) {
-							buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
-							costFunc.CostFunction(worldView_p, buttn)
-						}
+			//Assign hall orders to others:
+			for floor, f := range worldView_p.HallRequests {
+				for buttonType, o := range f {
+					if o == uint8(k_int) {
+						buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
+						costFunc.CostFunction(worldView_p, buttn)
 					}
 				}
-				worldView_p.Version_up()
-
 			}
-			if p.New != "" {
-				i, err := strconv.Atoi(p.New)
-				if err != nil {
-					panic(err)
-				}
-				worldView_p.ElevList[i-1].Online = true
-
-				worldView_p.Version_up()
+			worldView_p.Version_up()
+		}
+		if p.New != "" {
+			i, err := strconv.Atoi(p.New)
+			if err != nil {
+				panic(err)
 			}
-		case <-network_chan.PacketRx:
-			//fmt.Println("Received:")
-			//a.Display() // feilmelding hvis a ikke er en struct Packet
+			worldView_p.ElevList[i-1].Online = true
+
+			worldView_p.Version_up()
 		}
 	}
 }
