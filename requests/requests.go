@@ -5,12 +5,7 @@ import (
 	"project/elevio"
 )
 
-func RequestsAbove(elev_chan <-chan elevator.Elevator, worldView_chan <-chan elevator.Worldview, read_elev_chan chan<- bool, read_worldView_chan chan<- bool) bool {
-	read_elev_chan <- true
-	read_worldView_chan <- true
-	elev := <-elev_chan
-	worldView := <-worldView_chan
-
+func RequestsAbove(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	for f := elev.Last_Floor + 1; f < elevator.N_FLOORS; f++ {
 		if elev.CabRequests[f] {
 			return true
@@ -25,11 +20,7 @@ func RequestsAbove(elev_chan <-chan elevator.Elevator, worldView_chan <-chan ele
 	return false
 }
 
-func RequestsBelow(elev_chan <-chan elevator.Elevator, worldView_chan <-chan elevator.Worldview, read_elev_chan chan<- bool, read_worldView_chan chan<- bool) bool {
-	read_elev_chan <- true
-	read_worldView_chan <- true
-	elev := <-elev_chan
-	worldView := <-worldView_chan
+func RequestsBelow(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	for f := 0; f < elev.Last_Floor; f++ {
 		if elev.CabRequests[f] {
 			return true
@@ -44,11 +35,7 @@ func RequestsBelow(elev_chan <-chan elevator.Elevator, worldView_chan <-chan ele
 	return false
 }
 
-func RequestsHere(elev_chan <-chan elevator.Elevator, worldView_chan <-chan elevator.Worldview, read_elev_chan chan<- bool, read_worldView_chan chan<- bool) bool {
-	read_elev_chan <- true
-	read_worldView_chan <- true
-	elev := <-elev_chan
-	worldView := <-worldView_chan
+func RequestsHere(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	if elev.CabRequests[elev.Last_Floor] {
 		return true
 	}
@@ -61,11 +48,7 @@ func RequestsHere(elev_chan <-chan elevator.Elevator, worldView_chan <-chan elev
 	return false
 }
 
-func RequestsHereCabOrUp(elev_chan <-chan elevator.Elevator, worldView_chan <-chan elevator.Worldview, read_elev_chan chan<- bool, read_worldView_chan chan<- bool) bool { // TODO: stygt, kan ores på en linje
-	read_elev_chan <- true
-	read_worldView_chan <- true
-	elev := <-elev_chan
-	worldView := <-worldView_chan
+func RequestsHereCabOrUp(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 		return true
 	}
@@ -75,11 +58,7 @@ func RequestsHereCabOrUp(elev_chan <-chan elevator.Elevator, worldView_chan <-ch
 	return false
 }
 
-func RequestsHereCabOrDown(elev_chan <-chan elevator.Elevator, worldView_chan <-chan elevator.Worldview, read_elev_chan chan<- bool, read_worldView_chan chan<- bool) bool {
-	read_elev_chan <- true
-	read_worldView_chan <- true
-	elev := <-elev_chan
-	worldView := <-worldView_chan
+func RequestsHereCabOrDown(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
 		return true
 	}

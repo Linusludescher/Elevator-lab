@@ -37,24 +37,25 @@ func versionIfEqualQueue(elev elevator.Elevator, my_worldView elevator.Worldview
 	return areEqual
 }
 
-func VersionUpdateQueue(elev_p *elevator.Elevator, my_worldView_p *elevator.Worldview, incoming_worldView elevator.Worldview) {
-	if incoming_worldView.Version > my_worldView_p.Version || ((my_worldView_p.Version > elevator.VERSIONLIMIT-elevator.VERSIONBUFFER) && incoming_worldView.Version < elevator.VERSIONBUFFER) {
-		my_worldView_p.HallRequests = incoming_worldView.HallRequests
-		my_worldView_p.Version = incoming_worldView.Version
-		my_worldView_p.ElevList = incoming_worldView.ElevList
-		elev_p.CabRequests = incoming_worldView.ElevList[elev_p.ElevNum-1].CabRequests //La til dette
-		// Slå av og på lys
-		go elevator.UpdateLights(*my_worldView_p, elev_p.ElevNum)
-	} else if incoming_worldView.Version == my_worldView_p.Version {
-		go elevator.UpdateLights(*my_worldView_p, elev_p.ElevNum)
-	} else if (incoming_worldView.Version == my_worldView_p.Version) && !versionIfEqualQueue(*elev_p, *my_worldView_p, incoming_worldView) {
+func CheckIncomingWorldView(readChannels elevator.ReadWorldviewChannels,
+	version_up_chan chan<- bool,
+	incomingWorldView elevator.Worldview,
+	update_to_incoming_worldview_chan chan<- elevator.Worldview,
+	update_lights_chan chan<- int) {
+
+	myWorldView := elevator.ReadWorldView(readChannels)
+	myElev := elevator.ReadElevator(readChannels)
+	if incomingWorldView.Version > myWorldView.Version || ((myWorldView.Version > elevator.VERSIONLIMIT-elevator.VERSIONBUFFER) && incomingWorldView.Version < elevator.VERSIONBUFFER) {
+		update_to_incoming_worldview_chan <- incomingWorldView
+
+		update_lights_chan <- myElev.ElevNum
+	} else if incomingWorldView.Version == myWorldView.Version {
+		update_lights_chan <- myElev.ElevNum
+	} else if (incomingWorldView.Version == myWorldView.Version) && !versionIfEqualQueue(myElev, myWorldView, incomingWorldView) {
 		fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-		if incoming_worldView.Sender > my_worldView_p.Sender {
-			my_worldView_p.HallRequests = incoming_worldView.HallRequests
-			my_worldView_p.Version = incoming_worldView.Version
-			my_worldView_p.ElevList = incoming_worldView.ElevList
-			elev_p.CabRequests = incoming_worldView.ElevList[elev_p.ElevNum-1].CabRequests //La til dette
-			my_worldView_p.VersionUp()
+		if incomingWorldView.Sender > myWorldView.Sender {
+			update_to_incoming_worldview_chan <- incomingWorldView
+			version_up_chan <- true
 		}
 	}
-} // må ha noe med når version nullstilles
+}

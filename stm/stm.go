@@ -1,82 +1,130 @@
 package stm
 
 import (
+	"net"
 	"project/elevator"
 	"project/elevio"
+	"project/network"
+	"project/network/bcast"
 	"project/requests"
+	"project/versioncontrol"
 	"time"
 )
 
-func ClosingDoor(elev_p *elevator.Elevator, worldView elevator.Worldview, wd_chan chan bool) { //kalle denne for door closed
-	wd_chan <- false
-	elevio.SetDoorOpenLamp(false)
-	if elev_p.Last_dir == elevio.MD_UP {
-		if requests.RequestsAbove(*elev_p, worldView) {
-			elev_p.UpdateDirection(elevio.MD_UP, wd_chan)
-		} else if requests.RequestsBelow(*elev_p, worldView) {
-			elev_p.UpdateDirection(elevio.MD_DOWN, wd_chan)
-		} else {
-			elev_p.UpdateDirection(elevio.MD_STOP, wd_chan)
+func MainFSM(
+	timer_exp_chan <-chan bool,
+	watchdog_chan chan bool,
+	processPairConn *net.UDPConn,
+	drv_buttons_chan chan elevio.ButtonEvent,
+	reset_timer_chan chan bool,
+	drv_floors_chan chan int,
+	network_channels network.NetworkChan,
+	bc_timer_chan chan bool,
+	update_lights_chan chan int,
+	readChannels elevator.ReadWorldviewChannels,
+	updateChannels elevator.UpdateWorldviewChannels,
+	ioChannels elevio.ElevioChannels) {
+	for {
+		select {
+		case <-timer_exp_chan:
+			ClosingDoor(readChannels, watchdog_chan, updateChannels.Update_direction_chan, ioChannels.Set_door_open_lamp_chan)
+
+		case buttn := <-drv_buttons_chan:
+			ButtonPressed(updateChannels.Set_order_chan, buttn)
+
+		case floor_sens := <-drv_floors_chan:
+			FloorSensed(updateChannels.Update_floor_chan, updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels, floor_sens, reset_timer_chan, watchdog_chan)
+
+		case incomingWorldview := <-network_channels.PacketRx_chan: //legge til
+			versioncontrol.CheckIncomingWorldView(readChannels, updateChannels.Version_up_chan, incomingWorldview, updateChannels.Update_to_incoming_chan, update_lights_chan)
+
+		case <-bc_timer_chan:
+			DefaultState(update_lights_chan, updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels)
+			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
+			processPairConn.Write([]byte("42"))
+			//my_worldView.Display()
+
+		case elevnum := <-update_lights_chan:
+			UpdateLights(ioChannels.Set_button_lamp_chan, readChannels, elevnum)
 		}
-	} else if elev_p.Last_dir == elevio.MD_DOWN {
-		if requests.RequestsBelow(*elev_p, worldView) {
-			elev_p.UpdateDirection(elevio.MD_DOWN, wd_chan)
-		} else if requests.RequestsAbove(*elev_p, worldView) {
-			elev_p.UpdateDirection(elevio.MD_UP, wd_chan)
+	}
+}
+
+func ClosingDoor(readChannels elevator.ReadWorldviewChannels,
+	watchdog_chan chan<- bool,
+	update_direction_chan chan<- elevio.MotorDirection,
+	set_door_open_lamp_chan chan<- bool) {
+
+	watchdog_chan <- false
+	set_door_open_lamp_chan <- false
+	worldView := elevator.ReadWorldView(readChannels)
+	elev := elevator.ReadElevator(readChannels)
+	if elev.Last_dir == elevio.MD_UP {
+		if requests.RequestsAbove(elev, worldView) {
+			update_direction_chan <- elevio.MD_UP
+		} else if requests.RequestsBelow(elev, worldView) {
+			update_direction_chan <- elevio.MD_DOWN
 		} else {
-			elev_p.UpdateDirection(elevio.MD_STOP, wd_chan)
+			update_direction_chan <- elevio.MD_STOP
+		}
+	} else if elev.Last_dir == elevio.MD_DOWN {
+		if requests.RequestsBelow(elev, worldView) {
+			update_direction_chan <- elevio.MD_DOWN
+		} else if requests.RequestsAbove(elev, worldView) {
+			update_direction_chan <- elevio.MD_UP
+		} else {
+			update_direction_chan <- elevio.MD_STOP
 		}
 	} else {
-		elev_p.UpdateDirection(elevio.MD_STOP, wd_chan)
+		update_direction_chan <- elevio.MD_STOP
 	}
 }
 
-func ButtonPressed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, reset_timer_chan chan bool, wd_chan chan bool) {
-	requests.SetOrder(elev_p, worldView_p, buttn, reset_timer_chan, wd_chan)
+func ButtonPressed(set_order_chan chan<- elevio.ButtonEvent, buttn elevio.ButtonEvent) {
+	set_order_chan <- buttn
 }
 
-func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, floor_sens int, reset_timer_chan chan bool, wd_chan chan<- bool) {
-	wd_chan <- false
+func FloorSensed(update_floor_chan chan<- int, update_direction_chan chan<- elevio.MotorDirection, arrived_at_floor_chan chan<- bool, readChannels elevator.ReadWorldviewChannels, floor_sens int, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
+	watchdog_chan <- false
+	worldView := elevator.ReadWorldView(readChannels)
+	elev := elevator.ReadElevator(readChannels)
+	update_floor_chan <- floor_sens
 
-	if floor_sens != -1 {
-		elev_p.Last_Floor = floor_sens
-		elevio.SetFloorIndicator(floor_sens)
-	}
-	if elev_p.Dirn == elevio.MD_UP && floor_sens != -1 {
-		if requests.RequestsHereCabOrUp(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
-		} else if (!requests.RequestsAbove(*elev_p, *worldView_p)) && requests.RequestsHere(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
+	if elev.Dirn == elevio.MD_UP && floor_sens != -1 {
+		if requests.RequestsHereCabOrUp(elev, worldView) {
+			arrived_at_floor_chan <- true
+		} else if (!requests.RequestsAbove(elev, worldView)) && requests.RequestsHere(elev, worldView) {
+			arrived_at_floor_chan <- true
 		}
 	}
-	if elev_p.Dirn == elevio.MD_DOWN && floor_sens != -1 {
-		if requests.RequestsHereCabOrDown(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
-		} else if (!requests.RequestsBelow(*elev_p, *worldView_p)) && requests.RequestsHere(*elev_p, *worldView_p) {
-			requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
+	if elev.Dirn == elevio.MD_DOWN && floor_sens != -1 {
+		if requests.RequestsHereCabOrDown(elev, worldView) {
+			arrived_at_floor_chan <- true
+		} else if (!requests.RequestsBelow(elev, worldView)) && requests.RequestsHere(elev, worldView) {
+			arrived_at_floor_chan <- true
 		}
 	}
-	//softstop
-	if (floor_sens == -1 && elev_p.Last_dir == elevio.MD_DOWN && elev_p.Last_Floor == 0) || (floor_sens == -1 && elev_p.Last_dir == elevio.MD_UP && elev_p.Last_Floor == 3) {
-		elev_p.UpdateDirection(elevio.MD_STOP, wd_chan)
+	//softstop: TODO kan ikke bruke hardkoda values!
+	if (floor_sens == -1 && elev.Last_dir == elevio.MD_DOWN && elev.Last_Floor == 0) ||
+		(floor_sens == -1 && elev.Last_dir == elevio.MD_UP && elev.Last_Floor == 3) {
+		update_direction_chan <- elevio.MD_STOP
 	}
-}
+} // TODO: her kan noe gjenbrukes, og kanskje deles opp?
 
-func Obstruction(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, obstruction_chan <-chan bool, reset_timer_chan chan<- bool) {
+func Obstruction(updateChannels elevator.UpdateWorldviewChannels, readChannels elevator.ReadWorldviewChannels, reset_timer_chan chan<- bool, obstruction_chan chan bool) {
 	last_obst := false
 	for {
 		select {
 		case obst := <-obstruction_chan:
 			last_obst = obst
-
 		default:
-			if elev_p.Behaviour != elevator.EB_DOOR_OPEN { //TODO: må endres når channels er klare, read elev_p.Behaviour
+			readChannels.Read_request_elev_chan <- true
+			elev := <-readChannels.Read_elev_chan
+			if elev.Behaviour != elevator.EB_DOOR_OPEN {
 				break
 			}
-
-			elev_p.Obstruction = last_obst //TODO: må endres når channels er klare
-			worldView_p.VersionUp()        //TODO: må endres når channels er klare
-
+			updateChannels.Update_obstr_chan <- last_obst
+			updateChannels.Version_up_chan <- true
 			if last_obst {
 				reset_timer_chan <- true
 			}
@@ -85,25 +133,46 @@ func Obstruction(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, obs
 	}
 }
 
-func DefaultState(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_timer_chan chan bool, wd_chan chan bool) {
-	go aloneUpdateLights(*worldView_p, *elev_p)
-	for floor := range worldView_p.HallRequests {
-		for _, order := range worldView_p.HallRequests[floor] {
-			if order == uint8(elev_p.ElevNum) && floor == elev_p.Last_Floor && elevio.GetFloor() == floor {
-				requests.ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
+func DefaultState(update_lights_chan chan int, update_direction_chan chan<- elevio.MotorDirection, arrived_at_floor_chan chan<- bool, readChannels elevator.ReadWorldviewChannels) {
+	worldView := elevator.ReadWorldView(readChannels)
+	elev := elevator.ReadElevator(readChannels)
+
+	go aloneUpdateLights(worldView, elev, update_lights_chan) // TODO: Noe rart med denne eller?
+
+	for floor := range worldView.HallRequests {
+		for _, order := range worldView.HallRequests[floor] {
+			if order == uint8(elev.ElevNum) && floor == elev.Last_Floor && elevio.GetFloor() == floor {
+				arrived_at_floor_chan <- true
 			}
 		}
 	}
-	if (elev_p.Dirn == elevio.MD_STOP) && (elev_p.Behaviour != elevator.EB_DOOR_OPEN) {
-		if requests.RequestsAbove(*elev_p, *worldView_p) {
-			elev_p.UpdateDirection(elevio.MD_UP, wd_chan)
-		} else if requests.RequestsBelow(*elev_p, *worldView_p) {
-			elev_p.UpdateDirection(elevio.MD_DOWN, wd_chan)
+	if (elev.Dirn == elevio.MD_STOP) && (elev.Behaviour != elevator.EB_DOOR_OPEN) {
+		if requests.RequestsAbove(elev, worldView) {
+			update_direction_chan <- elevio.MD_UP
+		} else if requests.RequestsBelow(elev, worldView) {
+			update_direction_chan <- elevio.MD_DOWN
 		}
 	}
 }
 
-func aloneUpdateLights(worldView elevator.Worldview, elev elevator.Elevator) {
+func UpdateLights(set_button_lamp_chan chan<- elevio.ButtonLampOrder, readChannels elevator.ReadWorldviewChannels, elevnum int) {
+	worldView := elevator.ReadWorldView(readChannels)
+	for floor, f := range worldView.HallRequests {
+		for buttonType, order := range f {
+			set_button_lamp_chan <- elevio.ButtonLampOrder{Button_type: elevio.ButtonType(buttonType), OrderFloor: floor, Value: order != 0}
+		}
+	}
+	for i, elev := range worldView.ElevList {
+		if i+1 != elevnum {
+			continue
+		}
+		for floor, f := range elev.CabRequests {
+			set_button_lamp_chan <- elevio.ButtonLampOrder{Button_type: elevio.BT_CAB, OrderFloor: floor, Value: f}
+		}
+	}
+}
+
+func aloneUpdateLights(worldView elevator.Worldview, elev elevator.Elevator, update_lights_chan chan<- int) { //TODO: dårlig funksjon: burde deles opp i checkAlone og noe annet
 	only_elev := true
 	for i := range worldView.ElevList {
 		if worldView.ElevList[i].Online && worldView.ElevList[i].ElevNum != elev.ElevNum {
@@ -111,6 +180,6 @@ func aloneUpdateLights(worldView elevator.Worldview, elev elevator.Elevator) {
 		}
 	}
 	if only_elev {
-		elevator.UpdateLights(worldView, elev.ElevNum)
+		update_lights_chan <- elev.ElevNum
 	}
 }

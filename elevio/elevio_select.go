@@ -6,24 +6,42 @@ type ButtonLampOrder struct {
 	Value       bool
 }
 
-func Elevio_select(set_floor_indicator_chan <-chan int,
-	set_motor_direction_chan <-chan MotorDirection,
-	set_button_lamp_chan <-chan ButtonLampOrder,
-	set_door_open_lamp_chan <-chan bool,
-	get_floor_chan <-chan bool,
-	send_floor_chan chan<- int) {
+type ElevioChannels struct {
+	Set_floor_indicator_chan chan int
+	Set_motor_direction_chan chan MotorDirection
+	Set_button_lamp_chan     chan ButtonLampOrder
+	Set_door_open_lamp_chan  chan bool
+	Get_floor_chan           chan bool
+	Send_floor_chan          chan int
+}
+
+func InitElevioChannels() (ioChannels ElevioChannels) {
+	ioChannels.Set_floor_indicator_chan = make(chan int)
+	ioChannels.Set_motor_direction_chan = make(chan MotorDirection)
+	ioChannels.Set_button_lamp_chan = make(chan ButtonLampOrder)
+	ioChannels.Set_door_open_lamp_chan = make(chan bool)
+	ioChannels.Get_floor_chan = make(chan bool)
+	ioChannels.Send_floor_chan = make(chan int)
+	return
+}
+
+func Elevio_select(ioChannels ElevioChannels) {
 	for {
 		select {
-		case floor := <-set_floor_indicator_chan:
+		case floor := <-ioChannels.Set_floor_indicator_chan:
 			SetFloorIndicator(floor)
-		case motorDirection := <-set_motor_direction_chan:
+
+		case motorDirection := <-ioChannels.Set_motor_direction_chan:
 			SetMotorDirection(motorDirection)
-		case buttonLamp := <-set_button_lamp_chan:
+
+		case buttonLamp := <-ioChannels.Set_button_lamp_chan:
 			SetButtonLamp(buttonLamp.Button_type, buttonLamp.OrderFloor, buttonLamp.Value)
-		case openDoorLamp := <-set_door_open_lamp_chan:
+
+		case openDoorLamp := <-ioChannels.Set_door_open_lamp_chan:
 			SetDoorOpenLamp(openDoorLamp)
-		case <-get_floor_chan:
-			send_floor_chan <- GetFloor()
+
+		case <-ioChannels.Get_floor_chan:
+			ioChannels.Send_floor_chan <- GetFloor()
 		}
 	}
 }

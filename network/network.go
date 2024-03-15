@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"project/costFunc"
 	"project/elevator"
-	"project/elevio"
 	"project/network/bcast"
 	"project/network/peers"
 	"strconv"
@@ -84,8 +82,7 @@ func InitNetwork(id int) (networkChan NetworkChan) {
 	return
 }
 
-func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
-	fmt.Println("Started")
+func PeersOnline(readChannels elevator.ReadWorldviewChannels, network_chan NetworkChan, updateWorldviewChannels elevator.UpdateWorldviewChannels) {
 	for {
 		p := <-network_chan.PeerUpdate_chan
 		fmt.Printf("Peer update:\n")
@@ -100,27 +97,14 @@ func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 			if err != nil {
 				panic(err)
 			}
-			worldView_p.ElevList[k_int-1].Online = false
-
-			//Assign hall orders to others:
-			for floor, f := range worldView_p.HallRequests {
-				for buttonType, o := range f {
-					if o == uint8(k_int) {
-						buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
-						costFunc.CostFunction(worldView_p, buttn)
-					}
-				}
-			}
-			worldView_p.VersionUp()
+			updateWorldviewChannels.Peer_lost_chan <- k_int
 		}
 		if p.New != "" {
 			i, err := strconv.Atoi(p.New)
 			if err != nil {
 				panic(err)
 			}
-			worldView_p.ElevList[i-1].Online = true
-
-			worldView_p.VersionUp()
+			updateWorldviewChannels.Peer_new_chan <- i
 		}
 	}
 }

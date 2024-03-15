@@ -23,19 +23,19 @@ func TimerStart(duration time.Duration, timer_exp_chan chan<- bool, reset_timer_
 	}
 }
 
-func OperativeWatchdog(d time.Duration, wd_chan <-chan bool) {
-	wd_over := time.NewTimer(0)
-	defer wd_over.Stop()
-	wd_over.Stop()
+func OperativeWatchdog(d time.Duration, watchdog_chan <-chan bool) {
+	watchdog_over := time.NewTimer(0)
+	defer watchdog_over.Stop()
+	watchdog_over.Stop()
 	for {
 		select {
-		case msg := <-wd_chan:
+		case msg := <-watchdog_chan:
 			if msg {
-				wd_over.Reset(d * time.Second)
+				watchdog_over.Reset(d * time.Second)
 			} else {
-				wd_over.Stop()
+				watchdog_over.Stop()
 			}
-		case <-wd_over.C:
+		case <-watchdog_over.C:
 			os.Exit(1)
 		}
 	}

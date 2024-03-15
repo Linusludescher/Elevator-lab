@@ -143,13 +143,13 @@ func (elev Elevator) Display() { //lage en for worldview også!
 	}
 }
 
-func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan<- bool) {
+func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, watchdog_chan chan<- bool) {
 	elevio.SetMotorDirection(dir)
 	elev_p.Last_dir = dir
 	elev_p.Dirn = dir
 	if elev_p.Dirn != elevio.MD_STOP {
 		elev_p.Behaviour = EB_MOVING
-		wd_chan <- true
+		watchdog_chan <- true
 	} else {
 		elev_p.Behaviour = EB_IDLE
 	}
@@ -159,22 +159,5 @@ func BroadcastElevator(bc_chan chan<- bool, n_ms int) {
 	for {
 		bc_chan <- true
 		time.Sleep(time.Duration(n_ms) * time.Millisecond)
-	}
-}
-
-func UpdateLights(worldView Worldview, elevnum int) {
-	for floor, f := range worldView.HallRequests {
-		for buttonType, order := range f {
-			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, order != 0)
-		}
-	}
-	for i, elev := range worldView.ElevList {
-		if i+1 != elevnum {
-			continue
-		}
-		for floor, f := range elev.CabRequests {
-			elevio.SetButtonLamp(elevio.BT_CAB, floor, f) //TODO sende noe sånt <- elevio.ButtonLampOrder{1,2,true}
-
-		}
 	}
 }
