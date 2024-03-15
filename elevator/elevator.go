@@ -26,7 +26,7 @@ type ConfigData struct { //Reader config 2 steder: En gang her, en gang i networ
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
 	//ElevatorNum int   `json:"ElevNum"`
-	UDPBase		int    `json:"BasePort"`
+	UDPBase int `json:"BasePort"`
 }
 
 type Elevator struct {
@@ -54,20 +54,20 @@ const (
 	// versionInitVal = 10000 //initialisere på høyere verdi enn 0 for ikke problemer med nullstilling ved tilbakekobling etter utfall
 )
 
-func (wv *Worldview) Version_up() {
-	if wv.Version < V_l {
-		wv.Version++
+func (worldView_p *Worldview) Version_up() {
+	if worldView_p.Version < V_l {
+		worldView_p.Version++
 	} else {
-		wv.Version = 0
+		worldView_p.Version = 0
 	}
 }
 
-func (w Worldview) Display() {
-	fmt.Printf("Sender: %d\n", w.Sender)
-	fmt.Printf("Version: %d\n", w.Version)
+func (worldview Worldview) Display() {
+	fmt.Printf("Sender: %d\n", worldview.Sender)
+	fmt.Printf("Version: %d\n", worldview.Version)
 
 	fmt.Println("Elevator List:")
-	for i, elev := range w.ElevList {
+	for i, elev := range worldview.ElevList {
 		fmt.Printf("  Elevator %d:\n", i+1)
 		fmt.Printf("    Online: %v\n", elev.Online)
 		fmt.Printf("    Operative: %v\n", elev.Operative)
@@ -81,8 +81,8 @@ func (w Worldview) Display() {
 	}
 
 	fmt.Println("Hall Requests:")
-	for i := len(w.HallRequests); i > 0; i-- {
-		fmt.Printf("floor: %d \thall up: %d\t, halldown: %d\n", i-1, w.HallRequests[i-1][0], w.HallRequests[i-1][1])
+	for i := len(worldview.HallRequests); i > 0; i-- {
+		fmt.Printf("floor: %d \thall up: %d\t, halldown: %d\n", i-1, worldview.HallRequests[i-1][0], worldview.HallRequests[i-1][1])
 	}
 }
 
@@ -108,22 +108,22 @@ func ReadElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-func ElevatorInit(id int) (e Elevator, wv Worldview) {
+func ElevatorInit(id int) (elev Elevator, worldView Worldview) {
 	elevatorConfig := ReadElevatorConfig()
-	hall := make([][2]uint8, elevatorConfig.N_FLOORS)
-	for i := range hall {
-		hall[i] = [2]uint8{0, 0}
+	hallOrders := make([][2]uint8, elevatorConfig.N_FLOORS)
+	for i := range hallOrders {
+		hallOrders[i] = [2]uint8{0, 0}
 	}
 
-	wv = Worldview{[]Elevator{}, id, startVersion, hall}
+	worldView = Worldview{[]Elevator{}, id, startVersion, hallOrders}
 
 	for i := 1; i <= int(elevatorConfig.N_elevators); i++ {
-		cab := make([]bool, elevatorConfig.N_FLOORS)
-		n := Elevator{false, true, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cab}
-		wv.ElevList = append(wv.ElevList, n)
+		cabOrders := make([]bool, elevatorConfig.N_FLOORS)
+		n := Elevator{false, true, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cabOrders}
+		worldView.ElevList = append(worldView.ElevList, n)
 	}
-	e = wv.ElevList[id-1]
-	e.Online = true
+	elev = worldView.ElevList[id-1]
+	elev.Online = true
 
 	for elevio.GetFloor() != 0 {
 		elevio.SetMotorDirection(elevio.MD_Down)
@@ -132,26 +132,26 @@ func ElevatorInit(id int) (e Elevator, wv Worldview) {
 	return
 }
 
-func (e Elevator) Display() { //lage en for worldview også!
-	fmt.Printf("Direction: %v\n", e.Dirn)
-	fmt.Printf("Last Direction: %v\n", e.Last_dir)
-	fmt.Printf("Last Floor: %v\n", e.Last_Floor)
+func (elev Elevator) Display() { //lage en for worldview også!
+	fmt.Printf("Direction: %v\n", elev.Dirn)
+	fmt.Printf("Last Direction: %v\n", elev.Last_dir)
+	fmt.Printf("Last Floor: %v\n", elev.Last_Floor)
 	fmt.Println("Requests")
 	fmt.Println("Floor\t Cab")
-	for i := len(e.CabRequests) - 1; i >= 0; i-- {
-		fmt.Printf("%v \t %v \t\n", i+1, e.CabRequests[i])
+	for i := len(elev.CabRequests) - 1; i >= 0; i-- {
+		fmt.Printf("%v \t %v \t\n", i+1, elev.CabRequests[i])
 	}
 }
 
-func (e_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan bool) {
+func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan bool) {
 	elevio.SetMotorDirection(dir)
-	e_p.Last_dir = dir
-	e_p.Dirn = dir
-	if e_p.Dirn != elevio.MD_Stop {
-		e_p.Behaviour = EB_Moving
+	elev_p.Last_dir = dir
+	elev_p.Dirn = dir
+	if elev_p.Dirn != elevio.MD_Stop {
+		elev_p.Behaviour = EB_Moving
 		wd_chan <- true
 	} else {
-		e_p.Behaviour = EB_Idle
+		elev_p.Behaviour = EB_Idle
 	}
 }
 
@@ -162,13 +162,13 @@ func BroadcastElevator(bc_chan chan bool, n_ms int) {
 	}
 }
 
-func UpdateLights(wv Worldview, elevnum int) {
-	for floor, f := range wv.HallRequests {
+func UpdateLights(worldView Worldview, elevnum int) {
+	for floor, f := range worldView.HallRequests {
 		for buttonType, order := range f {
 			elevio.SetButtonLamp(elevio.ButtonType(buttonType), floor, order != 0)
 		}
 	}
-	for i, elev := range wv.ElevList {
+	for i, elev := range worldView.ElevList {
 		if i+1 != elevnum {
 			continue
 		}

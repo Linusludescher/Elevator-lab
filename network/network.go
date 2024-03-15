@@ -28,9 +28,9 @@ type NetworkChan struct {
 	PacketRx     chan elevator.Worldview
 }
 
-func getNetworkConfig(id int) (cp ConfigUDPPorts) { //mer beskrivende navn til cp!
+func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende navn til configPorts!
 	jsonData, err := os.ReadFile("config.json")
-	cp.Id = id
+	configPorts.Id = id
 	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("/network/udp.go: Error reading config file: %s\n", err)
@@ -38,24 +38,24 @@ func getNetworkConfig(id int) (cp ConfigUDPPorts) { //mer beskrivende navn til c
 	}
 
 	// Parse jsonData into ElevatorPorts struct
-	err = json.Unmarshal(jsonData, &cp)
+	err = json.Unmarshal(jsonData, &configPorts)
 	if err != nil {
 		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
 
 		// try again
 		getNetworkConfig(id)
 	}
-	for i := 1; i < cp.N_elevators+1; i++ {
-		if i == cp.Id {
-			cp.UDPTx = cp.UDPBase + cp.Id
+	for i := 1; i < configPorts.N_elevators+1; i++ {
+		if i == configPorts.Id {
+			configPorts.UDPTx = configPorts.UDPBase + configPorts.Id
 		} else {
-			cp.UDPRx = append(cp.UDPRx, cp.UDPBase+i)
+			configPorts.UDPRx = append(configPorts.UDPRx, configPorts.UDPBase+i)
 		}
 	}
 	return
 }
 
-func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (networkChan NetworkChan) {
+func Init_network(id int) (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
 	ports := getNetworkConfig(id)
 
@@ -84,7 +84,7 @@ func Init_network(id int, e *elevator.Elevator, wv *elevator.Worldview) (network
 	return
 }
 
-func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan NetworkChan) {
+func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 	fmt.Println("Started")
 	for {
 		select {
@@ -102,18 +102,18 @@ func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan 
 					fmt.Println("Error:", err)
 					return
 				}
-				wv_p.ElevList[k_int-1].Online = false
+				worldView_p.ElevList[k_int-1].Online = false
 
 				//Assign hall orders to other:
-				for floor, f := range wv_p.HallRequests {
+				for floor, f := range worldView_p.HallRequests {
 					for buttonType, o := range f {
 						if o == uint8(k_int) {
 							buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
-							costFunc.CostFunction(wv_p, buttn)
+							costFunc.CostFunction(worldView_p, buttn)
 						}
 					}
 				}
-				wv_p.Version_up()
+				worldView_p.Version_up()
 
 			}
 			if p.New != "" {
@@ -122,9 +122,9 @@ func PeersOnline(e_p *elevator.Elevator, wv_p *elevator.Worldview, network_chan 
 					fmt.Println("Error:", err)
 					return
 				}
-				wv_p.ElevList[i-1].Online = true
+				worldView_p.ElevList[i-1].Online = true
 
-				wv_p.Version_up()
+				worldView_p.Version_up()
 			}
 		case <-network_chan.PacketRx:
 			//fmt.Println("Received:")
