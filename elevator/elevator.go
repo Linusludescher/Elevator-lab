@@ -8,6 +8,19 @@ import (
 	"time"
 )
 
+//elevio structs
+const (
+	MD_Down = elevio.MD_Down
+	MD_Up   = elevio.MD_Up
+	MD_Stop = elevio.MD_Stop
+
+	BT_Cab      = elevio.BT_Cab
+	BT_HallDown = elevio.BT_HallDown
+	BT_HallUp   = elevio.BT_HallUp
+)
+
+type ButtonEvent = elevio.ButtonEvent
+
 const (
 	N_FLOORS     int    = 4
 	N_BUTTONS    int    = 3
