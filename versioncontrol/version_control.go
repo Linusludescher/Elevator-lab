@@ -5,11 +5,11 @@ import (
 	"project/elevator"
 )
 
-func Version_if_equal_queue(e elevator.Elevator, my_wv elevator.Worldview, incoming_wv elevator.Worldview) bool {
+func versionIfEqualQueue(elev elevator.Elevator, my_worldView elevator.Worldview, incoming_worldView elevator.Worldview) bool {
 	areEqual := true
-	for i := range my_wv.HallRequests {
-		for j := range my_wv.HallRequests[i] {
-			if my_wv.HallRequests[i][j] != incoming_wv.HallRequests[i][j] {
+	for i := range my_worldView.HallRequests {
+		for j := range my_worldView.HallRequests[i] {
+			if my_worldView.HallRequests[i][j] != incoming_worldView.HallRequests[i][j] {
 				areEqual = false
 				break
 			}
@@ -18,14 +18,14 @@ func Version_if_equal_queue(e elevator.Elevator, my_wv elevator.Worldview, incom
 			break
 		}
 	}
-	for elev := range my_wv.ElevList {
-		for f := range my_wv.ElevList[elev].CabRequests {
-			if elev == e.ElevNum-1 {
-				if e.CabRequests[f] != incoming_wv.ElevList[elev].CabRequests[f] {
+	for elevator := range my_worldView.ElevList {
+		for f := range my_worldView.ElevList[elevator].CabRequests {
+			if elevator == elev.ElevNum-1 {
+				if elev.CabRequests[f] != incoming_worldView.ElevList[elevator].CabRequests[f] {
 					areEqual = false
 					break
 				}
-			} else if my_wv.ElevList[elev].CabRequests[f] != incoming_wv.ElevList[elev].CabRequests[f] {
+			} else if my_worldView.ElevList[elevator].CabRequests[f] != incoming_worldView.ElevList[elevator].CabRequests[f] {
 				areEqual = false
 				break
 			}
@@ -37,24 +37,24 @@ func Version_if_equal_queue(e elevator.Elevator, my_wv elevator.Worldview, incom
 	return areEqual
 }
 
-func Version_update_queue(e_p *elevator.Elevator, my_wv_p *elevator.Worldview, incoming_wv elevator.Worldview) {
-	if incoming_wv.Version > my_wv_p.Version || ((my_wv_p.Version > elevator.V_l-elevator.V_s_c) && incoming_wv.Version < elevator.V_s_c) {
-		my_wv_p.HallRequests = incoming_wv.HallRequests
-		my_wv_p.Version = incoming_wv.Version
-		my_wv_p.ElevList = incoming_wv.ElevList
-		e_p.CabRequests = incoming_wv.ElevList[e_p.ElevNum-1].CabRequests //La til dette
+func VersionUpdateQueue(elev_p *elevator.Elevator, my_worldView_p *elevator.Worldview, incoming_worldView elevator.Worldview) {
+	if incoming_worldView.Version > my_worldView_p.Version || ((my_worldView_p.Version > elevator.VERSIONLIMIT-elevator.VERSIONBUFFER) && incoming_worldView.Version < elevator.VERSIONBUFFER) {
+		my_worldView_p.HallRequests = incoming_worldView.HallRequests
+		my_worldView_p.Version = incoming_worldView.Version
+		my_worldView_p.ElevList = incoming_worldView.ElevList
+		elev_p.CabRequests = incoming_worldView.ElevList[elev_p.ElevNum-1].CabRequests //La til dette
 		// Slå av og på lys
-		go elevator.UpdateLights(*my_wv_p, e_p.ElevNum)
-	} else if incoming_wv.Version == my_wv_p.Version {
-		go elevator.UpdateLights(*my_wv_p, e_p.ElevNum)
-	} else if (incoming_wv.Version == my_wv_p.Version) && !Version_if_equal_queue(*e_p, *my_wv_p, incoming_wv) {
+		go elevator.UpdateLights(*my_worldView_p, elev_p.ElevNum)
+	} else if incoming_worldView.Version == my_worldView_p.Version {
+		go elevator.UpdateLights(*my_worldView_p, elev_p.ElevNum)
+	} else if (incoming_worldView.Version == my_worldView_p.Version) && !versionIfEqualQueue(*elev_p, *my_worldView_p, incoming_worldView) {
 		fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-		if incoming_wv.Sender > my_wv_p.Sender {
-			my_wv_p.HallRequests = incoming_wv.HallRequests
-			my_wv_p.Version = incoming_wv.Version
-			my_wv_p.ElevList = incoming_wv.ElevList
-			e_p.CabRequests = incoming_wv.ElevList[e_p.ElevNum-1].CabRequests //La til dette
-			my_wv_p.Version_up()
+		if incoming_worldView.Sender > my_worldView_p.Sender {
+			my_worldView_p.HallRequests = incoming_worldView.HallRequests
+			my_worldView_p.Version = incoming_worldView.Version
+			my_worldView_p.ElevList = incoming_worldView.ElevList
+			elev_p.CabRequests = incoming_worldView.ElevList[elev_p.ElevNum-1].CabRequests //La til dette
+			my_worldView_p.VersionUp()
 		}
 	}
 } // må ha noe med når version nullstilles

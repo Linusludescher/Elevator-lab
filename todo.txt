@@ -109,16 +109,16 @@ Onsdag:
 Torsdag: 
 ---------------------------------------------------------------------------------- fiske etasjelys
 ---------------------------------------------------------------------------------- fiske en lys når en heis alene
-- Hvordan merge to systemer som har vært adskilt
+- Hvordan merge to systemer som har vært adskilt, fuck
 ---------------------------------------------------------------------------------- Få 3 heiser til å funger
 ---------------------------------------------------------------------------------- trykker hall order i samme etasje som egen heis er i, åpner ikke døren
 ---------------------------------------------------------------------------------- noen ganger går den i idle i stede for door open
 ---------------------------------------------------------------------------------- trykker hall i last floor -> åpner dør midt mellom etasjer
 ---------------------------------------------------------------------------------- få en heis til å funke ..!!! fette bra
 ---------------------------------------------------------------------------------- Ikke bruke hardcodet numFloors i main 
-- tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> ---------lage en softstop før hardstoppen kicker inn
+- tar strømmen, så kommer heis tilbake, kjører helt opp eller helt ned -> -------- lage en softstop før hardstoppen kicker inn
 ---------------------------------------------------------------------------------- process pairs- fette nice
-- setter obstr uten at door open, da skjer dårlige ting
+---------------------------------------------------------------------------------- setter obstr uten at door open, da skjer dårlige ting
 - wd funker ikke med 1 heis (men må det?)
 ---------------------------------------------------------------------------------- ny bug: må cleare andres andres hall-ordre når vi er i etasje
 
@@ -132,9 +132,9 @@ Fredag: Kodekvalitet, Kodekvalitet, Kodekvalitet
 
 Pynt og secondary
 - flag for bitcoin symbol i terminal
-- implementere stop-knapp
-- CostFunksjon kanskje rearrange alle? -> sjekke requests oftere
-- Process pairs?
+----------------------------------------------------------------------------------- implementere stop-knapp, nope!
+----------------------------------------------------------------------------------- CostFunksjon kanskje rearrange alle? -> sjekke requests oftere, GIDDER IKKE DETTE
+----------------------------------------------------------------------------------- Process pairs?
 - Teste med packetloss
 - litt rart forhold melloom lokal wv og elevator
 
@@ -145,4 +145,15 @@ Kode kvalitet
 - kommunikasjon mellom moduler, få moduler snakker med elevio for eks
 - Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor 
 - mer forklarende navn til parametre, kortere imports
-- spesifisere retning på channels som parametre
+------------------------------------------------------------------------------- spesifisere retning på channels som parametre
+------------------------------------------------------------------------------- panic som errorhandling
+- rydde i kommentarer og prints. Legge til noen forklarende kommentarer der det trengs
+------------------------------------------------------------------------------- peersOnline har en switch som ikke trengs? kanskje onstruktureres?
+
+
+Navn parametre
+------------------------------------------------------------------------------- Funksjoner: camelCase
+------------------------------------------------------------------------------- konstanter: CAPS
+------------------------------------------------------------------------------- channels: snake, slutte på channels; broadcast_chan
+------------------------------------------------------------------------------- pekere: snake_p; elev_p, worldview_p
+- forkorte import navn

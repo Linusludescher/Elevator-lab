@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.Duration, timer_exp_chan chan<- bool, obstruction chan bool, reset_ch <-chan bool) {
-	obstructed := e_p.Obstruction
+func TimerStart(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, duration time.Duration, timer_exp_chan chan<- bool, obstruction_chan <-chan bool, reset_timer_chan <-chan bool) {
+	obstructed := elev_p.Obstruction
 	sec_timer := time.NewTimer(duration * time.Second)
 	defer sec_timer.Stop()
 	sec_timer.Stop()
@@ -22,10 +22,10 @@ func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.
 				// Restart the timer if obstructed is true
 				sec_timer.Reset(duration * time.Second)
 			}
-		case obstr := <-obstruction:
+		case obstr := <-obstruction_chan:
 			obstructed = obstr
-			e_p.Obstruction = obstr
-			wv_p.Version_up()
+			elev_p.Obstruction = obstr
+			worldView_p.VersionUp()
 			if obstructed {
 				// If obstructed becomes true, restart the timer
 				if !sec_timer.Stop() {
@@ -33,13 +33,13 @@ func TimerStart(e_p *elevator.Elevator, wv_p *elevator.Worldview, duration time.
 				}
 				sec_timer.Reset(duration * time.Second)
 			}
-		case <-reset_ch:
+		case <-reset_timer_chan:
 			sec_timer.Reset(duration * time.Second)
 		}
 	}
 }
 
-func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.Duration, wd_chan chan bool) {
+func OperativeWatchdog(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, d time.Duration, wd_chan <-chan bool) {
 	wd_over := time.NewTimer(0)
 	defer wd_over.Stop()
 	wd_over.Stop()
@@ -50,20 +50,20 @@ func OperativeWatchdog(e_p *elevator.Elevator, wv_p *elevator.Worldview, d time.
 				wd_over.Reset(d * time.Second)
 			} else {
 				wd_over.Stop()
-				e_p.Operative = true
+				elev_p.Operative = true
 			}
 		case <-wd_over.C:
-			e_p.Operative = false
-			wv_p.ElevList[e_p.ElevNum-1].Operative = false
-			for floor, f := range wv_p.HallRequests {
+			elev_p.Operative = false
+			worldView_p.ElevList[elev_p.ElevNum-1].Operative = false
+			for floor, f := range worldView_p.HallRequests {
 				for buttonType, o := range f {
-					if o == uint8(e_p.ElevNum) {
+					if o == uint8(elev_p.ElevNum) {
 						buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
-						costFunc.CostFunction(wv_p, buttn)
+						costFunc.CostFunction(worldView_p, buttn)
 					}
 				}
 			}
-			wv_p.Version_up()
+			worldView_p.VersionUp()
 			os.Exit(1)
 		}
 	}

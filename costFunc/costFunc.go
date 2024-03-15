@@ -21,34 +21,29 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
-func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
+func CostFunction(worldView_p *elevator.Worldview, buttn elevio.ButtonEvent) {
 	hraExecutable := "hall_request_assigner"
-	input := wvToCfInput(*wv, buttn)
+	input := worldViewToCfInput(*worldView_p, buttn)
 	jsonBytes, err := json.Marshal(input)
 	if err != nil {
-		fmt.Println("json.Marshal error: ", err)
-		return
+		panic(err)
 	}
 
 	ret, err := exec.Command("../"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
-		fmt.Println("exec.Command error: ", err)
-		fmt.Println(string(ret))
-		return
+		panic(err)
 	}
 
 	output := new(map[string][][2]bool)
 	err = json.Unmarshal(ret, &output)
 	if err != nil {
-		fmt.Println("json.Unmarshal error: ", err)
-		return
+		panic(err)
 	}
 
 	fmt.Printf("output: \n")
 	for k, v := range *output {
 		fmt.Printf("%6v :  %+v\n", k, v)
 	}
-	
 
 	for i, e := range *output {
 		for j, r := range e {
@@ -56,25 +51,24 @@ func CostFunction(wv *elevator.Worldview, buttn elevio.ButtonEvent) {
 				if b {
 					num, err := strconv.Atoi(i)
 					if err != nil {
-						fmt.Println("Error:", err)
-						return
+						panic(err)
 					}
-					wv.HallRequests[j][k] = uint8(num)
+					worldView_p.HallRequests[j][k] = uint8(num)
 				}
 			}
 		}
 	}
 }
 
-func wvToCfInput(wv elevator.Worldview, buttn elevio.ButtonEvent) (input HRAInput) {
+func worldViewToCfInput(worldView elevator.Worldview, buttn elevio.ButtonEvent) (input HRAInput) {
 	input.States = make(map[string]HRAElevState)
-	for _, elev := range wv.ElevList {
+	for _, elev := range worldView.ElevList {
 		if elev.Online && elev.Operative {
 			elevstate := HRAElevState{string(elev.Behaviour), elev.Last_Floor, elev.Dirn.String(), elev.CabRequests}
 			input.States[strconv.Itoa(elev.ElevNum)] = elevstate
 		}
 	}
-	input.HallRequests = make([][2]bool, len(wv.HallRequests))
+	input.HallRequests = make([][2]bool, len(worldView.HallRequests))
 	for i := range input.HallRequests {
 		input.HallRequests[i] = [2]bool{false, false}
 	}

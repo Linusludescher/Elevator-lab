@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const bufSize = 1024
+const BUFSIZE = 1024
 
 // Encodes received values from `chans` into type-tagged JSON, then broadcasts
 // it on `port`
@@ -39,11 +39,11 @@ func Transmitter(port int, chans ...interface{}) {
 			TypeId: typeNames[chosen],
 			JSON:   jsonstr,
 		})
-		if len(ttj) > bufSize {
+		if len(ttj) > BUFSIZE {
 			panic(fmt.Sprintf(
 				"Tried to send a message longer than the buffer size (length: %d, buffer size: %d)\n\t'%s'\n"+
 					"Either send smaller packets, or go to network/bcast/bcast.go and increase the buffer size",
-				len(ttj), bufSize, string(ttj)))
+				len(ttj), BUFSIZE, string(ttj)))
 		}
 		conn.WriteTo(ttj, addr)
 	}
@@ -57,7 +57,7 @@ func Receiver(port int, chans ...interface{}) {
 	for _, ch := range chans {
 		chansMap[reflect.TypeOf(ch).Elem().String()] = ch
 	}
-	var buf [bufSize]byte
+	var buf [BUFSIZE]byte
 	conn := conn.DialBroadcastUDP(port)
 	for {
 		n, _, e := conn.ReadFrom(buf[0:])
@@ -149,9 +149,9 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 	}
 }
 
-func BcWorldView(e elevator.Elevator, wv elevator.Worldview, bc_chan chan elevator.Worldview) {
-	wv.ElevList[e.ElevNum-1] = e
-	bc_chan <- wv
+func BcWorldView(elev elevator.Elevator, worldView elevator.Worldview, bc_chan chan<- elevator.Worldview) {
+	worldView.ElevList[elev.ElevNum-1] = elev
+	bc_chan <- worldView
 }
 
 func ProcessPairListner(id int) (udpConn *net.UDPConn) {
@@ -163,8 +163,7 @@ func ProcessPairListner(id int) (udpConn *net.UDPConn) {
 	// backup, lytter på UDP
 	listen_conn, err := net.ListenUDP("udp", broadcastAddr)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		panic(err)
 	}
 	fmt.Println("Listening..")
 
@@ -180,9 +179,7 @@ func ProcessPairListner(id int) (udpConn *net.UDPConn) {
 				fmt.Println("Read timeout occurred. Breaking...")
 				break
 			}
-			// maybe panic?==?????
-			fmt.Println("Error reading data:", err)
-			return
+			panic(err)
 		}
 	}
 
