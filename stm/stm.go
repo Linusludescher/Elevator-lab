@@ -4,6 +4,7 @@ import (
 	"project/elevator"
 	"project/elevio"
 	"project/requests"
+	"time"
 )
 
 func ClosingDoor(elev_p *elevator.Elevator, worldView elevator.Worldview, wd_chan chan bool) { //kalle denne for door closed
@@ -61,13 +62,26 @@ func FloorSensed(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, flo
 	}
 }
 
-func Obstruction(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, obstr bool) {
-	if obstr && elev_p.Behaviour == elevator.EB_DOOR_OPEN {
-		elev_p.Obstruction = obstr
-		worldView_p.VersionUp()
-	} else if !obstr {
-		elev_p.Obstruction = obstr
-		worldView_p.VersionUp()
+func Obstruction(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, obstruction_chan <-chan bool, reset_timer_chan chan<- bool) {
+	last_obst := false
+	for {
+		select {
+		case obst := <-obstruction_chan:
+			last_obst = obst
+
+		default:
+			if elev_p.Behaviour != elevator.EB_DOOR_OPEN { //TODO: må endres når channels er klare, read elev_p.Behaviour
+				break
+			}
+
+			elev_p.Obstruction = last_obst //TODO: må endres når channels er klare
+			worldView_p.VersionUp()        //TODO: må endres når channels er klare
+
+			if last_obst {
+				reset_timer_chan <- true
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
 	}
 }
 

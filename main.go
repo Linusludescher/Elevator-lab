@@ -52,8 +52,9 @@ func main() {
 	go elevio.PollFloorSensor(drv_floors_chan)
 	go elevio.PollObstructionSwitch(drv_obstr_chan)
 	go elevator.BroadcastElevator(bc_timer_chan, 10)
-	go timer.OperativeWatchdog(&my_elevator, &my_wv, 10, wd_chan)
-	go timer.TimerStart(&my_elevator, &my_wv, 3, timer_exp_chan, drv_obstr_chan, reset_timer_chan)
+	go timer.OperativeWatchdog(10, wd_chan)
+	go timer.TimerStart(3, timer_exp_chan, reset_timer_chan)
+	go stm.Obstruction(&my_elevator, &my_wv, drv_obstr_chan, reset_timer_chan)
 
 	for {
 		select {
@@ -66,9 +67,6 @@ func main() {
 		case floor_sens := <-drv_floors_chan:
 			stm.FloorSensed(&my_elevator, &my_wv, floor_sens, reset_timer_chan, wd_chan)
 
-		case obstr := <-drv_obstr_chan:
-			stm.Obstruction(&my_elevator, &my_wv, obstr)
-
 		case udp_packet := <-network_channels.PacketRx_chan: //legge til
 			versioncontrol.VersionUpdateQueue(&my_elevator, &my_wv, udp_packet)
 
@@ -76,7 +74,6 @@ func main() {
 			stm.DefaultState(&my_elevator, &my_wv, reset_timer_chan, wd_chan)
 			bcast.BcWorldView(my_elevator, my_wv, network_channels.PacketTx_chan)
 			// processPairConn.Write([]byte("42"))
-			//default:
 			my_wv.Display()
 		}
 	}
