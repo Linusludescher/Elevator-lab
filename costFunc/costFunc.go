@@ -26,22 +26,18 @@ func CostFunction(worldView_p *elevator.Worldview, buttn elevio.ButtonEvent) {
 	input := worldViewToCfInput(*worldView_p, buttn)
 	jsonBytes, err := json.Marshal(input)
 	if err != nil {
-		fmt.Println("json.Marshal error: ", err)
-		return
+		panic(err)
 	}
 
 	ret, err := exec.Command("../"+hraExecutable, "-i", string(jsonBytes)).CombinedOutput()
 	if err != nil {
-		fmt.Println("exec.Command error: ", err)
-		fmt.Println(string(ret))
-		return
+		panic(err)
 	}
 
 	output := new(map[string][][2]bool)
 	err = json.Unmarshal(ret, &output)
 	if err != nil {
-		fmt.Println("json.Unmarshal error: ", err)
-		return
+		panic(err)
 	}
 
 	fmt.Printf("output: \n")
@@ -55,8 +51,7 @@ func CostFunction(worldView_p *elevator.Worldview, buttn elevio.ButtonEvent) {
 				if b {
 					num, err := strconv.Atoi(i)
 					if err != nil {
-						fmt.Println("Error:", err)
-						return
+						panic(err)
 					}
 					worldView_p.HallRequests[j][k] = uint8(num)
 				}

@@ -163,8 +163,7 @@ func ProcessPairListner(id int) (udpConn *net.UDPConn) {
 	// backup, lytter på UDP
 	listen_conn, err := net.ListenUDP("udp", broadcastAddr)
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		panic(err)
 	}
 	fmt.Println("Listening..")
 
@@ -180,9 +179,7 @@ func ProcessPairListner(id int) (udpConn *net.UDPConn) {
 				fmt.Println("Read timeout occurred. Breaking...")
 				break
 			}
-			// maybe panic?==?????
-			fmt.Println("Error reading data:", err)
-			return
+			panic(err)
 		}
 	}
 

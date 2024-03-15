@@ -99,8 +99,7 @@ func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 			for _, k := range p.Lost {
 				k_int, err := strconv.Atoi(k)
 				if err != nil {
-					fmt.Println("Error:", err)
-					return
+					panic(err)
 				}
 				worldView_p.ElevList[k_int-1].Online = false
 
@@ -119,8 +118,7 @@ func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 			if p.New != "" {
 				i, err := strconv.Atoi(p.New)
 				if err != nil {
-					fmt.Println("Error:", err)
-					return
+					panic(err)
 				}
 				worldView_p.ElevList[i-1].Online = true
 
