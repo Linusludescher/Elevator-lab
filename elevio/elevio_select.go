@@ -6,7 +6,7 @@ type ButtonLampOrder struct {
 	Value       bool
 }
 
-func elevio_select(set_floor_indicator_chan <-chan int,
+func Elevio_select(set_floor_indicator_chan <-chan int,
 	set_motor_direction_chan <-chan MotorDirection,
 	set_button_lamp_chan <-chan ButtonLampOrder,
 	set_door_open_lamp_chan <-chan bool,
