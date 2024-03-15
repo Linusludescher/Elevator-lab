@@ -22,10 +22,10 @@ type ConfigUDPPorts struct {
 }
 
 type NetworkChan struct {
-	PeerUpdateCh chan peers.PeerUpdate
-	PeerTxEnable chan bool
-	PacketTx     chan elevator.Worldview
-	PacketRx     chan elevator.Worldview
+	PeerUpdate_chan   chan peers.PeerUpdate
+	PeerTxEnable_chan chan bool
+	PacketTx_chan     chan elevator.Worldview
+	PacketRx_chan     chan elevator.Worldview
 }
 
 func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende navn til configPorts!
@@ -55,31 +55,31 @@ func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende n
 	return
 }
 
-func Init_network(id int) (networkChan NetworkChan) {
+func InitNetwork(id int) (networkChan NetworkChan) {
 	// Read from config.json port addresses for Rx and Tx
 	ports := getNetworkConfig(id)
 
 	// We make a channel for receiving updates on the id's of the peers that are
 	//  alive on the network
-	networkChan.PeerUpdateCh = make(chan peers.PeerUpdate)
+	networkChan.PeerUpdate_chan = make(chan peers.PeerUpdate)
 	// We can disable/enable the transmitter after it has been started.
 	// This could be used to signal that we are somehow "unavailable".
-	networkChan.PeerTxEnable = make(chan bool)
+	networkChan.PeerTxEnable_chan = make(chan bool)
 
-	go peers.Transmitter(ports.UDPstatusPort, strconv.Itoa(id), networkChan.PeerTxEnable)
-	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdateCh)
+	go peers.Transmitter(ports.UDPstatusPort, strconv.Itoa(id), networkChan.PeerTxEnable_chan)
+	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdate_chan)
 
 	// We make channels for sending and receiving our custom data types
-	networkChan.PacketTx = make(chan elevator.Worldview)
-	networkChan.PacketRx = make(chan elevator.Worldview)
+	networkChan.PacketTx_chan = make(chan elevator.Worldview)
+	networkChan.PacketRx_chan = make(chan elevator.Worldview)
 	// ... and start the transmitter/receiver pair on some port
 	// These functions can take any number of channels! It is also possible to
 	//  start multiple transmitters/receivers on the same port.
-	go bcast.Transmitter(ports.UDPTx, networkChan.PacketTx)
+	go bcast.Transmitter(ports.UDPTx, networkChan.PacketTx_chan)
 
 	for rxPort := range ports.UDPRx {
 		fmt.Printf("rxport %d\n", ports.UDPRx[rxPort])
-		go bcast.Receiver(ports.UDPRx[rxPort], networkChan.PacketRx)
+		go bcast.Receiver(ports.UDPRx[rxPort], networkChan.PacketRx_chan)
 	}
 	return
 }
@@ -87,46 +87,40 @@ func Init_network(id int) (networkChan NetworkChan) {
 func PeersOnline(worldView_p *elevator.Worldview, network_chan NetworkChan) {
 	fmt.Println("Started")
 	for {
-		select {
-		case p := <-network_chan.PeerUpdateCh:
-			fmt.Printf("Peer update:\n")
-			fmt.Printf("  Peers:    %q\n", p.Peers)
-			fmt.Printf("  New:      %q\n", p.New)
-			fmt.Printf("  Lost:     %q\n", p.Lost)
-			fmt.Printf("  UdpTx: 	%d\n", network_chan.PacketTx)
-			fmt.Printf("  UdpRx: 	%d\n", network_chan.PacketRx)
+		p := <-network_chan.PeerUpdate_chan
+		fmt.Printf("Peer update:\n")
+		fmt.Printf("  Peers:    %q\n", p.Peers)
+		fmt.Printf("  New:      %q\n", p.New)
+		fmt.Printf("  Lost:     %q\n", p.Lost)
+		fmt.Printf("  UdpTx: 	%d\n", network_chan.PacketTx_chan)
+		fmt.Printf("  UdpRx: 	%d\n", network_chan.PacketRx_chan)
 
-			for _, k := range p.Lost {
-				k_int, err := strconv.Atoi(k)
-				if err != nil {
-					panic(err)
-				}
-				worldView_p.ElevList[k_int-1].Online = false
+		for _, k := range p.Lost {
+			k_int, err := strconv.Atoi(k)
+			if err != nil {
+				panic(err)
+			}
+			worldView_p.ElevList[k_int-1].Online = false
 
-				//Assign hall orders to other:
-				for floor, f := range worldView_p.HallRequests {
-					for buttonType, o := range f {
-						if o == uint8(k_int) {
-							buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
-							costFunc.CostFunction(worldView_p, buttn)
-						}
+			//Assign hall orders to others:
+			for floor, f := range worldView_p.HallRequests {
+				for buttonType, o := range f {
+					if o == uint8(k_int) {
+						buttn := elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}
+						costFunc.CostFunction(worldView_p, buttn)
 					}
 				}
-				worldView_p.Version_up()
-
 			}
-			if p.New != "" {
-				i, err := strconv.Atoi(p.New)
-				if err != nil {
-					panic(err)
-				}
-				worldView_p.ElevList[i-1].Online = true
-
-				worldView_p.Version_up()
+			worldView_p.VersionUp()
+		}
+		if p.New != "" {
+			i, err := strconv.Atoi(p.New)
+			if err != nil {
+				panic(err)
 			}
-		case <-network_chan.PacketRx:
-			//fmt.Println("Received:")
-			//a.Display() // feilmelding hvis a ikke er en struct Packet
+			worldView_p.ElevList[i-1].Online = true
+
+			worldView_p.VersionUp()
 		}
 	}
 }

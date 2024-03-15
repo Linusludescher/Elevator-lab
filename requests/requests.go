@@ -12,10 +12,10 @@ func RequestsAbove(elev elevator.Elevator, worldView elevator.Worldview) bool {
 		if elev.CabRequests[f] {
 			return true
 		}
-		if worldView.HallRequests[f][elevio.BT_HallUp] == uint8(elev.ElevNum) {
+		if worldView.HallRequests[f][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 			return true
 		}
-		if worldView.HallRequests[f][elevio.BT_HallDown] == uint8(elev.ElevNum) {
+		if worldView.HallRequests[f][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
 			return true
 		}
 	}
@@ -27,10 +27,10 @@ func RequestsBelow(elev elevator.Elevator, worldView elevator.Worldview) bool {
 		if elev.CabRequests[f] {
 			return true
 		}
-		if worldView.HallRequests[f][elevio.BT_HallUp] == uint8(elev.ElevNum) {
+		if worldView.HallRequests[f][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 			return true
 		}
-		if worldView.HallRequests[f][elevio.BT_HallDown] == uint8(elev.ElevNum) {
+		if worldView.HallRequests[f][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
 			return true
 		}
 	}
@@ -41,17 +41,17 @@ func RequestsHere(elev elevator.Elevator, worldView elevator.Worldview) bool { /
 	if elev.CabRequests[elev.Last_Floor] {
 		return true
 	}
-	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HallUp] == uint8(elev.ElevNum) {
+	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 		return true
 	}
-	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HallDown] == uint8(elev.ElevNum) {
+	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
 		return true
 	}
 	return false
 }
 
 func RequestsHereCabOrUp(elev elevator.Elevator, worldView elevator.Worldview) bool { // stygt, kan ores på en linje
-	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HallUp] == uint8(elev.ElevNum) {
+	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 		return true
 	}
 	if elev.CabRequests[elev.Last_Floor] {
@@ -61,7 +61,7 @@ func RequestsHereCabOrUp(elev elevator.Elevator, worldView elevator.Worldview) b
 }
 
 func RequestsHereCabOrDown(elev elevator.Elevator, worldView elevator.Worldview) bool {
-	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HallDown] == uint8(elev.ElevNum) {
+	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
 		return true
 	}
 	if elev.CabRequests[elev.Last_Floor] {
@@ -77,31 +77,31 @@ func DeleteOrdersHere(elev_p *elevator.Elevator, worldView_p *elevator.Worldview
 		}
 	}
 	elev_p.CabRequests[elev_p.Last_Floor] = false
-	worldView_p.Version_up()
+	worldView_p.VersionUp()
 }
 
-func SetOrder(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, resetTimer_chan chan bool, wd_chan chan bool) {
+func SetOrder(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, buttn elevio.ButtonEvent, reset_timer_chan chan bool, wd_chan chan bool) {
 	if (buttn.Floor == elev_p.Last_Floor) && (elevio.GetFloor() != -1) {
-		ArrivedAtFloor(elev_p, worldView_p, resetTimer_chan, wd_chan)
+		ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, wd_chan)
 		return
 	}
-	if buttn.Button == elevio.BT_Cab {
+	if buttn.Button == elevio.BT_CAB {
 		elev_p.CabRequests[buttn.Floor] = true
 	} else if worldView_p.HallRequests[buttn.Floor][buttn.Button] == 0 {
 		costFunc.CostFunction(worldView_p, buttn)
 	}
-	worldView_p.Version_up()
+	worldView_p.VersionUp()
 }
 
-func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_ch chan bool, wd_chan chan bool) {
+func ArrivedAtFloor(elev_p *elevator.Elevator, worldView_p *elevator.Worldview, reset_timer_chan chan<- bool, wd_chan chan<- bool) {
 	elevio.SetDoorOpenLamp(true)
-	elevio.SetMotorDirection(elevio.MD_Stop)
-	elev_p.Dirn = elevio.MD_Stop
+	elevio.SetMotorDirection(elevio.MD_STOP)
+	elev_p.Dirn = elevio.MD_STOP
 	DeleteOrdersHere(elev_p, worldView_p)
-	worldView_p.Version_up()
-	elev_p.Behaviour = elevator.EB_DoorOpen
+	worldView_p.VersionUp()
+	elev_p.Behaviour = elevator.EB_DOOR_OPEN
 	wd_chan <- true
-	reset_ch <- true
+	reset_timer_chan <- true
 }
 
 func DisplayQueueCont(elev_p *elevator.Elevator) {

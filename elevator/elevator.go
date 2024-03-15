@@ -24,15 +24,15 @@ type ButtonEvent = elevio.ButtonEvent
 const (
 	N_FLOORS     int    = 4
 	N_BUTTONS    int    = 3
-	startVersion uint64 = 5000
+	STARTVERSION uint64 = 5000
 )
 
 type Behaviour string
 
 const (
-	EB_Idle     Behaviour = "idle"
-	EB_Moving   Behaviour = "moving"
-	EB_DoorOpen Behaviour = "doorOpen"
+	EB_IDLE      Behaviour = "idle"
+	EB_MOVING    Behaviour = "moving"
+	EB_DOOR_OPEN Behaviour = "doorOpen"
 )
 
 type ConfigData struct { //Reader config 2 steder: En gang her, en gang i network!
@@ -62,13 +62,13 @@ type Worldview struct {
 }
 
 const (
-	V_l   = 18446744073709551615 //2e64-1
-	V_s_c = 100000               //maks antall sykler ny versjon kan være foran for at e.Version settes godtar lavere p.Version (ved Version overflow)
+	VERSIONLIMIT  = 18446744073709551615 //2e64-1
+	VERSIONBUFFER = 100000               //maks antall sykler ny versjon kan være foran for at e.Version settes godtar lavere p.Version (ved Version overflow)
 	// versionInitVal = 10000 //initialisere på høyere verdi enn 0 for ikke problemer med nullstilling ved tilbakekobling etter utfall
 )
 
-func (worldView_p *Worldview) Version_up() {
-	if worldView_p.Version < V_l {
+func (worldView_p *Worldview) VersionUp() {
+	if worldView_p.Version < VERSIONLIMIT {
 		worldView_p.Version++
 	} else {
 		worldView_p.Version = 0
@@ -128,20 +128,20 @@ func ElevatorInit(id int) (elev Elevator, worldView Worldview) {
 		hallOrders[i] = [2]uint8{0, 0}
 	}
 
-	worldView = Worldview{[]Elevator{}, id, startVersion, hallOrders}
+	worldView = Worldview{[]Elevator{}, id, STARTVERSION, hallOrders}
 
 	for i := 1; i <= int(elevatorConfig.N_elevators); i++ {
 		cabOrders := make([]bool, elevatorConfig.N_FLOORS)
-		n := Elevator{false, true, EB_Idle, false, i, elevio.MD_Stop, elevio.MD_Stop, 0, cabOrders}
+		n := Elevator{false, true, EB_IDLE, false, i, elevio.MD_STOP, elevio.MD_STOP, 0, cabOrders}
 		worldView.ElevList = append(worldView.ElevList, n)
 	}
 	elev = worldView.ElevList[id-1]
 	elev.Online = true
 
 	for elevio.GetFloor() != 0 {
-		elevio.SetMotorDirection(elevio.MD_Down)
+		elevio.SetMotorDirection(elevio.MD_DOWN)
 	}
-	elevio.SetMotorDirection(elevio.MD_Stop)
+	elevio.SetMotorDirection(elevio.MD_STOP)
 	return
 }
 
@@ -156,19 +156,19 @@ func (elev Elevator) Display() { //lage en for worldview også!
 	}
 }
 
-func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan bool) {
+func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, wd_chan chan<- bool) {
 	elevio.SetMotorDirection(dir)
 	elev_p.Last_dir = dir
 	elev_p.Dirn = dir
-	if elev_p.Dirn != elevio.MD_Stop {
-		elev_p.Behaviour = EB_Moving
+	if elev_p.Dirn != elevio.MD_STOP {
+		elev_p.Behaviour = EB_MOVING
 		wd_chan <- true
 	} else {
-		elev_p.Behaviour = EB_Idle
+		elev_p.Behaviour = EB_IDLE
 	}
 }
 
-func BroadcastElevator(bc_chan chan bool, n_ms int) {
+func BroadcastElevator(bc_chan chan<- bool, n_ms int) {
 	for {
 		bc_chan <- true
 		time.Sleep(time.Duration(n_ms) * time.Millisecond)
@@ -186,7 +186,7 @@ func UpdateLights(worldView Worldview, elevnum int) {
 			continue
 		}
 		for floor, f := range elev.CabRequests {
-			elevio.SetButtonLamp(elevio.BT_Cab, floor, f)
+			elevio.SetButtonLamp(elevio.BT_CAB, floor, f)
 		}
 	}
 }

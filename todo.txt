@@ -1,3 +1,12 @@
+Mandagstodo: 
+- oppdatere elevator-struct med behaviour + teste
+- lage updateOrders: tar inn info fra hver heis som er lokalt lagret, omformer til input for kostfunksjon, kjører costfunksjon, putter info inn i kø som sendes ut. 
+- Watchdog: passer på hver heis, hvis en faller ut gir den ordre fri og kjører kostfunksjon. Sendes ut med versjonskontroll. 
+- Endre statemachine til å bare ta hensyn til egne ordre. 
+- merge til main
+
+
+
 Notater om hva som har blitt neglisjert/må gjøres
 
 -fikse obstruction og stop og timer
@@ -136,15 +145,15 @@ Kode kvalitet
 - kommunikasjon mellom moduler, få moduler snakker med elevio for eks
 - Unngå strong coupling bortsett fra i main: unngå pointere som parametre. Bruke channels istedenfor 
 - mer forklarende navn til parametre, kortere imports
-- spesifisere retning på channels som parametre
-- panic som errorhandling
+------------------------------------------------------------------------------- spesifisere retning på channels som parametre
+------------------------------------------------------------------------------- panic som errorhandling
 - rydde i kommentarer og prints. Legge til noen forklarende kommentarer der det trengs
-- peersOnline har en switch som ikke trengs? kanskje onstruktureres?
+------------------------------------------------------------------------------- peersOnline har en switch som ikke trengs? kanskje onstruktureres?
 
 
 Navn parametre
-- Funksjoner: camelCase
-- konstanter: CAPS
-- channels: snake, slutte på channels; broadcast_chan
-- pekere: snake_p; elev_p, worldview_p
+------------------------------------------------------------------------------- Funksjoner: camelCase
+------------------------------------------------------------------------------- konstanter: CAPS
+------------------------------------------------------------------------------- channels: snake, slutte på channels; broadcast_chan
+------------------------------------------------------------------------------- pekere: snake_p; elev_p, worldview_p
 - forkorte import navn
