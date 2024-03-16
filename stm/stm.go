@@ -42,7 +42,8 @@ func MainFSM(
 			DefaultState(update_lights_chan, updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels)
 			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
 			processPairConn.Write([]byte("42"))
-			//my_worldView.Display()
+			my_worldView := elevator.ReadWorldView(readChannels)
+			my_worldView.Display()
 
 		case elevnum := <-update_lights_chan:
 			UpdateLights(ioChannels.Set_button_lamp_chan, readChannels, elevnum)

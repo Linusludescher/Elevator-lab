@@ -64,8 +64,9 @@ func main() {
 	go timer.TimerStart(3, timer_exp_chan, reset_timer_chan)
 
 	go stm.Obstruction(updateWorldviewChannels, readChannels, reset_timer_chan, drv_obstr_chan)
-	go stm.MainFSM(timer_exp_chan, watchdog_chan, processPairConn, drv_buttons_chan, reset_timer_chan,
-		drv_floors_chan, network_channels, bc_timer_chan, update_lights_chan, readChannels, updateWorldviewChannels, elevioChannels)
 
 	go network.PeersOnline(readChannels, network_channels, updateWorldviewChannels)
+
+	stm.MainFSM(timer_exp_chan, watchdog_chan, processPairConn, drv_buttons_chan, reset_timer_chan,
+		drv_floors_chan, network_channels, bc_timer_chan, update_lights_chan, readChannels, updateWorldviewChannels, elevioChannels)
 }
