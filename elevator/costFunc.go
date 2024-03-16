@@ -20,7 +20,7 @@ type HRAInput struct {
 	States       map[string]HRAElevState `json:"states"`
 }
 
-func CostFunction(worldView_p *Worldview, buttn elevio.ButtonEvent) {
+func costFunction(worldView_p *Worldview, buttn elevio.ButtonEvent) {
 	hraExecutable := "hall_request_assigner"
 	input := worldViewToCfInput(*worldView_p, buttn)
 	jsonBytes, err := json.Marshal(input)

@@ -58,13 +58,13 @@ func UpdateWorldview(worldView_p *Worldview,
 	for {
 		select {
 		case orderButton := <-updateChannels.Set_order_chan:
-			SetOrder(elev_p, worldView_p, orderButton, reset_timer_chan, watchdog_chan)
+			setOrder(elev_p, worldView_p, orderButton, reset_timer_chan, watchdog_chan)
 
 		case <-updateChannels.Delete_orders_here_chan:
-			DeleteOrdersHere(elev_p, worldView_p)
+			deleteOrdersHere(elev_p, worldView_p)
 
 		case <-updateChannels.Arrived_at_floor_chan:
-			ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, watchdog_chan)
+			arrivedAtFloor(elev_p, worldView_p, reset_timer_chan, watchdog_chan)
 
 		case dirUpdate := <-updateChannels.Update_direction_chan:
 			elev_p.UpdateDirection(dirUpdate, watchdog_chan)
@@ -84,7 +84,7 @@ func UpdateWorldview(worldView_p *Worldview,
 			elev_p.Obstruction = obstr
 
 		case buttn := <-updateChannels.Cost_func_chan:
-			CostFunction(worldView_p, buttn)
+			costFunction(worldView_p, buttn)
 
 		case peer := <-updateChannels.Peer_lost_chan:
 			peerLost(peer, readChannels, updateChannels.Cost_func_chan, updateChannels.Version_up_chan, worldView_p)
@@ -100,7 +100,7 @@ func UpdateWorldview(worldView_p *Worldview,
 	}
 }
 
-func DeleteOrdersHere(elev_p *Elevator, worldView_p *Worldview) {
+func deleteOrdersHere(elev_p *Elevator, worldView_p *Worldview) {
 	for orderType := 0; orderType < 2; orderType++ {
 		if worldView_p.HallRequests[elev_p.Last_Floor][orderType] == uint8(elev_p.ElevNum) {
 			worldView_p.HallRequests[elev_p.Last_Floor][orderType] = 0
@@ -110,25 +110,25 @@ func DeleteOrdersHere(elev_p *Elevator, worldView_p *Worldview) {
 	worldView_p.VersionUp()
 }
 
-func SetOrder(elev_p *Elevator, worldView_p *Worldview, buttn elevio.ButtonEvent, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
+func setOrder(elev_p *Elevator, worldView_p *Worldview, buttn elevio.ButtonEvent, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
 	if (buttn.Floor == elev_p.Last_Floor) && (elevio.GetFloor() != -1) {
-		ArrivedAtFloor(elev_p, worldView_p, reset_timer_chan, watchdog_chan)
+		arrivedAtFloor(elev_p, worldView_p, reset_timer_chan, watchdog_chan)
 		return
 	}
 	if buttn.Button == elevio.BT_CAB {
 		elev_p.CabRequests[buttn.Floor] = true
 	} else if worldView_p.HallRequests[buttn.Floor][buttn.Button] == 0 {
-		CostFunction(worldView_p, buttn)
+		costFunction(worldView_p, buttn)
 	}
 	worldView_p.VersionUp()
 }
 
-func ArrivedAtFloor(elev_p *Elevator, worldView_p *Worldview, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
+func arrivedAtFloor(elev_p *Elevator, worldView_p *Worldview, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
 	reset_timer_chan <- true
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_STOP)
 	elev_p.Dirn = elevio.MD_STOP
-	DeleteOrdersHere(elev_p, worldView_p)
+	deleteOrdersHere(elev_p, worldView_p)
 	worldView_p.VersionUp()
 	elev_p.Behaviour = EB_DOOR_OPEN
 	watchdog_chan <- true
