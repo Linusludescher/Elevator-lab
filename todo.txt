@@ -171,3 +171,5 @@ Siste krametrekning
 
 - READMEFILE
 - TENKE OVER EXECUTAbLE HALLASSIGNER
+- Fjerne alt av process pairs
+    - Fjerne Panic()

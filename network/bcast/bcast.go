@@ -6,8 +6,8 @@ import (
 	"net"
 	"os/exec"
 	"path/filepath"
-	"project/elevator"
 	"project/network/conn"
+	"project/worldview"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -149,9 +149,9 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 	}
 }
 
-func BcWorldView(readChannels elevator.ReadWorldviewChannels, bc_chan chan<- elevator.Worldview) {
-	worldView := elevator.ReadWorldView(readChannels)
-	elev := elevator.ReadElevator(readChannels)
+func BcWorldView(readChannels worldview.ReadWorldviewChannels, bc_chan chan<- worldview.Worldview) {
+	worldView := worldview.ReadWorldView(readChannels)
+	elev := worldview.ReadElevator(readChannels)
 	worldView.ElevList[elev.ElevNum-1] = elev
 	bc_chan <- worldView
 }

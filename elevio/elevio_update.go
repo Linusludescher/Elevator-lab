@@ -25,7 +25,7 @@ func InitElevioChannels() (ioChannels ElevioChannels) {
 	return
 }
 
-func Elevio_select(ioChannels ElevioChannels) {
+func ElevioUpdate(ioChannels ElevioChannels) {
 	for {
 		select {
 		case floor := <-ioChannels.Set_floor_indicator_chan:

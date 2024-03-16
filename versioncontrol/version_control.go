@@ -2,10 +2,10 @@ package versioncontrol
 
 import (
 	"fmt"
-	"project/elevator"
+	w "project/worldview"
 )
 
-func versionIfEqualQueue(elev elevator.Elevator, my_worldView elevator.Worldview, incoming_worldView elevator.Worldview) bool {
+func versionIfEqualQueue(elev w.Elevator, my_worldView w.Worldview, incoming_worldView w.Worldview) bool {
 	areEqual := true
 	for i := range my_worldView.HallRequests {
 		for j := range my_worldView.HallRequests[i] {
@@ -37,15 +37,15 @@ func versionIfEqualQueue(elev elevator.Elevator, my_worldView elevator.Worldview
 	return areEqual
 }
 
-func CheckIncomingWorldView(readChannels elevator.ReadWorldviewChannels,
+func CheckIncomingWorldView(readChannels w.ReadWorldviewChannels,
 	version_up_chan chan<- bool,
-	incomingWorldView elevator.Worldview,
-	update_to_incoming_worldview_chan chan<- elevator.Worldview,
+	incomingWorldView w.Worldview,
+	update_to_incoming_worldview_chan chan<- w.Worldview,
 	update_lights_chan chan<- int) {
 
-	myWorldView := elevator.ReadWorldView(readChannels)
-	myElev := elevator.ReadElevator(readChannels)
-	if incomingWorldView.Version > myWorldView.Version || ((myWorldView.Version > elevator.VERSIONLIMIT-elevator.VERSIONBUFFER) && incomingWorldView.Version < elevator.VERSIONBUFFER) {
+	myWorldView := w.ReadWorldView(readChannels)
+	myElev := w.ReadElevator(readChannels)
+	if incomingWorldView.Version > myWorldView.Version || ((myWorldView.Version > w.VERSIONLIMIT-w.VERSIONBUFFER) && incomingWorldView.Version < w.VERSIONBUFFER) {
 		update_to_incoming_worldview_chan <- incomingWorldView
 
 		update_lights_chan <- myElev.ElevNum

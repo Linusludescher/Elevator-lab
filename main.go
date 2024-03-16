@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"project/elevator"
 	"project/elevio"
+	"project/fsm"
 	"project/network"
 	"project/network/bcast"
-	"project/stm"
 	"project/timer"
-	// "strconv"
+	w "project/worldview"
 )
 
 //Todo rydding: samle ting i funkdjonrt
@@ -27,7 +26,7 @@ func main() {
 	//localhostnr := strconv.Itoa(19657 + id)
 	fmt.Println(id)
 
-	elevatorConf := elevator.ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
+	elevatorConf := w.ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
 	numFloors := int(elevatorConf.N_FLOORS)
 
 	processPairConn := bcast.ProcessPairListner(id)
@@ -37,8 +36,8 @@ func main() {
 
 	//clean_main greier:
 	elevioChannels := elevio.InitElevioChannels()
-	updateWorldviewChannels := elevator.InitUpdateWorldviewChannels()
-	readChannels := elevator.InitReadWorldViewChannels()
+	updateWorldviewChannels := w.InitUpdateWorldviewChannels()
+	readChannels := w.InitReadWorldViewChannels()
 
 	drv_buttons_chan := make(chan elevio.ButtonEvent, 100)
 	drv_floors_chan := make(chan int, 100)
@@ -49,13 +48,13 @@ func main() {
 	reset_timer_chan := make(chan bool, 100)
 	update_lights_chan := make(chan int, 100)
 
-	my_elevator, my_wv := elevator.ElevatorInit(timer_exp_chan, id)
+	my_elevator, my_wv := w.ElevatorInit(timer_exp_chan, id)
 	network_channels := network.InitNetwork(id)
 
-	go elevator.UpdateWorldview(&my_wv, &my_elevator, reset_timer_chan, watchdog_chan, readChannels, updateWorldviewChannels, elevioChannels)
-	go elevator.BroadcastElevator(bc_timer_chan, 10)
+	go w.UpdateWorldview(&my_wv, &my_elevator, reset_timer_chan, watchdog_chan, readChannels, updateWorldviewChannels, elevioChannels)
+	go w.BroadcastElevator(bc_timer_chan, 10)
 
-	go elevio.Elevio_select(elevioChannels)
+	go elevio.ElevioUpdate(elevioChannels)
 	go elevio.PollButtons(drv_buttons_chan)
 	go elevio.PollFloorSensor(drv_floors_chan)
 	go elevio.PollObstructionSwitch(drv_obstr_chan)
@@ -63,10 +62,10 @@ func main() {
 	go timer.OperativeWatchdog(10, watchdog_chan)
 	go timer.TimerStart(3, timer_exp_chan, reset_timer_chan)
 
-	go stm.Obstruction(updateWorldviewChannels, readChannels, reset_timer_chan, drv_obstr_chan)
+	go fsm.Obstruction(updateWorldviewChannels, readChannels, reset_timer_chan, drv_obstr_chan)
 
 	go network.PeersOnline(readChannels, network_channels, updateWorldviewChannels)
 
-	stm.MainFSM(timer_exp_chan, watchdog_chan, processPairConn, drv_buttons_chan, reset_timer_chan,
+	fsm.MainFSM(timer_exp_chan, watchdog_chan, processPairConn, drv_buttons_chan, reset_timer_chan,
 		drv_floors_chan, network_channels, bc_timer_chan, update_lights_chan, readChannels, updateWorldviewChannels, elevioChannels)
 }

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"project/elevator"
 	"project/network/bcast"
 	"project/network/peers"
+	w "project/worldview"
 	"strconv"
 )
 
@@ -22,8 +22,8 @@ type ConfigUDPPorts struct {
 type NetworkChan struct {
 	PeerUpdate_chan   chan peers.PeerUpdate
 	PeerTxEnable_chan chan bool
-	PacketTx_chan     chan elevator.Worldview
-	PacketRx_chan     chan elevator.Worldview
+	PacketTx_chan     chan w.Worldview
+	PacketRx_chan     chan w.Worldview
 }
 
 func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende navn til configPorts!
@@ -68,8 +68,8 @@ func InitNetwork(id int) (networkChan NetworkChan) {
 	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdate_chan)
 
 	// We make channels for sending and receiving our custom data types
-	networkChan.PacketTx_chan = make(chan elevator.Worldview)
-	networkChan.PacketRx_chan = make(chan elevator.Worldview)
+	networkChan.PacketTx_chan = make(chan w.Worldview)
+	networkChan.PacketRx_chan = make(chan w.Worldview)
 	// ... and start the transmitter/receiver pair on some port
 	// These functions can take any number of channels! It is also possible to
 	//  start multiple transmitters/receivers on the same port.
@@ -82,7 +82,7 @@ func InitNetwork(id int) (networkChan NetworkChan) {
 	return
 }
 
-func PeersOnline(readChannels elevator.ReadWorldviewChannels, network_chan NetworkChan, updateWorldviewChannels elevator.UpdateWorldviewChannels) {
+func PeersOnline(readChannels w.ReadWorldviewChannels, network_chan NetworkChan, updateWorldviewChannels w.UpdateWorldviewChannels) {
 	for {
 		p := <-network_chan.PeerUpdate_chan
 		fmt.Printf("Peer update:\n")
