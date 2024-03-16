@@ -1,6 +1,7 @@
 package timer
 
 import (
+	"fmt"
 	"os"
 	"time"
 )
@@ -15,9 +16,11 @@ func TimerStart(duration time.Duration, timer_exp_chan chan<- bool, reset_timer_
 			timer_exp_chan <- true
 
 		case <-reset_timer_chan:
-			if !sec_timer.Stop() {
-				<-sec_timer.C // Drain the timer channel if the timer has already expired
-			}
+			// if !sec_timer.Stop() {
+			// 	fmt.Println("Venter på drain")
+			// 	<-sec_timer.C // Drain the timer channel if the timer has already expired
+			// }
+			fmt.Println("Resetting")
 			sec_timer.Reset(duration * time.Second)
 		}
 	}

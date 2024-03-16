@@ -33,7 +33,8 @@ func MainFSM(
 			ButtonPressed(updateChannels.Set_order_chan, buttn)
 
 		case floor_sens := <-drv_floors_chan:
-			FloorSensed(updateChannels.Update_floor_chan, updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels, floor_sens, reset_timer_chan, watchdog_chan)
+			updateChannels.Update_floor_chan <- floor_sens
+			FloorSensed(updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels, floor_sens, watchdog_chan)
 
 		case incomingWorldview := <-network_channels.PacketRx_chan: //legge til
 			versioncontrol.CheckIncomingWorldView(readChannels, updateChannels.Version_up_chan, incomingWorldview, updateChannels.Update_to_incoming_chan, update_lights_chan)
@@ -42,8 +43,8 @@ func MainFSM(
 			DefaultState(update_lights_chan, updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels)
 			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
 			processPairConn.Write([]byte("42"))
-			my_worldView := elevator.ReadWorldView(readChannels)
-			my_worldView.Display()
+			//my_worldView := elevator.ReadWorldView(readChannels)
+			//my_worldView.Display()
 
 		case elevnum := <-update_lights_chan:
 			UpdateLights(ioChannels.Set_button_lamp_chan, readChannels, elevnum)
@@ -85,11 +86,10 @@ func ButtonPressed(set_order_chan chan<- elevio.ButtonEvent, buttn elevio.Button
 	set_order_chan <- buttn
 }
 
-func FloorSensed(update_floor_chan chan<- int, update_direction_chan chan<- elevio.MotorDirection, arrived_at_floor_chan chan<- bool, readChannels elevator.ReadWorldviewChannels, floor_sens int, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
+func FloorSensed(update_direction_chan chan<- elevio.MotorDirection, arrived_at_floor_chan chan<- bool, readChannels elevator.ReadWorldviewChannels, floor_sens int, watchdog_chan chan<- bool) {
 	watchdog_chan <- false
 	worldView := elevator.ReadWorldView(readChannels)
 	elev := elevator.ReadElevator(readChannels)
-	update_floor_chan <- floor_sens
 
 	if elev.Dirn == elevio.MD_UP && floor_sens != -1 {
 		if requests.RequestsHereCabOrUp(elev, worldView) {

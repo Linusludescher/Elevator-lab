@@ -26,25 +26,25 @@ type UpdateWorldviewChannels struct {
 }
 
 func InitReadWorldViewChannels() (readChannels ReadWorldviewChannels) {
-	readChannels.Read_request_worldView_chan = make(chan bool)
-	readChannels.Read_request_elev_chan = make(chan bool)
-	readChannels.Read_worldView_chan = make(chan Worldview)
-	readChannels.Read_elev_chan = make(chan Elevator)
+	readChannels.Read_request_worldView_chan = make(chan bool, 100)
+	readChannels.Read_request_elev_chan = make(chan bool, 100)
+	readChannels.Read_worldView_chan = make(chan Worldview, 100)
+	readChannels.Read_elev_chan = make(chan Elevator, 100)
 	return
 }
 
 func InitUpdateWorldviewChannels() (updateChannels UpdateWorldviewChannels) {
-	updateChannels.Set_order_chan = make(chan elevio.ButtonEvent)
-	updateChannels.Delete_orders_here_chan = make(chan bool)
-	updateChannels.Arrived_at_floor_chan = make(chan bool)
-	updateChannels.Update_direction_chan = make(chan elevio.MotorDirection)
-	updateChannels.Version_up_chan = make(chan bool)
-	updateChannels.Update_floor_chan = make(chan int)
-	updateChannels.Update_to_incoming_chan = make(chan Worldview)
-	updateChannels.Update_obstr_chan = make(chan bool)
-	updateChannels.Cost_func_chan = make(chan elevio.ButtonEvent)
-	updateChannels.Peer_lost_chan = make(chan int)
-	updateChannels.Peer_new_chan = make(chan int)
+	updateChannels.Set_order_chan = make(chan elevio.ButtonEvent, 100)
+	updateChannels.Delete_orders_here_chan = make(chan bool, 100)
+	updateChannels.Arrived_at_floor_chan = make(chan bool, 100)
+	updateChannels.Update_direction_chan = make(chan elevio.MotorDirection, 100)
+	updateChannels.Version_up_chan = make(chan bool, 100)
+	updateChannels.Update_floor_chan = make(chan int, 100)
+	updateChannels.Update_to_incoming_chan = make(chan Worldview, 100)
+	updateChannels.Update_obstr_chan = make(chan bool, 100)
+	updateChannels.Cost_func_chan = make(chan elevio.ButtonEvent, 100)
+	updateChannels.Peer_lost_chan = make(chan int, 100)
+	updateChannels.Peer_new_chan = make(chan int, 100)
 	return
 }
 
@@ -124,6 +124,7 @@ func SetOrder(elev_p *Elevator, worldView_p *Worldview, buttn elevio.ButtonEvent
 }
 
 func ArrivedAtFloor(elev_p *Elevator, worldView_p *Worldview, reset_timer_chan chan<- bool, watchdog_chan chan<- bool) {
+	reset_timer_chan <- true
 	elevio.SetDoorOpenLamp(true)
 	elevio.SetMotorDirection(elevio.MD_STOP)
 	elev_p.Dirn = elevio.MD_STOP
@@ -131,7 +132,6 @@ func ArrivedAtFloor(elev_p *Elevator, worldView_p *Worldview, reset_timer_chan c
 	worldView_p.VersionUp()
 	elev_p.Behaviour = EB_DOOR_OPEN
 	watchdog_chan <- true
-	reset_timer_chan <- true
 }
 
 //TODO: alle funksjonene her kan få små bokstaver!

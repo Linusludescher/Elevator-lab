@@ -108,7 +108,7 @@ func ReadElevatorConfig() (elevatorData ConfigData) {
 	return
 }
 
-func ElevatorInit(id int) (elev Elevator, worldView Worldview) {
+func ElevatorInit(timer_exp_chan chan bool, id int) (elev Elevator, worldView Worldview) {
 	elevatorConfig := ReadElevatorConfig()
 	hallOrders := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hallOrders {
@@ -129,6 +129,7 @@ func ElevatorInit(id int) (elev Elevator, worldView Worldview) {
 		elevio.SetMotorDirection(elevio.MD_DOWN)
 	}
 	elevio.SetMotorDirection(elevio.MD_STOP)
+	timer_exp_chan <- true
 	return
 }
 

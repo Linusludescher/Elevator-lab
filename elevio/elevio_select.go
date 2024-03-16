@@ -16,12 +16,12 @@ type ElevioChannels struct {
 }
 
 func InitElevioChannels() (ioChannels ElevioChannels) {
-	ioChannels.Set_floor_indicator_chan = make(chan int)
-	ioChannels.Set_motor_direction_chan = make(chan MotorDirection)
-	ioChannels.Set_button_lamp_chan = make(chan ButtonLampOrder)
-	ioChannels.Set_door_open_lamp_chan = make(chan bool)
-	ioChannels.Get_floor_chan = make(chan bool)
-	ioChannels.Send_floor_chan = make(chan int)
+	ioChannels.Set_floor_indicator_chan = make(chan int, 100)
+	ioChannels.Set_motor_direction_chan = make(chan MotorDirection, 100)
+	ioChannels.Set_button_lamp_chan = make(chan ButtonLampOrder, 100)
+	ioChannels.Set_door_open_lamp_chan = make(chan bool, 100)
+	ioChannels.Get_floor_chan = make(chan bool, 100)
+	ioChannels.Send_floor_chan = make(chan int, 100)
 	return
 }
 

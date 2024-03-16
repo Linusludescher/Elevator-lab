@@ -157,3 +157,17 @@ Navn parametre
 ------------------------------------------------------------------------------- channels: snake, slutte på channels; broadcast_chan
 ------------------------------------------------------------------------------- pekere: snake_p; elev_p, worldview_p
 - forkorte import navn
+
+
+Siste krametrekning
+------------------------------------------------------------------------------- cab requests etasje 0 er 1 osv
+------------------------------------------------------------------------------- timer på dør er for lang kanskje? wd går ut
+- kjøre med -race flag
+- trykker cab i egen floor, timer går ikke ut, starter aldri
+
+- prøve å fjerne process pairs hvis ting ikke funker
+
+
+
+- READMEFILE
+- TENKE OVER EXECUTAbLE HALLASSIGNER

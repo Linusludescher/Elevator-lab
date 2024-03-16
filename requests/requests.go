@@ -42,28 +42,19 @@ func RequestsHere(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 		return true
 	}
-	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
-		return true
-	}
-	return false
+	return worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLDOWN] == uint8(elev.ElevNum)
 }
 
 func RequestsHereCabOrUp(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLUP] == uint8(elev.ElevNum) {
 		return true
 	}
-	if elev.CabRequests[elev.Last_Floor] {
-		return true
-	}
-	return false
+	return elev.CabRequests[elev.Last_Floor]
 }
 
 func RequestsHereCabOrDown(elev elevator.Elevator, worldView elevator.Worldview) bool {
 	if worldView.HallRequests[elev.Last_Floor][elevio.BT_HALLDOWN] == uint8(elev.ElevNum) {
 		return true
 	}
-	if elev.CabRequests[elev.Last_Floor] {
-		return true
-	}
-	return false
+	return elev.CabRequests[elev.Last_Floor]
 }

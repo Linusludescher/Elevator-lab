@@ -129,6 +129,8 @@ func PollObstructionSwitch(receiver_chan chan<- bool) {
 		time.Sleep(_POLLRATE)
 		v := GetObstruction()
 		if v != prev {
+			fmt.Println(v) // TEST HEREEEEEEEE
+
 			receiver_chan <- v
 		}
 		prev = v
