@@ -1,7 +1,6 @@
 package fsm
 
 import (
-	"net"
 	"project/elevio"
 	"project/network"
 	"project/network/bcast"
@@ -14,7 +13,6 @@ import (
 func MainFSM(
 	timer_exp_chan <-chan bool,
 	watchdog_chan chan bool,
-	processPairConn *net.UDPConn,
 	drv_buttons_chan chan elevio.ButtonEvent,
 	reset_timer_chan chan bool,
 	drv_floors_chan chan int,
@@ -42,7 +40,7 @@ func MainFSM(
 		case <-bc_timer_chan:
 			DefaultState(updateChannels, readChannels, ioChannels)
 			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
-			processPairConn.Write([]byte("42"))
+			//processPairConn.Write([]byte("42"))
 			my_worldView := w.ReadWorldView(readChannels)
 			my_worldView.Display()
 

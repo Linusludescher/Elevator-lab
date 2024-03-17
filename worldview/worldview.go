@@ -1,6 +1,7 @@
 package worldview
 
 import (
+	"flag"
 	"fmt"
 	"project/elevio"
 )
@@ -115,6 +116,22 @@ func UpdateWorldview(worldView_p *Worldview,
 			readChannels.Read_elev_chan <- *elev_p
 		}
 	}
+}
+
+func GetElevatorCredentials() (id int, numFloors int) {
+	idFlag := flag.Int("id", 1, "Specifies an ID number")
+
+	// Parse the command-line flags
+	flag.Parse()
+
+	// Retrieve the value of the idFlag
+	id = *idFlag
+	//localhostnr := strconv.Itoa(19657 + id)
+	fmt.Println(id)
+
+	elevatorConf := ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
+	numFloors = int(elevatorConf.N_FLOORS)
+	return
 }
 
 func deleteOrdersHere(elev_p *Elevator, worldView_p *Worldview) {

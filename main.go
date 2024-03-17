@@ -1,12 +1,9 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"project/elevio"
 	"project/fsm"
 	"project/network"
-	"project/network/bcast"
 	"project/timer"
 	w "project/worldview"
 )
@@ -16,23 +13,10 @@ import (
 
 func main() {
 
-	idFlag := flag.Int("id", 1, "Specifies an ID number")
-
-	// Parse the command-line flags
-	flag.Parse()
-
-	// Retrieve the value of the idFlag
-	id := *idFlag
-	//localhostnr := strconv.Itoa(19657 + id)
-	fmt.Println(id)
-
-	elevatorConf := w.ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
-	numFloors := int(elevatorConf.N_FLOORS)
-
-	processPairConn := bcast.ProcessPairListner(id)
-
+	//processPairConn := bcast.ProcessPairListner(id)
+	id, numFloors := w.GetElevatorCredentials()
 	//elevio.Init("localhost:"+localhostnr, numFloors)
-	elevio.Init("localhost:15657", numFloors) //15657
+	elevio.Init("localhost:15658", numFloors) //15657
 
 	//clean_main greier:
 	elevioChannels := elevio.InitElevioChannels()
@@ -62,6 +46,6 @@ func main() {
 	go fsm.Obstruction(updateWorldviewChannels, readChannels, reset_timer_chan, drv_obstr_chan)
 	go network.PeersOnline(readChannels, network_channels, updateWorldviewChannels)
 
-	fsm.MainFSM(timer_exp_chan, watchdog_chan, processPairConn, drv_buttons_chan, reset_timer_chan,
+	fsm.MainFSM(timer_exp_chan, watchdog_chan, drv_buttons_chan, reset_timer_chan,
 		drv_floors_chan, network_channels, bc_timer_chan, update_lights_chan, readChannels, updateWorldviewChannels, elevioChannels)
 }
