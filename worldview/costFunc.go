@@ -39,7 +39,6 @@ func costFunction(worldView_p *Worldview, buttn elevio.ButtonEvent) {
 		panic(err)
 	}
 
-	fmt.Printf("output: \n")
 	for k, v := range *output {
 		fmt.Printf("%6v :  %+v\n", k, v)
 	}

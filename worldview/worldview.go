@@ -104,7 +104,6 @@ func UpdateWorldview(worldView_p *Worldview,
 			costFunction(worldView_p, buttn)
 
 		case peer := <-updateChannels.Peer_lost_chan:
-			fmt.Println("mottatt fra channel Peer_lost")
 			peerLost(peer, updateChannels.Cost_func_chan, updateChannels.Version_up_chan, worldView_p)
 
 		case peer := <-updateChannels.Peer_new_chan:
@@ -112,6 +111,7 @@ func UpdateWorldview(worldView_p *Worldview,
 
 		case <-readChannels.Read_request_worldView_chan:
 			readChannels.Read_worldView_chan <- *worldView_p
+
 		case <-readChannels.Read_request_elev_chan:
 			readChannels.Read_elev_chan <- *elev_p
 		}
@@ -120,16 +120,10 @@ func UpdateWorldview(worldView_p *Worldview,
 
 func GetElevatorCredentials() (id int, numFloors int) {
 	idFlag := flag.Int("id", 1, "Specifies an ID number")
-
-	// Parse the command-line flags
 	flag.Parse()
-
-	// Retrieve the value of the idFlag
 	id = *idFlag
-	//localhostnr := strconv.Itoa(19657 + id)
-	fmt.Println(id)
-
-	elevatorConf := ReadElevatorConfig() //Dette burde bli en initfunksjon, og legges tilbake i elevator package!
+	fmt.Printf("elevator number: %d:\n", id)
+	elevatorConf := ReadElevatorConfig() 
 	numFloors = int(elevatorConf.N_FLOORS)
 	return
 }
@@ -186,10 +180,7 @@ func ReadElevator(readChannels ReadWorldviewChannels) Elevator {
 }
 
 func peerLost(peer int, cost_func_chan chan elevio.ButtonEvent, version_up_chan chan bool, worldView_p *Worldview) {
-	fmt.Println("peerLost starter")
-	//worldView := ReadWorldView(readChannels)
 	worldView_p.ElevList[peer-1].Online = false
-	fmt.Println("peer lost")
 	//Assign hall orders to others:
 	for floor, f := range worldView_p.HallRequests {
 		for buttonType, o := range f {

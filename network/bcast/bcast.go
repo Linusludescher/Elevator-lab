@@ -4,20 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"os/exec"
-	"path/filepath"
 	"project/network/conn"
 	"project/worldview"
 	"reflect"
-	"runtime"
-	"strconv"
-	"time"
 )
 
 const BUFSIZE = 1024
 
-// Encodes received values from `chans` into type-tagged JSON, then broadcasts
-// it on `port`
+// Encodes received values from `chans` into type-tagged JSON, then broadcasts it on `port`
 func Transmitter(port int, chans ...interface{}) {
 	checkArgs(chans...)
 	typeNames := make([]string, len(chans))
@@ -86,14 +80,6 @@ type typeTaggedJSON struct {
 }
 
 // Checks that args to Tx'er/Rx'er are valid:
-//
-//	All args must be channels
-//	Element types of channels must be encodable with JSON
-//	No element types are repeated
-//
-// Implementation note:
-//   - Why there is no `isMarshalable()` function in encoding/json is a mystery,
-//     so the tests on element type are hand-copied from `encoding/json/encode.go`
 func checkArgs(chans ...interface{}) {
 	n := 0
 	for range chans {
@@ -154,61 +140,4 @@ func BcWorldView(readChannels worldview.ReadWorldviewChannels, bc_chan chan<- wo
 	elev := worldview.ReadElevator(readChannels)
 	worldView.ElevList[elev.ElevNum-1] = elev
 	bc_chan <- worldView
-}
-
-func ProcessPairListner(id int) (udpConn *net.UDPConn) {
-	broadcastAddr, err := net.ResolveUDPAddr("udp", "localhost:8091")
-	if err != nil {
-		panic(err)
-	}
-
-	// backup, lytter på UDP
-	listen_conn, err := net.ListenUDP("udp", broadcastAddr)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Listening..")
-
-	buffer := make([]byte, 1024)
-
-	for {
-		timeout := time.Now().Add(10 * time.Second)
-		listen_conn.SetReadDeadline(timeout)
-		_, _, err := listen_conn.ReadFromUDP(buffer)
-		if err != nil {
-			// Check if the error is a timeout
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				fmt.Println("Read timeout occurred. Breaking...")
-				break
-			}
-			panic(err)
-		}
-	}
-
-	listen_conn.Close()
-
-	// starte nytt vindu
-	time.Sleep(1000 * time.Millisecond)
-	flag := "-id"
-	value := strconv.Itoa(id)
-
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic(ok)
-	}
-	path_to_main := filepath.Join(filepath.Dir(filename), "..", "..", "main.go")
-	cmd := exec.Command("gnome-terminal", "--", "go", "run", path_to_main, flag, value)
-	fmt.Println(cmd.Args)
-
-	// Run the command
-	err = cmd.Run()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Im the primary")
-	udpConn, err = net.DialUDP("udp", nil, broadcastAddr)
-	if err != nil {
-		panic(err)
-	}
-	return
 }

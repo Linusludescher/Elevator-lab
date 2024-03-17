@@ -34,13 +34,12 @@ func MainFSM(
 			updateChannels.Update_floor_chan <- floor_sens
 			FloorSensed(updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels, floor_sens, watchdog_chan)
 
-		case incomingWorldview := <-network_channels.PacketRx_chan: //legge til
+		case incomingWorldview := <-network_channels.PacketRx_chan:
 			versioncontrol.CheckIncomingWorldView(readChannels, updateChannels.Version_up_chan, incomingWorldview, updateChannels.Update_to_incoming_chan, update_lights_chan)
 
 		case <-bc_timer_chan:
 			DefaultState(updateChannels, readChannels, ioChannels)
 			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
-			//processPairConn.Write([]byte("42"))
 			my_worldView := w.ReadWorldView(readChannels)
 			my_worldView.Display()
 
@@ -103,12 +102,13 @@ func FloorSensed(update_direction_chan chan<- elevio.MotorDirection, arrived_at_
 			arrived_at_floor_chan <- true
 		}
 	}
-	//softstop: TODO kan ikke bruke hardkoda values!
+	
+	//stop elevator from passing boundaries
 	if (floor_sens == -1 && elev.Last_dir == elevio.MD_DOWN && elev.Last_Floor == 0) ||
-		(floor_sens == -1 && elev.Last_dir == elevio.MD_UP && elev.Last_Floor == 3) {
+		(floor_sens == -1 && elev.Last_dir == elevio.MD_UP && elev.Last_Floor == len(elev.CabRequests)) {
 		update_direction_chan <- elevio.MD_STOP
 	}
-} // TODO: her kan noe gjenbrukes, og kanskje deles opp?
+}
 
 func Obstruction(updateChannels w.UpdateWorldviewChannels, readChannels w.ReadWorldviewChannels, reset_timer_chan chan<- bool, obstruction_chan chan bool) {
 	last_obst := false

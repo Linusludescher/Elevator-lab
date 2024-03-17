@@ -26,7 +26,7 @@ type NetworkChan struct {
 	PacketRx_chan     chan w.Worldview
 }
 
-func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende navn til configPorts!
+func getNetworkConfig(id int) (configPorts ConfigUDPPorts) {
 	jsonData, err := os.ReadFile("config.json")
 	configPorts.Id = id
 	// can't read the config file, try again
@@ -39,7 +39,6 @@ func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende n
 	err = json.Unmarshal(jsonData, &configPorts)
 	if err != nil {
 		fmt.Printf("/network/upd.go: Error unmarshal json data to ElevatorPorts struct: %s\n", err)
-
 		// try again
 		getNetworkConfig(id)
 	}
@@ -54,27 +53,16 @@ func getNetworkConfig(id int) (configPorts ConfigUDPPorts) { //mer beskrivende n
 }
 
 func InitNetwork(id int) (networkChan NetworkChan) {
-	// Read from config.json port addresses for Rx and Tx
 	ports := getNetworkConfig(id)
 
-	// We make a channel for receiving updates on the id's of the peers that are
-	//  alive on the network
 	networkChan.PeerUpdate_chan = make(chan peers.PeerUpdate)
-	// We can disable/enable the transmitter after it has been started.
-	// This could be used to signal that we are somehow "unavailable".
 	networkChan.PeerTxEnable_chan = make(chan bool)
+	networkChan.PacketTx_chan = make(chan w.Worldview)
+	networkChan.PacketRx_chan = make(chan w.Worldview)
 
 	go peers.Transmitter(ports.UDPstatusPort, strconv.Itoa(id), networkChan.PeerTxEnable_chan)
 	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdate_chan)
-
-	// We make channels for sending and receiving our custom data types
-	networkChan.PacketTx_chan = make(chan w.Worldview)
-	networkChan.PacketRx_chan = make(chan w.Worldview)
-	// ... and start the transmitter/receiver pair on some port
-	// These functions can take any number of channels! It is also possible to
-	//  start multiple transmitters/receivers on the same port.
 	go bcast.Transmitter(ports.UDPTx, networkChan.PacketTx_chan)
-
 	for rxPort := range ports.UDPRx {
 		fmt.Printf("rxport %d\n", ports.UDPRx[rxPort])
 		go bcast.Receiver(ports.UDPRx[rxPort], networkChan.PacketRx_chan)
@@ -89,17 +77,15 @@ func PeersOnline(readChannels w.ReadWorldviewChannels, network_chan NetworkChan,
 		fmt.Printf("  Peers:    %q\n", p.Peers)
 		fmt.Printf("  New:      %q\n", p.New)
 		fmt.Printf("  Lost:     %q\n", p.Lost)
-		fmt.Printf("  UdpTx: 	%d\n", network_chan.PacketTx_chan)
-		fmt.Printf("  UdpRx: 	%d\n", network_chan.PacketRx_chan)
+		fmt.Printf("  UdpTx: 	%v\n", network_chan.PacketTx_chan)
+		fmt.Printf("  UdpRx: 	%v\n", network_chan.PacketRx_chan)
 
 		for _, k := range p.Lost {
 			k_int, err := strconv.Atoi(k)
 			if err != nil {
 				panic(err)
 			}
-			fmt.Print("Sender lost til peer")
 			updateWorldviewChannels.Peer_lost_chan <- k_int
-			fmt.Println("ferdig sendt")
 		}
 		if p.New != "" {
 			i, err := strconv.Atoi(p.New)

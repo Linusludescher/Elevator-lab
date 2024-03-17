@@ -8,20 +8,15 @@ import (
 	w "project/worldview"
 )
 
-//Todo rydding: samle ting i funkdjonrt
-//og endre objektnavn på elevator- heter nå e eller my_elevator eller elevator
-
 func main() {
 
-	//processPairConn := bcast.ProcessPairListner(id)
 	id, numFloors := w.GetElevatorCredentials()
-	//elevio.Init("localhost:"+localhostnr, numFloors)
-	elevio.Init("localhost:15658", numFloors) //15657
+	elevio.Init("localhost:15657", numFloors)
 
-	//clean_main greier:
 	elevioChannels := elevio.InitElevioChannels()
 	updateWorldviewChannels := w.InitUpdateWorldviewChannels()
 	readChannels := w.InitReadWorldViewChannels()
+	network_channels := network.InitNetwork(id)
 
 	drv_buttons_chan := make(chan elevio.ButtonEvent, 100)
 	drv_floors_chan := make(chan int, 100)
@@ -32,11 +27,10 @@ func main() {
 	reset_timer_chan := make(chan bool, 100)
 	update_lights_chan := make(chan int, 100)
 
-	my_elevator, my_wv := w.ElevatorInit(timer_exp_chan, id)
-	network_channels := network.InitNetwork(id)
+	my_elevator, my_wv := w.WorldviewInit(timer_exp_chan, id)
 
 	go w.UpdateWorldview(&my_wv, &my_elevator, reset_timer_chan, watchdog_chan, readChannels, updateWorldviewChannels, elevioChannels)
-	go w.BroadcastElevator(bc_timer_chan, 10)
+	go w.StartBroadcastLoop(bc_timer_chan, 10)
 	go elevio.ElevioUpdate(elevioChannels)
 	go elevio.PollButtons(drv_buttons_chan)
 	go elevio.PollFloorSensor(drv_floors_chan)

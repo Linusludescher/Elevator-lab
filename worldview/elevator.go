@@ -16,7 +16,7 @@ const (
 	EB_DOOR_OPEN Behaviour = "doorOpen"
 )
 
-type ConfigData struct { //Reader config 2 steder: En gang her, en gang i network!
+type ConfigData struct {
 	N_FLOORS    uint8 `json:"Floors"`
 	N_elevators uint8 `json:"n_elevators"`
 	UDPBase     int   `json:"BasePort"`
@@ -37,26 +37,21 @@ type Elevator struct {
 func ReadElevatorConfig() (elevatorData ConfigData) {
 	jsonData, err := os.ReadFile("config.json")
 
-	// can't read the config file, try again
 	if err != nil {
 		fmt.Printf("elevator.go: Error reading config file: %s\n", err)
-		// tyr again
 		ReadElevatorConfig()
 	}
 
-	// Parse jsonData into ElevatorData struct
 	err = json.Unmarshal(jsonData, &elevatorData)
 
-	// can't parse the config file, try again
 	if err != nil {
 		fmt.Printf("elevator.go: Error unmarshal json data to ElevatorData struct: %s\n", err)
-		// tyr again
 		ReadElevatorConfig()
 	}
 	return
 }
 
-func ElevatorInit(timer_exp_chan chan bool, id int) (elev Elevator, worldView Worldview) {
+func WorldviewInit(timer_exp_chan chan bool, id int) (elev Elevator, worldView Worldview) {
 	elevatorConfig := ReadElevatorConfig()
 	hallOrders := make([][2]uint8, elevatorConfig.N_FLOORS)
 	for i := range hallOrders {
@@ -81,17 +76,6 @@ func ElevatorInit(timer_exp_chan chan bool, id int) (elev Elevator, worldView Wo
 	return
 }
 
-func (elev Elevator) Display() { //lage en for worldview også!
-	fmt.Printf("Direction: %v\n", elev.Dirn)
-	fmt.Printf("Last Direction: %v\n", elev.Last_dir)
-	fmt.Printf("Last Floor: %v\n", elev.Last_Floor)
-	fmt.Println("Requests")
-	fmt.Println("Floor\t Cab")
-	for i := len(elev.CabRequests) - 1; i >= 0; i-- {
-		fmt.Printf("%v \t %v \t\n", i+1, elev.CabRequests[i])
-	}
-}
-
 func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, watchdog_chan chan<- bool) {
 	elevio.SetMotorDirection(dir)
 	elev_p.Last_dir = dir
@@ -104,7 +88,7 @@ func (elev_p *Elevator) UpdateDirection(dir elevio.MotorDirection, watchdog_chan
 	}
 }
 
-func BroadcastElevator(bc_chan chan<- bool, n_ms int) {
+func StartBroadcastLoop(bc_chan chan<- bool, n_ms int) {
 	for {
 		bc_chan <- true
 		time.Sleep(time.Duration(n_ms) * time.Millisecond)

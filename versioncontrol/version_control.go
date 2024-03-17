@@ -1,7 +1,6 @@
 package versioncontrol
 
 import (
-	"fmt"
 	w "project/worldview"
 )
 
@@ -45,14 +44,13 @@ func CheckIncomingWorldView(readChannels w.ReadWorldviewChannels,
 
 	myWorldView := w.ReadWorldView(readChannels)
 	myElev := w.ReadElevator(readChannels)
+
 	if incomingWorldView.Version > myWorldView.Version || ((myWorldView.Version > w.VERSIONLIMIT-w.VERSIONBUFFER) && incomingWorldView.Version < w.VERSIONBUFFER) {
 		update_to_incoming_worldview_chan <- incomingWorldView
-
 		update_lights_chan <- myElev.ElevNum
 	} else if incomingWorldView.Version == myWorldView.Version {
 		update_lights_chan <- myElev.ElevNum
 	} else if (incomingWorldView.Version == myWorldView.Version) && !versionIfEqualQueue(myElev, myWorldView, incomingWorldView) {
-		fmt.Println("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 		if incomingWorldView.Sender > myWorldView.Sender {
 			update_to_incoming_worldview_chan <- incomingWorldView
 			version_up_chan <- true
