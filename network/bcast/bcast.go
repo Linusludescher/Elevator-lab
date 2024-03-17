@@ -135,9 +135,10 @@ func checkTypeRecursive(val reflect.Type, offsets []int) {
 	}
 }
 
-func BcWorldView(readChannels worldview.ReadWorldviewChannels, bc_chan chan<- worldview.Worldview) {
+func BroadcastWorldView(readChannels worldview.ReadWorldviewChannels, PacketTx_chan chan<- worldview.Worldview) {
 	worldView := worldview.ReadWorldView(readChannels)
 	elev := worldview.ReadElevator(readChannels)
 	worldView.ElevList[elev.ElevNum-1] = elev
-	bc_chan <- worldView
+
+	PacketTx_chan <- worldView
 }

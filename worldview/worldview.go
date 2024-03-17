@@ -123,7 +123,7 @@ func GetElevatorCredentials() (id int, numFloors int) {
 	flag.Parse()
 	id = *idFlag
 	fmt.Printf("elevator number: %d:\n", id)
-	elevatorConf := ReadElevatorConfig() 
+	elevatorConf := ReadElevatorConfig()
 	numFloors = int(elevatorConf.N_FLOORS)
 	return
 }

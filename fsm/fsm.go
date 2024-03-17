@@ -39,9 +39,9 @@ func MainFSM(
 
 		case <-bc_timer_chan:
 			DefaultState(updateChannels, readChannels, ioChannels)
-			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
-			my_worldView := w.ReadWorldView(readChannels)
-			my_worldView.Display()
+			bcast.BroadcastWorldView(readChannels, network_channels.PacketTx_chan)
+			//my_worldView := w.ReadWorldView(readChannels)
+			//my_worldView.Display()
 
 		case elevnum := <-update_lights_chan:
 			UpdateLights(ioChannels, readChannels, elevnum)
@@ -102,10 +102,10 @@ func FloorSensed(update_direction_chan chan<- elevio.MotorDirection, arrived_at_
 			arrived_at_floor_chan <- true
 		}
 	}
-	
+
 	//stop elevator from passing boundaries
 	if (floor_sens == -1 && elev.Last_dir == elevio.MD_DOWN && elev.Last_Floor == 0) ||
-		(floor_sens == -1 && elev.Last_dir == elevio.MD_UP && elev.Last_Floor == len(elev.CabRequests)) {
+		(floor_sens == -1 && elev.Last_dir == elevio.MD_UP && elev.Last_Floor == len(elev.CabRequests)-1) {
 		update_direction_chan <- elevio.MD_STOP
 	}
 }
