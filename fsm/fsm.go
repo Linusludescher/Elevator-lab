@@ -40,14 +40,14 @@ func MainFSM(
 			versioncontrol.CheckIncomingWorldView(readChannels, updateChannels.Version_up_chan, incomingWorldview, updateChannels.Update_to_incoming_chan, update_lights_chan)
 
 		case <-bc_timer_chan:
-			DefaultState(update_lights_chan, updateChannels.Update_direction_chan, updateChannels.Arrived_at_floor_chan, readChannels)
+			DefaultState(updateChannels, readChannels, ioChannels)
 			bcast.BcWorldView(readChannels, network_channels.PacketTx_chan)
 			processPairConn.Write([]byte("42"))
 			my_worldView := w.ReadWorldView(readChannels)
 			my_worldView.Display()
 
 		case elevnum := <-update_lights_chan:
-			UpdateLights(ioChannels.Set_button_lamp_chan, readChannels, elevnum)
+			UpdateLights(ioChannels, readChannels, elevnum)
 		}
 	}
 }
@@ -134,33 +134,35 @@ func Obstruction(updateChannels w.UpdateWorldviewChannels, readChannels w.ReadWo
 	}
 }
 
-func DefaultState(update_lights_chan chan int, update_direction_chan chan<- elevio.MotorDirection, arrived_at_floor_chan chan<- bool, readChannels w.ReadWorldviewChannels) {
+func DefaultState(updateWorldviewChannels w.UpdateWorldviewChannels, readChannels w.ReadWorldviewChannels, ioChannels elevio.ElevioChannels) {
 	worldView := w.ReadWorldView(readChannels)
 	elev := w.ReadElevator(readChannels)
 
-	go aloneUpdateLights(worldView, elev, update_lights_chan) // TODO: Noe rart med denne eller?
+	if isElevAlone(worldView, elev) {
+		UpdateLights(ioChannels, readChannels, elev.ElevNum)
+	}
 
 	for floor := range worldView.HallRequests {
 		for _, order := range worldView.HallRequests[floor] {
 			if order == uint8(elev.ElevNum) && floor == elev.Last_Floor && elevio.GetFloor() == floor {
-				arrived_at_floor_chan <- true
+				updateWorldviewChannels.Arrived_at_floor_chan <- true
 			}
 		}
 	}
 	if (elev.Dirn == elevio.MD_STOP) && (elev.Behaviour != w.EB_DOOR_OPEN) {
 		if requests.RequestsAbove(elev, worldView) {
-			update_direction_chan <- elevio.MD_UP
+			updateWorldviewChannels.Update_direction_chan <- elevio.MD_UP
 		} else if requests.RequestsBelow(elev, worldView) {
-			update_direction_chan <- elevio.MD_DOWN
+			updateWorldviewChannels.Update_direction_chan <- elevio.MD_DOWN
 		}
 	}
 }
 
-func UpdateLights(set_button_lamp_chan chan<- elevio.ButtonLampOrder, readChannels w.ReadWorldviewChannels, elevnum int) {
+func UpdateLights(ioChannels elevio.ElevioChannels, readChannels w.ReadWorldviewChannels, elevnum int) {
 	worldView := w.ReadWorldView(readChannels)
 	for floor, f := range worldView.HallRequests {
 		for buttonType, order := range f {
-			set_button_lamp_chan <- elevio.ButtonLampOrder{Button_type: elevio.ButtonType(buttonType), OrderFloor: floor, Value: order != 0}
+			ioChannels.Set_button_lamp_chan <- elevio.ButtonLampOrder{Button_type: elevio.ButtonType(buttonType), OrderFloor: floor, Value: order != 0}
 		}
 	}
 	for i, elev := range worldView.ElevList {
@@ -168,19 +170,17 @@ func UpdateLights(set_button_lamp_chan chan<- elevio.ButtonLampOrder, readChanne
 			continue
 		}
 		for floor, f := range elev.CabRequests {
-			set_button_lamp_chan <- elevio.ButtonLampOrder{Button_type: elevio.BT_CAB, OrderFloor: floor, Value: f}
+			ioChannels.Set_button_lamp_chan <- elevio.ButtonLampOrder{Button_type: elevio.BT_CAB, OrderFloor: floor, Value: f}
 		}
 	}
 }
 
-func aloneUpdateLights(worldView w.Worldview, elev w.Elevator, update_lights_chan chan<- int) { //TODO: dårlig funksjon: burde deles opp i checkAlone og noe annet
-	only_elev := true
+func isElevAlone(worldView w.Worldview, elev w.Elevator) (only_elev bool) {
+	only_elev = true
 	for i := range worldView.ElevList {
 		if worldView.ElevList[i].Online && worldView.ElevList[i].ElevNum != elev.ElevNum {
 			only_elev = false
 		}
 	}
-	if only_elev {
-		update_lights_chan <- elev.ElevNum
-	}
+	return
 }
