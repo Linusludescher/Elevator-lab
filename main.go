@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"project/elevio"
 	"project/fsm"
 	"project/network"
@@ -10,7 +12,14 @@ import (
 
 func main() {
 
-	id, numFloors := w.GetElevatorCredentials()
+	idFlag := flag.Int("id", 1, "Specifies an ID number")
+	flag.Parse()
+	id := *idFlag
+	fmt.Printf("elevator number: %d:\n", id)
+	elevatorConf := w.ReadElevatorConfig()
+	numFloors := int(elevatorConf.N_FLOORS)
+
+	//id, numFloors := w.GetElevatorCredentials()
 	elevio.Init("localhost:15657", numFloors)
 
 	elevioChannels := elevio.InitElevioChannels()
