@@ -1,26 +1,14 @@
 # Elevator-lab
-helikopterlab
-
-ny lenke:
-https://prod.liveshare.vsengsaas.visualstudio.com/join?56F64805BF6DB492DE0C970C23FDDFDC76D4
-
-For processPairs: 
-- kommentere inn i main: 
-// processPairConn := bcast.ProcessPairListner(id)
-- i default case:
-// processPairConn.Write([]byte("42"))
-- fjerne panic() i ved watchdog time out! og flere steder sikkert
-
-
-
 
 This is a pure peer to peer system to run multiple elevators.
 
 In order to run the elevator, type:
 
-go run main.go -id <elevator_number>
+***go run main.go -id <elevator_number>***
 
 Each elevator needs to have their own number from 1 to n_elevators.
 n_elevators is set to 3 but can be changed in config.json.
-One can also change the number of floors, and the ports the elevators communicate over.
-
+Also use config.jason to change the number of floors, and the ports the elevators communicate over.  
+Before starting the program, you need to download the executable: hall_request_assigner, found [here](https://github.com/TTK4145/Project-resources/releases/tag/v1.1.1)
+The hall_request_assigner must be placed in the the parentfolder of Elevator-lab.
+You might have to give permission to run the hall_request_assigner. To do this you can run: chmod a+xw hall_request_assigner.

@@ -103,7 +103,8 @@ func UpdateWorldview(worldView_p *Worldview,
 			costFunction(worldView_p, buttn)
 
 		case peer := <-updateChannels.Peer_lost_chan:
-			peerLost(peer, readChannels, updateChannels.Cost_func_chan, updateChannels.Version_up_chan, worldView_p)
+			fmt.Println("mottatt fra channel Peer_lost")
+			peerLost(peer, updateChannels.Cost_func_chan, updateChannels.Version_up_chan, worldView_p)
 
 		case peer := <-updateChannels.Peer_new_chan:
 			peerNew(peer, updateChannels.Version_up_chan, worldView_p)
@@ -167,13 +168,13 @@ func ReadElevator(readChannels ReadWorldviewChannels) Elevator {
 	return <-readChannels.Read_elev_chan
 }
 
-func peerLost(peer int, readChannels ReadWorldviewChannels, cost_func_chan chan elevio.ButtonEvent, version_up_chan chan bool, worldView_p *Worldview) {
-	worldView := ReadWorldView(readChannels)
-
+func peerLost(peer int, cost_func_chan chan elevio.ButtonEvent, version_up_chan chan bool, worldView_p *Worldview) {
+	fmt.Println("peerLost starter")
+	//worldView := ReadWorldView(readChannels)
 	worldView_p.ElevList[peer-1].Online = false
-
+	fmt.Println("peer lost")
 	//Assign hall orders to others:
-	for floor, f := range worldView.HallRequests {
+	for floor, f := range worldView_p.HallRequests {
 		for buttonType, o := range f {
 			if o == uint8(peer) {
 				cost_func_chan <- elevio.ButtonEvent{Floor: floor, Button: elevio.ButtonType(buttonType)}

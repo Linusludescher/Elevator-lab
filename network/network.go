@@ -97,7 +97,9 @@ func PeersOnline(readChannels w.ReadWorldviewChannels, network_chan NetworkChan,
 			if err != nil {
 				panic(err)
 			}
+			fmt.Print("Sender lost til peer")
 			updateWorldviewChannels.Peer_lost_chan <- k_int
+			fmt.Println("ferdig sendt")
 		}
 		if p.New != "" {
 			i, err := strconv.Atoi(p.New)
