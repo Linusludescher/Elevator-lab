@@ -2,7 +2,6 @@ package worldview
 
 import (
 	"encoding/json"
-	"fmt"
 	"os/exec"
 	"project/elevio"
 	"strconv"
@@ -37,10 +36,6 @@ func costFunction(worldView_p *Worldview, buttn elevio.ButtonEvent) {
 	err = json.Unmarshal(ret, &output)
 	if err != nil {
 		panic(err)
-	}
-
-	for k, v := range *output {
-		fmt.Printf("%6v :  %+v\n", k, v)
 	}
 
 	for i, e := range *output {

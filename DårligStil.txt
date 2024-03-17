@@ -1,8 +1,0 @@
-Bad feeling på de her: 
-- At vi reader Config 2 ganger(network, elevator), og de heter det samme (jeg bruker også den ene i main).
-    - kanskje greit?
-    - masse ting i structene der vi ikke bruker.
-    - bruke Config til å gi oss TCP port og?
-    - veldig lite transparent hvilke UDP-porter som brukes, helt sykt lite transparent faktisk
-- At vi bruker elevio så høyt oppe i modulene. Alt bør bygges inn i elevator, og hvis vi trenger funksjoner som GetFloor() kan vi bare lage et skall
-- nesten hver eneste funksjon vi har skrevet bruker elevator eller worldview som objekt

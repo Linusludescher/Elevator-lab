@@ -64,7 +64,6 @@ func InitNetwork(id int) (networkChan NetworkChan) {
 	go peers.Receiver(ports.UDPstatusPort, networkChan.PeerUpdate_chan)
 	go bcast.Transmitter(ports.UDPTx, networkChan.PacketTx_chan)
 	for rxPort := range ports.UDPRx {
-		fmt.Printf("rxport %d\n", ports.UDPRx[rxPort])
 		go bcast.Receiver(ports.UDPRx[rxPort], networkChan.PacketRx_chan)
 	}
 	return

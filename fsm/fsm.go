@@ -40,8 +40,6 @@ func MainFSM(
 		case <-bc_timer_chan:
 			DefaultState(updateChannels, readChannels, ioChannels)
 			bcast.BroadcastWorldView(readChannels, network_channels.PacketTx_chan)
-			//my_worldView := w.ReadWorldView(readChannels)
-			//my_worldView.Display()
 
 		case elevnum := <-update_lights_chan:
 			UpdateLights(ioChannels, readChannels, elevnum)
