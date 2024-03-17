@@ -23,3 +23,4 @@ go run main.go -id <elevator_number>
 Each elevator needs to have their own number from 1 to n_elevators.
 n_elevators is set to 3 but can be changed in config.json.
 One can also change the number of floors, and the ports the elevators communicate over.
+

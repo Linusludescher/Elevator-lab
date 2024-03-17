@@ -163,7 +163,7 @@ Siste krametrekning
 ------------------------------------------------------------------------------- cab requests etasje 0 er 1 osv
 ------------------------------------------------------------------------------- timer på dør er for lang kanskje? wd går ut
 - kjøre med -race flag
-- trykker cab i egen floor, timer går ikke ut, starter aldri
+------------------------------------------------------------------------------- trykker cab i egen floor, timer går ikke ut, starter aldri
 
 - prøve å fjerne process pairs hvis ting ikke funker
 
@@ -173,3 +173,14 @@ Siste krametrekning
 - TENKE OVER EXECUTAbLE HALLASSIGNER
 - Fjerne alt av process pairs
     - Fjerne Panic()
+- 
+
+
+Todo tog: 
+- Teste med 3 heiser, teste overta ordre osv
+- Fikse opp i updatelights/alone updatelights
+- lage ReadMe
+- Fjerne kommentarer i koden, fjerne todoliste(??:/) 
+- Rydde opp i main-> putte ting i elevio Init
+
+- implementere processpairs til slutt!

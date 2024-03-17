@@ -53,17 +53,13 @@ func main() {
 
 	go w.UpdateWorldview(&my_wv, &my_elevator, reset_timer_chan, watchdog_chan, readChannels, updateWorldviewChannels, elevioChannels)
 	go w.BroadcastElevator(bc_timer_chan, 10)
-
 	go elevio.ElevioUpdate(elevioChannels)
 	go elevio.PollButtons(drv_buttons_chan)
 	go elevio.PollFloorSensor(drv_floors_chan)
 	go elevio.PollObstructionSwitch(drv_obstr_chan)
-
 	go timer.OperativeWatchdog(10, watchdog_chan)
 	go timer.TimerStart(3, timer_exp_chan, reset_timer_chan)
-
 	go fsm.Obstruction(updateWorldviewChannels, readChannels, reset_timer_chan, drv_obstr_chan)
-
 	go network.PeersOnline(readChannels, network_channels, updateWorldviewChannels)
 
 	fsm.MainFSM(timer_exp_chan, watchdog_chan, processPairConn, drv_buttons_chan, reset_timer_chan,
